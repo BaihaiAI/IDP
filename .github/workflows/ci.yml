@@ -1,15 +1,17 @@
 name: check_lint_test
 on: [push]
+env:
+  RUSTFLAGS: "-D warnings"
 
 jobs:
   ci_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
       - name: typo
         uses: crate-ci/typos@v1.12.0
+      - name: Check License Header
+        uses: apache/skywalking-eyes/header@main
 
       - uses: dtolnay/rust-toolchain@stable
-      - run: export RUSTFLAGS="-D warnings"
+      - run: cargo fmt --check
       - run: cargo clippy --tests --workspace --all-targets --all-features

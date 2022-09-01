@@ -138,7 +138,7 @@ pub async fn task_result(
 
     let team_id = get_cookie_value_by_team_id(cookies);
 
-    let is_ipynb = browser_path.ends_with(".ipynb") || browser_path.ends_with(".idpnb");
+    let is_idpnb = browser_path.ends_with(".ipynb") || browser_path.ends_with(".idpnb");
 
     let mut job_id_u64 = 0u64;
     if let Ok(p) = job_id.parse::<u64>() {
@@ -160,7 +160,7 @@ pub async fn task_result(
         job_id_u64,
         job_instance_id_u64,
         task_instance_id_u64,
-        is_ipynb,
+        is_idpnb,
     );
 
     tracing::info!(
@@ -184,25 +184,23 @@ pub async fn task_result(
         template_file_path, task_file_path
     );
 
-    let mut _real_path_str = "".to_string();
-    if is_ipynb {
+    let real_path_str = if is_idpnb {
         let real_path = path_to_use(
             get_job_pipeline_store_path(team_id, project_id, job_id, browser_path.clone()),
             task_file_path.to_str().unwrap().to_string(),
         );
         tracing::info!("##task_result real_path={:?}", real_path);
-        _real_path_str = real_path;
+        real_path
     } else {
         //not ipynb file , cat the job/xx.sh, or job/xx.py
-        _real_path_str =
-            get_job_pipeline_store_path(team_id, project_id, job_id, browser_path.clone());
-    }
+        get_job_pipeline_store_path(team_id, project_id, job_id, browser_path.clone())
+    };
 
-    tracing::info!("##task_result _ipynb_flag    ={:?}", is_ipynb);
-    tracing::info!("##task_result _real_path_str ={:?}", _real_path_str);
+    tracing::info!("##task_result _ipynb_flag    ={is_idpnb}");
+    tracing::info!("##task_result _real_path_str ={}", real_path_str);
 
-    if is_ipynb {
-        debug!("ipynb file {} need convert to html", _real_path_str);
+    if is_idpnb {
+        debug!("ipynb file {} need convert to html", real_path_str);
         let prefixed_file_name = format!(
             "preview_{}",
             path_tool::escape_path_as_string(browser_path.clone())
@@ -213,16 +211,16 @@ pub async fn task_result(
 
         ipynb2html(
             nbconvert_path,
-            _real_path_str,
+            real_path_str,
             dst.to_str().unwrap().to_string(),
         )
         .await
     } else {
         debug!(
             "not ipynb file, using preview_by_realpath {}",
-            _real_path_str
+            real_path_str
         );
-        preview_by_realpath(_real_path_str).await
+        preview_by_realpath(real_path_str).await
     }
 }
 
