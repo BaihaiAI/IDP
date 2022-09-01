@@ -1,0 +1,50 @@
+{
+  "name": "codemirror",
+  "version": "100.62.46",
+  "main": "lib/codemirror.js",
+  "style": "lib/codemirror.css",
+  "author": {
+    "name": "Marijn Haverbeke xzy",
+    "email": "marijnh@gmail.com xuzhaoyuan@baihai.ai",
+    "url": "http://marijnhaverbeke.nl"
+  },
+  "description": "Full-featured in-browser code editor",
+  "license": "MIT",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -w -c",
+    "prepare": "npm run-script build",
+    "test": "node ./test/run.js",
+    "lint": "bin/lint"
+  },
+  "devDependencies": {
+    "@rollup/plugin-buble": "^0.21.3",
+    "blint": "^1.1.2",
+    "node-static": "0.7.11",
+    "puppeteer": "^1.20.0",
+    "rollup": "^1.26.3"
+  },
+  "bugs": "http://github.com/codemirror/CodeMirror/issues",
+  "keywords": [
+    "JavaScript",
+    "CodeMirror",
+    "Editor"
+  ],
+  "homepage": "https://codemirror.net",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codemirror/CodeMirror.git"
+  },
+  "publishConfig": {
+    "registry": "http://10.9.148.89:4873"
+  },
+  "jspm": {
+    "directories": {},
+    "dependencies": {},
+    "devDependencies": {}
+  },
+  "dependencies": {}
+}

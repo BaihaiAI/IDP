@@ -1,0 +1,61 @@
+.operator-warp{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  .operator-header{
+    height: 32px;
+    background: rgba(244, 246, 248, 1);
+    padding-left: 8px;
+    font-size: 14px;
+    line-height: 33px
+  }
+  .operator-input{
+    height: 32px;
+    .ant-input-suffix{
+      padding-right: 9px;
+    }
+  }
+  .operator-tree{
+    flex: 1;
+    padding-bottom: 20px;
+    overflow-x: auto;
+    &:focus-visible{
+      outline: none;
+    }
+    .ant-tree-switcher .ant-tree-switcher-noop{
+      display: none;
+    }
+    // .ant-tree.ant-tree-directory .ant-tree-treenode .ant-tree-node-content-wrapper{
+    //   white-space: inherit;
+    // }
+    .add-title{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .ant-tree-title{
+        display: inline-block;
+        width: 85% !important;
+        text-overflow :ellipsis; /*让截断的文字显示为点点。还有一个值是clip意截断不显示点点*/
+        white-space :nowrap; /*让文字不换行*/
+        overflow : hidden;
+        .add-search-value{
+          color: #3793ef;
+        }
+      }
+      .add-operator{
+        margin-right: 6px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        &:hover{
+          .anticon{
+            color: #3793ef !important;
+          }
+        }
+        
+      }
+    }
+  }
+}

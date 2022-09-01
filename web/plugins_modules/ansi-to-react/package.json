@@ -1,0 +1,58 @@
+{
+  "name": "ansi-to-react",
+  "version": "6.1.14",
+  "description": "ANSI to React Elements",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "nteractDesktop": "src/index.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "semantic-release": "semantic-release"
+  },
+  "files": ["lib"],
+  "repository": "https://github.com/nteract/ansi-to-react",
+  "keywords": [
+    "ansi",
+    "react"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Kyle Kelley <rgbkrk@gmail.com>",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "anser": "^1.4.1",
+    "escape-carriage": "^1.3.0"
+  },
+  "peerDependencies": {
+    "react": "^16.3.2 || ^17.0.0",
+    "react-dom": "^16.3.2 || ^17.0.0"
+  },
+  "devDependencies": {
+    "@semantic-release/npm": "^7.0.8",
+    "@types/enzyme": "^3.10.5",
+    "@types/jest": "^25.1.4",
+    "@types/react": "^16.9.23",
+    "conventional-changelog-conventionalcommits": "^4.5.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "jest": "^25.1.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "semantic-release": "^17.2.1",
+    "ts-jest": "^25.2.1",
+    "typescript": "^3.8.3"
+  },
+  "release": {
+    "plugins": [
+      "@semantic-release/npm",
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits"
+        }
+      ]
+    ]
+  }
+}

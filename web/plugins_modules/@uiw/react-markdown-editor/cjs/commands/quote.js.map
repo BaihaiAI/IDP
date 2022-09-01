@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/quote.tsx"
+  ],
+  "names": [
+    "quote",
+    "name",
+    "keyCommand",
+    "button",
+    "icon",
+    "execute",
+    "editor",
+    "selection",
+    "position",
+    "value",
+    "replaceSelection",
+    "ch",
+    "setCursor",
+    "line",
+    "focus"
+  ],
+  "mappings": ";;;;;;;;;AAAA;;;;AAGO,IAAMA,KAAe,GAAG;AAC7BC,EAAAA,IAAI,EAAE,OADuB;AAE7BC,EAAAA,UAAU,EAAE,OAFiB;AAG7BC,EAAAA,MAAM,EAAE;AAAE,kBAAc;AAAhB,GAHqB;AAI7BC,EAAAA,IAAI,eACF;AAAK,IAAA,KAAK,EAAC,IAAX;AAAgB,IAAA,MAAM,EAAC,IAAvB;AAA4B,IAAA,OAAO,EAAC,aAApC;AAAA,2BACE;AAAM,MAAA,IAAI,EAAC,cAAX;AAA0B,MAAA,CAAC,EAAC;AAA5B;AADF,IAL2B;AAS7BC,EAAAA,OAAO,EAAE,iBAACC,MAAD,EAASC,SAAT,EAAoBC,QAApB,EAAiC;AACxC,QAAMC,KAAK,GAAGF,SAAS,eAAQA,SAAR,IAAsB,IAA7C;AACAD,IAAAA,MAAM,CAACI,gBAAP,CAAwBD,KAAxB;AACAD,IAAAA,QAAQ,CAACG,EAAT,GAAc,CAAC,CAACJ,SAAF,GAAcC,QAAQ,CAACG,EAAvB,GAA4BH,QAAQ,CAACG,EAAT,GAAc,CAAxD;AACAL,IAAAA,MAAM,CAACM,SAAP,CAAiBJ,QAAQ,CAACK,IAA1B,EAAgCL,QAAQ,CAACG,EAAzC;AACAL,IAAAA,MAAM,CAACQ,KAAP;AACD;AAf4B,CAAxB",
+  "sourcesContent": [
+    "import React from 'react';\nimport { ICommand} from './'\n\nexport const quote: ICommand = {\n  name: 'quote',\n  keyCommand: 'quote',\n  button: { 'aria-label': 'Add quote text' },\n  icon: (\n    <svg width=\"12\" height=\"12\" viewBox=\"0 0 512 512\">\n      <path fill=\"currentColor\" d=\"M512 80v128c0 137.018-63.772 236.324-193.827 271.172-15.225 4.08-30.173-7.437-30.173-23.199v-33.895c0-10.057 6.228-19.133 15.687-22.55C369.684 375.688 408 330.054 408 256h-72c-26.51 0-48-21.49-48-48V80c0-26.51 21.49-48 48-48h128c26.51 0 48 21.49 48 48zM176 32H48C21.49 32 0 53.49 0 80v128c0 26.51 21.49 48 48 48h72c0 74.054-38.316 119.688-104.313 143.528C6.228 402.945 0 412.021 0 422.078v33.895c0 15.762 14.948 27.279 30.173 23.199C160.228 444.324 224 345.018 224 208V80c0-26.51-21.49-48-48-48z\" />\n    </svg>\n  ),\n  execute: (editor, selection, position) => {\n    const value = selection ? `> ${selection}` : '> ';\n    editor.replaceSelection(value);\n    position.ch = !!selection ? position.ch : position.ch + 2;\n    editor.setCursor(position.line, position.ch);\n    editor.focus();\n  },\n};"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/underline.tsx"
+  ],
+  "names": [
+    "underline",
+    "name",
+    "keyCommand",
+    "button",
+    "icon",
+    "execute",
+    "editor",
+    "selection",
+    "position",
+    "value",
+    "replaceSelection",
+    "ch",
+    "setCursor",
+    "line",
+    "focus"
+  ],
+  "mappings": ";;;;;;;;;AAAA;;;;AAGO,IAAMA,SAAmB,GAAG;AACjCC,EAAAA,IAAI,EAAE,WAD2B;AAEjCC,EAAAA,UAAU,EAAE,WAFqB;AAGjCC,EAAAA,MAAM,EAAE;AAAE,kBAAc;AAAhB,GAHyB;AAIjCC,EAAAA,IAAI,eACF;AAAK,IAAA,KAAK,EAAC,IAAX;AAAgB,IAAA,MAAM,EAAC,IAAvB;AAA4B,IAAA,OAAO,EAAC,WAApC;AAAA,2BACE;AAAM,MAAA,IAAI,EAAC,cAAX;AAA0B,MAAA,CAAC,EAAC;AAA5B;AADF,IAL+B;AASjCC,EAAAA,OAAO,EAAE,iBAACC,MAAD,EAASC,SAAT,EAAoBC,QAApB,EAAiC;AACxC,QAAMC,KAAK,GAAGF,SAAS,gBAASA,SAAT,YAA2B,SAAlD;AACAD,IAAAA,MAAM,CAACI,gBAAP,CAAwBD,KAAxB;AACAD,IAAAA,QAAQ,CAACG,EAAT,GAAc,CAAC,CAACJ,SAAF,GAAcC,QAAQ,CAACG,EAAvB,GAA4BH,QAAQ,CAACG,EAAT,GAAc,CAAxD;AACAL,IAAAA,MAAM,CAACM,SAAP,CAAiBJ,QAAQ,CAACK,IAA1B,EAAgCL,QAAQ,CAACG,EAAzC;AACAL,IAAAA,MAAM,CAACQ,KAAP;AACD;AAfgC,CAA5B",
+  "sourcesContent": [
+    "import React from 'react';\nimport { ICommand} from './'\n\nexport const underline: ICommand = {\n  name: 'underline',\n  keyCommand: 'underline',\n  button: { 'aria-label': 'Add underline text' },\n  icon: (\n    <svg width=\"14\" height=\"14\" viewBox=\"0 0 20 20\">\n      <path fill=\"currentColor\" d=\"M10 17c3.3 0 6-2.7 6-6V3.5c0-.8-.7-1.5-1.5-1.5S13 2.7 13 3.5V11c0 1.7-1.3 3-3 3s-3-1.3-3-3V3.5C7 2.7 6.3 2 5.5 2S4 2.7 4 3.5V11c0 3.3 2.7 6 6 6zM16.5 19h-13c-.3 0-.5.2-.5.5s.2.5.5.5h13c.3 0 .5-.2.5-.5s-.2-.5-.5-.5z\" />\n    </svg>\n  ),\n  execute: (editor, selection, position) => {\n    const value = selection ? `<u>${selection}</u>` : '<u></u>';\n    editor.replaceSelection(value);\n    position.ch = !!selection ? position.ch : position.ch + 3;\n    editor.setCursor(position.line, position.ch);\n    editor.focus();\n  },\n};"
+  ]
+}

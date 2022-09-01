@@ -1,0 +1,105 @@
+.addcell-btn{
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  z-index: 10;
+  margin-left: 50px;
+  .addcell-btns-box{
+      height:16px;
+      width:100%;
+  }
+}
+.addcell-top-btn{
+    position: relative;
+    height: 5px;
+    .addcell-btns-box{
+      height: 10px;
+      border-color: #fff;
+      opacity: 0;
+      transition: all 0.5s;
+
+    }
+    .addcell-btns-box-hover{
+      opacity: 1;
+      transition: all 0.6s;
+
+    }
+    
+
+}
+.addcell-middl-btn{
+    position: relative;
+    bottom: 0px;
+    height: 0;
+    z-index: 8;
+
+  .addcell-btns-box{
+    display: flex;
+    justify-content: center;
+    height: 2px;
+    height: 20px;
+    opacity: 0;
+    transition: all 0.5s;
+    &::before{
+      top: 8px;
+      width: 30%;
+      content: '';
+      display: block;
+      position: absolute;
+      border-bottom: 1px solid #d6d7d6;
+      transition: all 0.5s;
+
+    }
+    // &:hover{
+    //   }
+  }
+  .addcell-btns-box-hover{
+    opacity: 1;
+    transition: all 0.6s;
+    &::before{
+        width: 80%;
+        transition: all 0.5s;
+      }
+
+  }
+    .addcell-btns{
+      position: relative;
+      top: -9px;
+      
+    }
+}
+.addcell-bottom-btn{
+  margin-top: 10px;
+}
+.execution_time{
+  position: absolute;
+  left: 67px;
+  z-index: 9;
+  white-space: nowrap;
+  direction: ltr;
+}
+//The sidebar of runCell
+.cell-side-panel{
+  padding-left: 10px;
+  flex: none;
+  max-width: 50px;
+  .controls-start, .controls-times, div{
+    // display: block;
+    opacity: 1;
+    text-align: center;
+    height: 30px;
+    direction: rtl;
+    white-space: nowrap;
+  }
+  .controls-times{
+    // display: none;
+    opacity: 0;
+  }
+  .controls-times-style{
+    padding-left: 2px;
+    height: 20px;
+    .ant-typography{
+      color:#8D99A4;
+    }
+  }
+}

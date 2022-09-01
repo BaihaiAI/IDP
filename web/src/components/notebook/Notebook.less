@@ -1,0 +1,44 @@
+.cells-wrapper{
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    // padding: 10px 80px 0 0;
+    padding: 10px 15px 0 20px;
+    overflow-y: scroll;
+    // min-width: 721px;
+    flex: 1;
+    &:focus-visible{
+        outline: none;
+    }
+    .code-cell, .markdown-cell{
+        .sider-left-controlbar{
+        position:absolute;
+        left:0px;
+        width: 10px;
+        height: 100%;
+        }
+        }
+    .cells{
+        width: 90%;
+    }
+
+    .CodeMirror{
+        background-color: #F4F6F8;
+        border-radius: 0 0 5px 5px;
+    }
+    .CodeMirror-gutters{
+        border: none;
+        background: transparent;
+    }
+    .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like{
+        padding-left: 10px;
+
+    }
+
+    .highlight-line,.highlight-gutter,.highlight-wrap{
+        background-color: #d8e8f7;
+    }
+
+}
+
+

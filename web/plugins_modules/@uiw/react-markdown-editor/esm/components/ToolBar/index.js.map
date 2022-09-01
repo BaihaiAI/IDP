@@ -1,0 +1,46 @@
+{
+  "version": 3,
+  "sources": [
+    "../../../src/components/ToolBar/index.tsx"
+  ],
+  "names": [
+    "React",
+    "defaultCommands",
+    "ToolBar",
+    "props",
+    "prefixCls",
+    "className",
+    "toolbars",
+    "editor",
+    "mode",
+    "preview",
+    "container",
+    "containerEditor",
+    "editorProps",
+    "htmlProps",
+    "length",
+    "handleClick",
+    "execute",
+    "getSelection",
+    "getCursor",
+    "map",
+    "command",
+    "key",
+    "buttonProps",
+    "type",
+    "obj",
+    "children",
+    "icon",
+    "onClick",
+    "button",
+    "btn",
+    "Object",
+    "keys",
+    "forEach",
+    "cloneElement"
+  ],
+  "mappings": ";;;AAAA,OAAO,KAAKA,KAAZ,MAAuB,OAAvB;AAEA;AACA,SAAmBC,eAAnB,QAA0C,gBAA1C;;;AAgBA,eAAe,SAASC,OAAT,CAAiBC,KAAjB,EAAuC;AACpD,MAAM;AAAEC,IAAAA,SAAS,GAAG,WAAd;AAA2BC,IAAAA,SAA3B;AAA+CC,IAAAA,QAAQ,GAAG,EAA1D;AAA8DC,IAAAA,MAA9D;AAAsEC,IAAAA,IAAtE;AAA4EC,IAAAA,OAA5E;AAAqFC,IAAAA,SAArF;AAAgGC,IAAAA,eAAhG;AAAiHC,IAAAA,WAAW,GAAG;AAA/H,MAAoJT,KAA1J;AAAA,MAA4IU,SAA5I,iCAA0JV,KAA1J;;AACA,MAAI,CAACG,QAAD,IAAaA,QAAQ,CAACQ,MAAT,KAAoB,CAArC,EAAwC,OAAO,IAAP;;AACxC,WAASC,WAAT,CAAqBC,OAArB,EAAmD;AACjD,QAAIA,OAAO,IAAIT,MAAf,EAAuB;AACrBS,MAAAA,OAAO,CAACT,MAAD,EAASA,MAAM,CAACU,YAAP,EAAT,EAAgCV,MAAM,CAACW,SAAP,EAAhC,EAAoD;AAAET,QAAAA,OAAF;AAAWC,QAAAA;AAAX,OAApD,CAAP;AACD;AACF;;AACD,sBACE;AAAK,IAAA,SAAS,EAAKN,SAAL,kBAA0BC,SAAS,IAAI,EAAvC,WAA6CG,IAAI,GAAMJ,SAAN,qBAAiC,EAAlF;AAAd,KAA0GS,SAA1G;AAAA,cACG,CAAC,GAAGP,QAAJ,EAAca,GAAd,CAAkB,CAACC,OAAD,EAAUC,GAAV,KAAkB;AACnC,UAAIC,WAA0D,GAAG;AAC/DC,QAAAA,IAAI,EAAE;AADyD,OAAjE;AAGA,UAAMC,GAAG,GAAG,OAAOJ,OAAP,KAAmB,QAAnB,GAA8BnB,eAAe,CAACmB,OAAD,CAA7C,GAAyDA,OAArE;AACA,UAAI,CAACI,GAAL,EAAU,OAAO,IAAP;AACVF,MAAAA,WAAW,CAACG,QAAZ,GAAuBD,GAAG,CAACE,IAA3B;;AACAJ,MAAAA,WAAW,CAACK,OAAZ,GAAsB,MAAMZ,WAAW,CAACS,GAAG,CAACR,OAAL,CAAvC;;AACA,UAAIQ,GAAG,CAACI,MAAJ,IAAc,OAAOJ,GAAG,CAACI,MAAX,KAAsB,QAAxC,EAAkD;AAChD,YAAMC,GAAkD,GAAGL,GAAG,CAACI,MAA/D;AACCE,QAAAA,MAAM,CAACC,IAAP,CAAYF,GAAZ,CAAD,CAA8EG,OAA9E,CAAuFX,GAAD,IAAS;AAC7FC,UAAAA,WAAW,CAACD,GAAD,CAAX,GAAmBQ,GAAG,CAACR,GAAD,CAAtB;AACD,SAFD;AAGD,OALD,MAKO,IAAI,OAAOG,GAAG,CAACI,MAAX,KAAsB,UAA1B,EAAsC;AAC3C,4BAAO5B,KAAK,CAACiC,YAAN,CAAmBT,GAAG,CAACI,MAAJ,CAAWJ,GAAX,EAAgBZ,WAAhB,EAA6B;AAAEH,UAAAA,OAAF;AAAWC,UAAAA,SAAX;AAAsBC,UAAAA,eAAtB;AAAuCJ,UAAAA;AAAvC,SAA7B,CAAnB,EAAkG;AAAEc,UAAAA;AAAF,SAAlG,CAAP;AACD;;AAED,0BACE,sCAAYC,WAAZ;AAAyB,QAAA,GAAG,EAAED;AAA9B,SADF;AAGD,KApBA;AADH,KADF;AA0BD",
+  "sourcesContent": [
+    "import * as React from \"react\";\nimport CodeMirror from 'codemirror';\nimport './index.less';\nimport { ICommand, defaultCommands } from '../../commands';\nimport { IMarkdownEditor } from '../../';\n\nexport type IToolBarProps<T = (keyof (typeof defaultCommands)) | ICommand> = {\n  className?: string;\n  editorProps: IMarkdownEditor;\n  mode?: boolean;\n  preview?: HTMLDivElement | null;\n  container?: HTMLDivElement | null;\n  containerEditor?: HTMLDivElement | null;\n  prefixCls?: string;\n  editor?: CodeMirror.Editor;\n  toolbars?: T[];\n  onClick?: (type: string) => void;\n}\n\nexport default function ToolBar(props: IToolBarProps) {\n  const { prefixCls = 'md-editor', className, onClick, toolbars = [], editor, mode, preview, container, containerEditor, editorProps = {}, ...htmlProps } = props;\n  if (!toolbars || toolbars.length === 0) return null;\n  function handleClick(execute: ICommand['execute']) {\n    if (execute && editor) {\n      execute(editor, editor.getSelection(), editor.getCursor(), { preview, container });\n    }\n  }\n  return (\n    <div className={`${prefixCls}-toolbar ${className || ''} ${mode ? `${prefixCls}-toolbar-mode` : ''}`} {...htmlProps}>\n      {[...toolbars].map((command, key) => {\n        let buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> = {\n          type: 'button',\n        }\n        const obj = typeof command === 'string' ? defaultCommands[command] : command;\n        if (!obj) return null;\n        buttonProps.children = obj.icon;\n        buttonProps.onClick = () => handleClick(obj.execute);\n        if (obj.button && typeof obj.button === 'object') {\n          const btn: React.ButtonHTMLAttributes<HTMLButtonElement> = obj.button;\n          (Object.keys(btn) as (keyof React.ButtonHTMLAttributes<HTMLButtonElement>)[]).forEach((key) => {\n            buttonProps[key] = btn[key];\n          });\n        } else if (typeof obj.button === 'function') {\n          return React.cloneElement(obj.button(obj, editorProps, { preview, container, containerEditor, editor }), { key });\n        }\n\n        return (\n          <button {...buttonProps} key={key} />\n        );\n      })}\n    </div>\n  );\n\n}\n"
+  ]
+}

@@ -1,0 +1,100 @@
+.pipe-line-job-list-view {
+  .header-search {
+    display: flex;
+    justify-content: space-between;
+    .status-span {
+      &.Pending {
+        color: #1890ff;
+      }
+      &.Running {
+        color: #faad14;
+      }
+      &.Schedule {
+        color: #8c58eb;
+      }
+      &.Success {
+        color: #52c41a;
+      }
+      &.Fail {
+        color: #ff4d4f;
+      }
+      &.Init {
+        color: #666666;
+      }
+      &.NotPlanned{
+        color: #FF4D4F;
+      }
+      &.InsideThePlan{
+        color: #FAAD14;
+      }
+    }
+  }
+
+  .pipe-line-job-table {
+    margin-top: 25px;
+    .ant-pagination {
+      .ant-pagination-item-active {
+        background-color: #1890ff;
+        border: none;
+        > a {
+          color: white;
+        }
+      }
+    }
+
+    .ant-table-thead {
+      .ant-table-cell {
+        padding: 13px 16px;
+        background-color: #f4f6f8;
+        text-align: center;
+      }
+    }
+    .ant-table-tbody {
+      .ant-table-cell {
+
+        .status {
+          display: inline-block;
+          width: 48px;
+          text-align: center;
+          &.Pending {
+            color: #1890ff;
+            background-color: #e6f7ff;
+          }
+          &.Running {
+            color: #faad14;
+            background-color: #fbf5d8;
+          }
+          &.Schedule {
+            color: #FAAD14;
+            background-color: #FBF5D8;
+          }
+          &.Success {
+            color: #52c41a;
+            background-color: #edfddc;
+          }
+          &.Fail {
+            color: #ff4d4f;
+            background-color: #ffeeeb;
+          }
+          &.Init {
+            color: #FF4D4F;
+            background-color: #FFEEEB;
+          }
+        }
+        padding: 0 16px;
+        .run-work-btn {
+          > span {
+            padding-right: 7px;
+            border-right: 1px solid #1890ff;
+          }
+        }
+        &.black-color {
+          color: #000000;
+        }
+        &.black-opacity-color {
+          color: rgba(0, 0, 0, 0.55);
+        }
+      }
+    }
+  }
+}

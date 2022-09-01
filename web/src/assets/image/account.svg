@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="19px" height="18px" viewBox="0 0 19 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 3备份 6</title>
+    <defs>
+        <filter color-interpolation-filters="auto" id="filter-1">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0.094118 0 0 0 0 0.564706 0 0 0 0 1.000000 0 0 0 1.000000 0"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="团队页" transform="translate(-663.000000, -217.000000)">
+            <g id="编组-6" transform="translate(662.000000, 216.000000)">
+                <rect id="矩形" fill-opacity="0" fill="#D8D8D8" x="0" y="0" width="20" height="20"></rect>
+                <g filter="url(#filter-1)" id="编组-3备份-6">
+                    <g transform="translate(1.500000, 1.000000)">
+                        <circle id="椭圆形备份-6" fill="#3793EF" cx="9" cy="4.5" r="4.5"></circle>
+                        <path d="M18,18 C18,12.6743971 13.9705627,8.35714286 9,8.35714286 C4.02943725,8.35714286 0,12.6743971 0,18" id="椭圆形备份-7" fill="#3793EF"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

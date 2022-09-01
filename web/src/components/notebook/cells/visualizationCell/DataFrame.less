@@ -1,0 +1,37 @@
+.dataframe-container {
+  display: flex;
+  flex-flow: row;
+  .left {
+    width: 250px;
+    min-height: 300px;
+    background-color: rgba(244, 246, 248, 1);
+    padding: 8px 26px 0;
+    .ant-form-item-label {
+      padding-bottom: 1px;
+    }
+    .ant-form-item {
+      margin-bottom: 2px;
+    }
+  }
+  .right {
+    flex: 1;
+    overflow: hidden;
+    > div {
+      table {
+        width: 100%;
+        border-color: #e9e9e9;
+        text-align: left;
+        thead {
+          background-color: #f7f7f7;
+        }
+        thead th,
+        th,
+        td {
+          text-align: left !important;
+          color: #666;
+          padding: 8px;
+        }
+      }
+    }
+  }
+}

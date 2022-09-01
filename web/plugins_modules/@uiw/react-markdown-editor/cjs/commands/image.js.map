@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/image.tsx"
+  ],
+  "names": [
+    "image",
+    "name",
+    "keyCommand",
+    "button",
+    "icon",
+    "execute",
+    "editor",
+    "selection",
+    "position",
+    "value",
+    "replaceSelection",
+    "setCursor",
+    "line",
+    "ch",
+    "focus"
+  ],
+  "mappings": ";;;;;;;;;AAAA;;;;AAGO,IAAMA,KAAe,GAAG;AAC7BC,EAAAA,IAAI,EAAE,OADuB;AAE7BC,EAAAA,UAAU,EAAE,OAFiB;AAG7BC,EAAAA,MAAM,EAAE;AAAE,kBAAc;AAAhB,GAHqB;AAI7BC,EAAAA,IAAI,eACF;AAAK,IAAA,KAAK,EAAC,IAAX;AAAgB,IAAA,MAAM,EAAC,IAAvB;AAA4B,IAAA,OAAO,EAAC,WAApC;AAAA,2BACE;AAAM,MAAA,IAAI,EAAC,cAAX;AAA0B,MAAA,CAAC,EAAC;AAA5B;AADF,IAL2B;AAS7BC,EAAAA,OAAO,EAAE,iBAACC,MAAD,EAASC,SAAT,EAAoBC,QAApB,EAAiC;AACxC,QAAMC,KAAK,GAAGF,SAAS,aAAMA,SAAN,cAA0B,SAAjD;AACAD,IAAAA,MAAM,CAACI,gBAAP,CAAwBD,KAAxB,EAFwC,CAGxC;;AACAH,IAAAA,MAAM,CAACK,SAAP,CAAiBH,QAAQ,CAACI,IAA1B,EAAgCJ,QAAQ,CAACK,EAAzC;AACAP,IAAAA,MAAM,CAACQ,KAAP;AACD;AAf4B,CAAxB",
+  "sourcesContent": [
+    "import React from 'react';\nimport { ICommand} from './'\n\nexport const image: ICommand = {\n  name: 'image',\n  keyCommand: 'image',\n  button: { 'aria-label': 'Add image text' },\n  icon: (\n    <svg width=\"14\" height=\"14\" viewBox=\"0 0 20 20\">\n      <path fill=\"currentColor\" d=\"M15 9c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4-7H1c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm-1 13l-6-5-2 2-4-5-4 8V4h16v11z\" />\n    </svg>\n  ),\n  execute: (editor, selection, position) => {\n    const value = selection ? `${selection} ![]()` : '![]()\\n';\n    editor.replaceSelection(value);\n    // position.ch = !!selection ? position.ch : position.ch + 1;\n    editor.setCursor(position.line, position.ch);\n    editor.focus();\n  },\n};\n"
+  ]
+}

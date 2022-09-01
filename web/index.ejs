@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+     <link rel="icon" href=<%=htmlWebpackPlugin.options.faviconUrl %> />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="IDP是面向算法工程师一站式人工智能开发平台，提供易用的集成开发环境，支持高速大规模分布式训练和故障自动恢复等功能，使人工智能开发更简单、高效。" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>IDP Studio</title>
+    <link rel="stylesheet/less" type="text/css" href=<%=htmlWebpackPlugin.options.colorLinkUrl %> />
+    <script>
+        window.less = { async: false, env: 'production' }
+    </script>
+    <script>
+        if (typeof Promise !== "function") { document.write('<script src="//f.alicdn.com/es6-shim/0.35.1/??es6-shim.min.js,es6-sham.min.js"><\/script>') }
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?5d525d17dfd330c4741ebd3afe6ce0d3";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+
+<style type="text/css" id="less:color">
+    .test {
+        color: #ffffff;
+    }
+</style>
+
+</html>

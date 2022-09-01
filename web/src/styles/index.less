@@ -1,0 +1,76 @@
+//icon全局颜色
+.ant-layout .anticon{
+	color: #666;
+}
+//sider skin
+.ant-layout-sider{
+	background-color:@layout-sider-background;
+	border-right:1px solid #d6dee6;
+	.ant-tree.ant-tree-directory .ant-tree-treenode .ant-tree-node-content-wrapper.ant-tree-node-selected{
+		color: @layout-header-background;
+	}
+	.ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon, .ant-menu-dark .ant-menu-item-selected .anticon{
+		color: @menu-dark-highlight-color;
+
+	}
+	.ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub, .ant-menu.ant-menu-dark .ant-menu-sub{
+		background-color:@layout-sider-background;
+
+	}
+	.ant-menu-item{
+		border-radius: 6px;
+		&:hover{
+		background-color: #d6dee6;
+		}
+	}
+	.ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-selected{
+		background-color: #DBEAF8;
+	}
+	.ant-input-affix-wrapper{
+		border-color: #d6dee6;
+		border-right: 0;
+		border-left: 0;
+	}
+	.ant-tree.ant-tree-directory .ant-tree-treenode-selected:hover::before, .ant-tree.ant-tree-directory .ant-tree-treenode-selected::before{
+		background-color: #DBEAF8 !important;
+
+	}
+}
+//header skin
+.ant-layout-header{
+	padding: @layout-header-padding;
+	background-color: @layout-header-background;
+	.ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub, .ant-menu.ant-menu-dark .ant-menu-sub,
+	.ant-menu .ant-menu-sub .ant-menu-vertical,
+	.ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub, .ant-menu.ant-menu-dark .ant-menu-sub
+	{
+		background-color: @layout-header-background;
+	}
+	.ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon, .ant-menu-dark .ant-menu-item-selected .anticon{
+		color: @menu-dark-highlight-color;
+		background-color: @layout-header-background;
+
+	}
+}
+
+.ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-selected{
+	background-color: @layout-header-background;
+}
+.workspace-bg {
+background-color: @primary-color;
+}
+.ant-btn-primary{
+	background-color:@btn-custom-color !important;
+	border-color: @btn-custom-color;
+
+}
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item, .ant-menu-dark.ant-menu-horizontal > .ant-menu-submenu{
+	padding:  0 11px;
+}
+a,
+.ant-btn-link {
+	color: @btn-custom-color;
+}
+
+
+

@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/italic.tsx"
+  ],
+  "names": [
+    "italic",
+    "name",
+    "keyCommand",
+    "button",
+    "icon",
+    "execute",
+    "editor",
+    "selection",
+    "position",
+    "value",
+    "replaceSelection",
+    "ch",
+    "setCursor",
+    "line",
+    "focus"
+  ],
+  "mappings": ";;;;;;;;;AAAA;;;;AAGO,IAAMA,MAAgB,GAAG;AAC9BC,EAAAA,IAAI,EAAE,QADwB;AAE9BC,EAAAA,UAAU,EAAE,QAFkB;AAG9BC,EAAAA,MAAM,EAAE;AAAE,kBAAc;AAAhB,GAHsB;AAI9BC,EAAAA,IAAI,eACF;AAAK,IAAA,KAAK,EAAC,IAAX;AAAgB,IAAA,MAAM,EAAC,IAAvB;AAA4B,IAAA,OAAO,EAAC,aAApC;AAAA,2BACE;AAAM,MAAA,IAAI,EAAC,cAAX;AAA0B,MAAA,CAAC,EAAC;AAA5B;AADF,IAL4B;AAS9BC,EAAAA,OAAO,EAAE,iBAACC,MAAD,EAASC,SAAT,EAAoBC,QAApB,EAAiC;AACxC,QAAMC,KAAK,GAAGF,SAAS,cAAOA,SAAP,aAAvB;AACAD,IAAAA,MAAM,CAACI,gBAAP,CAAwBD,KAAxB;AACAD,IAAAA,QAAQ,CAACG,EAAT,GAAc,CAAC,CAACJ,SAAF,GAAcC,QAAQ,CAACG,EAAvB,GAA4BH,QAAQ,CAACG,EAAT,GAAc,CAAxD;AACAL,IAAAA,MAAM,CAACM,SAAP,CAAiBJ,QAAQ,CAACK,IAA1B,EAAgCL,QAAQ,CAACG,EAAzC;AACAL,IAAAA,MAAM,CAACQ,KAAP;AACD;AAf6B,CAAzB",
+  "sourcesContent": [
+    "import React from 'react';\nimport { ICommand} from './'\n\nexport const italic: ICommand = {\n  name: 'italic',\n  keyCommand: 'italic',\n  button: { 'aria-label': 'Add italic text' },\n  icon: (\n    <svg width=\"12\" height=\"12\" viewBox=\"0 0 320 512\">\n      <path fill=\"currentColor\" d=\"M204.758 416h-33.849l62.092-320h40.725a16 16 0 0 0 15.704-12.937l6.242-32C297.599 41.184 290.034 32 279.968 32H120.235a16 16 0 0 0-15.704 12.937l-6.242 32C96.362 86.816 103.927 96 113.993 96h33.846l-62.09 320H46.278a16 16 0 0 0-15.704 12.935l-6.245 32C22.402 470.815 29.967 480 40.034 480h158.479a16 16 0 0 0 15.704-12.935l6.245-32c1.927-9.88-5.638-19.065-15.704-19.065z\" />\n    </svg>\n  ),\n  execute: (editor, selection, position) => {\n    const value = selection ? `*${selection}*` : `**`;\n    editor.replaceSelection(value);\n    position.ch = !!selection ? position.ch : position.ch + 1;\n    editor.setCursor(position.line, position.ch);\n    editor.focus();\n  },\n};"
+  ]
+}

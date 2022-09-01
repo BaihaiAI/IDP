@@ -1,0 +1,86 @@
+{
+  "name": "@uiw/react-markdown-preview",
+  "version": "3.4.1",
+  "description": "React component preview markdown text in web browser. The minimal amount of CSS to replicate the GitHub Markdown style.",
+  "homepage": "https://uiwjs.github.io/react-markdown-preview",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "repository": {
+    "type": "git",
+    "url": "http://10.9.148.89:4873/"
+  },
+  "author": "kenny wang <wowohoo@qq.com>",
+  "license": "MIT",
+  "files": [
+    "lib",
+    "esm",
+    "markdown.css",
+    "src"
+  ],
+  "keywords": [
+    "react",
+    "markdown",
+    "prismjs",
+    "react-markdown"
+  ],
+  "jest": {
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/?!(.*)"
+    ]
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "7.15.4",
+    "@mapbox/rehype-prism": "0.8.0",
+    "rehype-autolink-headings": "6.1.0",
+    "rehype-raw": "6.1.0",
+    "rehype-attr": "2.0.6",
+    "rehype-slug": "5.0.0",
+    "rehype-rewrite": "3.0.4",
+    "remark-gfm": "3.0.0",
+    "react-markdown": "7.0.1"
+  },
+  "devDependencies": {
+    "@kkt/less-modules": "6.11.0",
+    "@kkt/raw-modules": "6.11.0",
+    "@kkt/scope-plugin-options": "6.11.0",
+    "@types/react": "17.0.27",
+    "@types/react-dom": "17.0.9",
+    "@types/react-test-renderer": "17.0.1",
+    "@uiw/react-codesandbox": "1.1.0",
+    "@uiw/react-github-corners": "1.5.3",
+    "@uiw/react-shields": "1.1.2",
+    "@uiw/reset.css": "1.0.5",
+    "compile-less-cli": "1.8.9",
+    "kkt": "6.11.0",
+    "prettier": "2.4.1",
+    "pretty-quick": "3.1.1",
+    "jest": "27.2.5",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-test-renderer": "17.0.2",
+    "tsbb": "3.4.4",
+    "husky": "7.0.2"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

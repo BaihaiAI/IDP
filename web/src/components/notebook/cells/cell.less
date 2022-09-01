@@ -1,0 +1,163 @@
+.demo-wrapper{
+  position: relative;
+  padding: 4px;
+  margin: 10px 0;
+  .demo-inner{
+    // margin-left: 50px;
+    margin-left: 7px;
+    border-radius: 4px;
+    border:1px solid #DBE2E9;
+    .demo-cell{
+        position: relative;
+        .cell-side-panel{
+          position: absolute;
+          width: 50px;
+          left: -60px;
+          .controls-start{
+            // display: none;
+            opacity: 0;
+          }
+        }
+        .code-cell{
+          .sider-left-controlbar{
+            position: absolute;
+            left:-10px;
+            overflow: hidden;
+            height: 100%;
+          }
+        }
+
+    }
+    .code-wrapper{
+      min-height: 40px;
+      .code-box{
+        display: block;
+        .code-box .CodeMirror-scroll{
+          margin-bottom: -30px;
+          margin-right: -50px;
+        }
+        .CodeMirror-sizer{
+          border-right: 0;
+          // border-top: 1px solid #DBE2E9;
+        }
+      }
+      .code-box-hide{
+        height: 1px;
+        overflow: hidden;
+      }
+    }
+    .editor-cell-statebar{
+            border-left: 10px solid #dbe2e9;
+            border-radius: 6px 0 0 6px;
+            // display: none;
+            opacity: 0;
+            height: 100%;
+            cursor: pointer;
+            &:hover{
+                border-color: #1890ff;
+            }
+    }
+    .code-editor-topbar{
+      position: absolute;
+      right: 10px;
+      top: -13px;
+      height: 20px;
+      justify-content:flex-end;
+      align-items: center;
+      z-index: 99;
+      .code-editor-topbar-actions{
+        padding: 0 3px;
+        border-radius: 4px;
+        border: 1px solid #dbe2db;
+        background-color: #DFE5EA;
+        &:hover{
+          border: 1px solid #e9f0e9;
+          background-color: #eaf0f5;
+        }
+
+      }
+    }
+    .add-cell-btn{
+    text-align: center;
+    }
+
+    .tool-placeholder {
+      height: 20px;
+      background-color: #F4F6F8;
+      border-radius: 5px 5px 0 0;
+      .execution-time-text {
+        padding-left: 10px;
+        color: #8D99A4;
+      }
+    }
+  }
+  &:hover .demo-inner{
+      border:1px solid #3793ef;
+      border-radius:4px;
+      transition: all 0.4s ease-out;
+      .editor-cell-statebar{
+        // display: block;
+        opacity: 1;
+      }
+      .demo-cell .cell-side-panel{
+        .controls-start{
+        //   display: block;
+            opacity: 1;
+        }
+        .controls-times{
+          // display: block;
+          opacity: 1;
+        }
+      }
+      .code-editor-topbar{
+        display: inherit !important;
+      }
+      .execution-time-text {
+        display: inherit !important;
+      }
+  }
+  .mk-demo-inner{
+    border-color: #fff;
+  }
+  .cell-active{
+      border:1px solid #3793ef;
+      transition: border-color 0.2s ease 0s;
+      box-shadow:rgb(195 227 255) 0px 0px 0px 2px;
+      .editor-cell-statebar{
+        // display: block;
+        opacity: 1;
+      }
+      .demo-cell .cell-side-panel{
+        .controls-start{
+          // display: block;
+          opacity: 1;
+        }
+
+      }
+  }
+  .CodeMirror-hints {
+    background-color: black;
+    width: 200px;
+  }
+  .CodeMirror-hint {
+    background-color: #3c3d38;
+    color: white;
+    font-weight: 500;
+  }
+  .CodeMirror-hint-active {
+    background-color: black;
+    color: yellow;
+  }
+
+}
+
+.cell-output-error{
+    &:hover .demo-inner, .demo-inner{
+        border:1px solid #df3416;
+    }
+    .cell-active{
+        border:1px solid #df3416;
+        transition: border-color 0.2s ease 0s;
+        box-shadow:#FFE1E1 0px 0px 0px 2px;
+    }
+  }

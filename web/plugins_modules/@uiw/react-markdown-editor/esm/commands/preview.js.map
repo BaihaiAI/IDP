@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/preview.tsx"
+  ],
+  "names": [
+    "React",
+    "useEffect",
+    "useState",
+    "Preview",
+    "props",
+    "editorProps",
+    "preview",
+    "containerEditor",
+    "visible",
+    "setVisible",
+    "style",
+    "borderBottomRightRadius",
+    "width",
+    "overflow",
+    "padding",
+    "borderLeft",
+    "command",
+    "icon",
+    "name",
+    "keyCommand",
+    "button",
+    "opts"
+  ],
+  "mappings": ";AAAA,OAAOA,KAAP,IAAgBC,SAAhB,EAA2BC,QAA3B,QAA2C,OAA3C;;;AAWA,IAAMC,OAAgF,GAAIC,KAAD,IAAW;AAClG,MAAM;AAAEC,IAAAA,WAAW,EAAE;AAAEC,MAAAA,OAAF;AAAWC,MAAAA;AAAX;AAAf,MAAgDH,KAAtD;AACA,MAAM,CAACI,OAAD,EAAUC,UAAV,IAAwBP,QAAQ,CAACE,KAAK,CAACC,WAAN,CAAkBG,OAAnB,CAAtC;AACAP,EAAAA,SAAS,CAAC,MAAM;AACdQ,IAAAA,UAAU,CAACL,KAAK,CAACC,WAAN,CAAkBG,OAAnB,CAAV;AACD,GAFQ,EAEN,CAACJ,KAAK,CAACC,WAAN,CAAkBG,OAAnB,CAFM,CAAT;AAIAP,EAAAA,SAAS,CAAC,MAAM;AACd,QAAIK,OAAJ,EAAa;AACXA,MAAAA,OAAO,CAACI,KAAR,CAAcC,uBAAd,GAAwC,KAAxC;AACD;;AACD,QAAIL,OAAO,IAAIE,OAAf,EAAwB;AACtBF,MAAAA,OAAO,CAACI,KAAR,CAAcE,KAAd,GAAsB,MAAtB;AACAN,MAAAA,OAAO,CAACI,KAAR,CAAcG,QAAd,GAAyB,MAAzB;AACAP,MAAAA,OAAO,CAACI,KAAR,CAAcI,OAAd,GAAwB,MAAxB;;AACA,UAAIP,eAAJ,EAAqB;AACnBA,QAAAA,eAAe,CAACG,KAAhB,CAAsBE,KAAtB,GAA8B,MAA9B;AACD;AACF,KAPD,MAOO,IAAIN,OAAJ,EAAa;AAClBA,MAAAA,OAAO,CAACI,KAAR,CAAcG,QAAd,GAAyB,QAAzB;AACAP,MAAAA,OAAO,CAACI,KAAR,CAAcK,UAAd,GAA2B,KAA3B;AACAT,MAAAA,OAAO,CAACI,KAAR,CAAcI,OAAd,GAAwB,GAAxB;;AACA,UAAIP,eAAJ,EAAqB;AACnBA,QAAAA,eAAe,CAACG,KAAhB,CAAsBE,KAAtB,GAA8B,MAA9B;AACD;AACF;AACF,GAnBQ,EAmBN,CAACN,OAAD,EAAUC,eAAV,EAA2BC,OAA3B,CAnBM,CAAT;AAqBA,sBACE;AACE,IAAA,OAAO,EAAE,MAAMC,UAAU,CAAC,CAACD,OAAF,CAD3B;AAEE,IAAA,IAAI,EAAC,QAFP;AAGE,IAAA,SAAS,EAAEA,OAAO,GAAG,QAAH,GAAc,EAHlC;AAAA,cAKGJ,KAAK,CAACY,OAAN,CAAcC;AALjB,IADF;AASD,CArCD;;AAuCA,OAAO,IAAMX,OAAiB,GAAG;AAC/BY,EAAAA,IAAI,EAAE,SADyB;AAE/BC,EAAAA,UAAU,EAAE,SAFmB;AAG/BC,EAAAA,MAAM,EAAE,CAACJ,OAAD,EAAUZ,KAAV,EAAiBiB,IAAjB,kBAA0B,KAAC,OAAD;AAAS,IAAA,OAAO,EAAEL,OAAlB;AAA2B,IAAA,WAAW,eAAOZ,KAAP,EAAiBiB,IAAjB;AAAtC,IAHH;AAI/BJ,EAAAA,IAAI,eACF;AAAK,IAAA,KAAK,EAAC,IAAX;AAAgB,IAAA,MAAM,EAAC,IAAvB;AAA4B,IAAA,OAAO,EAAC,WAApC;AAAA,2BACE;AAAM,MAAA,IAAI,EAAC,cAAX;AAA0B,MAAA,CAAC,EAAC;AAA5B;AADF;AAL6B,CAA1B",
+  "sourcesContent": [
+    "import React, { useEffect, useState } from 'react';\nimport { ICommand } from './';\nimport { IMarkdownEditor } from '../';\n\ntype Options = {\n  preview?: HTMLDivElement | null;\n  container?: HTMLDivElement | null;\n  containerEditor?: HTMLDivElement | null;\n  editor?: CodeMirror.Editor;\n}\n\nconst Preview: React.FC<{ command: ICommand, editorProps: IMarkdownEditor & Options }> = (props) => {\n  const { editorProps: { preview, containerEditor } } = props;\n  const [visible, setVisible] = useState(props.editorProps.visible);\n  useEffect(() => {\n    setVisible(props.editorProps.visible);\n  }, [props.editorProps.visible]);\n\n  useEffect(() => {\n    if (preview) {\n      preview.style.borderBottomRightRadius = '3px';\n    }\n    if (preview && visible) {\n      preview.style.width = '100%';\n      preview.style.overflow = 'auto';\n      preview.style.padding = '20px';\n      if (containerEditor) {\n        containerEditor.style.width = '100%'\n      }\n    } else if (preview) {\n      preview.style.overflow = 'hidden';\n      preview.style.borderLeft = '0px';\n      preview.style.padding = '0';\n      if (containerEditor) {\n        containerEditor.style.width = '100%'\n      }\n    }\n  }, [preview, containerEditor, visible]);\n\n  return (\n    <button\n      onClick={() => setVisible(!visible)}\n      type=\"button\"\n      className={visible ? 'active' : ''}\n    >\n      {props.command.icon}\n    </button>\n  )\n}\n\nexport const preview: ICommand = {\n  name: 'preview',\n  keyCommand: 'preview',\n  button: (command, props, opts) => <Preview command={command} editorProps={{ ...props, ...opts }} />,\n  icon: (\n    <svg width=\"16\" height=\"16\" viewBox=\"0 0 32 32\">\n      <path fill=\"currentColor\" d=\"M0 16c3.037-5.864 9.058-9.802 16-9.802s12.963 3.938 15.953 9.703l0.047 0.1c-3.037 5.864-9.058 9.802-16 9.802s-12.963-3.938-15.953-9.703l-0.047-0.1zM16 22.531c3.607 0 6.531-2.924 6.531-6.531s-2.924-6.531-6.531-6.531v0c-3.607 0-6.531 2.924-6.531 6.531s2.924 6.531 6.531 6.531v0zM16 19.265c-1.804 0-3.265-1.461-3.265-3.265s1.461-3.265 3.265-3.265v0c1.804 0 3.265 1.461 3.265 3.265s-1.461 3.265-3.265 3.265v0z\" />\n    </svg>\n  ),\n};\n"
+  ]
+}

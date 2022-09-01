@@ -1,0 +1,21 @@
+.problem-list{
+    color: #666;
+}
+.problem-list ul{
+	padding:0;
+}
+
+.problem-list li{
+	padding: 0;
+	margin: 0;
+	list-style:0 none;
+	font-size:16px;
+	font-weight:bold;
+	line-height:46px;
+	border-bottom:1px solid #f3f3f3;
+	display: flex;
+	justify-content: space-between;
+	align-content: space-around;
+	align-items:center;
+}
+

@@ -1,0 +1,28 @@
+.last-right-side {
+  position: relative;
+  background-color: white;
+  z-index: 31;
+  //border-left: 1px solid rgb(214, 222, 230);
+  .ant-layout-sider {
+    border-right: 0;
+    .ant-layout-sider-children {
+
+      padding: 0;
+      .column-item {
+        text-align: center;
+        padding: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        cursor: pointer;
+        &.active {
+          background-color: #8c8f93;
+        }
+        > span {
+          font-size: 14px;
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+}
