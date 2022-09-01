@@ -1,0 +1,17 @@
+[package]
+license = "Apache-2.0"
+name = "logger"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+#tokio_console = ["dep:console-subscriber"]
+
+[dependencies]
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+    "env-filter",
+    "registry",
+    "fmt",
+    "ansi",
+] }

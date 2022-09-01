@@ -1,0 +1,3 @@
+- db0: file/file cache
+- db1: router/pod info 
+- db2: kernel info cache

@@ -1,0 +1,21 @@
+# IDE
+.idea
+.vscode
+*.swp
+
+# mac
+.DS_Store
+
+# rust
+.cargo/config.toml
+/target
+Cargo.lock
+
+__pycache__
+
+# redis
+*.rdb
+
+dist
+*.tar.gz
+scripts/team_id.sh

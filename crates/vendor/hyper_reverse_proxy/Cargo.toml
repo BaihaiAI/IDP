@@ -1,0 +1,13 @@
+[package]
+license = "Apache-2.0"
+name = "hyper_reverse_proxy"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hyper = { version = "0.14.18", features = ["client"] }
+tokio = { version = "1.17.0", features = ["io-util", "rt"] }
+tracing = "0.1.34"
+
+[dev-dependencies]
+hyper = { version = "0.14", features = ["client", "http1", "tcp"] }

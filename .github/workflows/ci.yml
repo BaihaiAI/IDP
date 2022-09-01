@@ -1,0 +1,34 @@
+name: check_lint_test
+on: [push]
+#env:
+#  TOOLCHAIN: nightly-2022-03-01-x86_64-unknown-linux-gnu
+
+jobs:
+  typo_check_lint_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions Repository
+        uses: actions/checkout@v2
+
+      - name: typo
+        uses: crate-ci/typos@v1.4.0
+
+      - name: install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          components: rustfmt, clippy
+          override: true
+      - name: check
+        uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: check
+          args: --tests
+      - name: clippy
+        uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: clippy
+          args: --tests

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>idp client</title>
+    <!-- Modified from: https://github.com/actix/examples/blob/a66c05448eace8b1ea53c7495b27604e7e91281c/websockets/chat-broker/static/index.html -->
+    <style>
+        /* :root { font-size: 14px; } */
+        input[type='text'] {
+            font-size: inherit;
+        }
+
+        #log {
+            width: 30em;
+            height: 20em;
+            overflow: auto;
+            margin: 0.5em 0;
+            border: 1px solid black;
+        }
+
+        #status {
+            padding: 0 0.2em;
+        }
+
+        #url, #text {
+            width: 17em;
+            padding: 0.5em;
+        }
+
+        .msg {
+            margin: 0;
+            padding: 0.25em 0.5em;
+        }
+
+        .msg--status {
+            background-color: #ffffc9;
+        }
+
+        .msg--message {
+            background-color: #d2f4ff;
+        }
+
+        .msg--error {
+            background-color: pink;
+        }
+    </style>
+</head>
+<body>
+<h2>Chat Client</h2>
+<form id="urlform">
+    <label for="url">usage: click submit and then click connect</label>
+    <br>
+    <input type="text" id="url" value="ws://localhost:9007/api/v1/execute/ws/kernel/execute/" />
+    <input type="submit"/>
+</form>
+
+<div>
+    <span>Status:</span>
+    <span id="status">disconnected</span>
+    <button id="connect">Connect</button>
+</div>
+
+<div id="log" style="width: 90%;"></div>
+
+<form id="chatform">
+    <label for="text"></label>
+    <input type="text" id="text" value='{"teamId":"1","projectId":"1","region":"b","session":"bbb5b78a-6001-415b-a1f9-45037d6a3045","userId":"1513505645016584192","executeType":"cell","msgId":"/helloworld.ipynb/c17b7abb-b82c-47d7-be0c-ea0c03beca65/6291","path":"/helloworld.ipynb","cellId":"c17b7abb-b82c-47d7-be0c-ea0c03beca65","cellType":"code","code":"print(1)","meta":{"uid":"1513505645016584192","id":"c17b7abb-b82c-47d7-be0c-ea0c03beca65","path":"/helloworld.ipynb","index":2},"kernel":"1647936446652","identity":"c66b2dc9-2412-4f74-b838-a6fbccc7194c","recordExecuteTime":"true","batchId":1650514702737}'/>
+    <input type="submit" id="send" />
+</form>
+
+<p>{"teamId":"1","projectId":"1","region":"b","session":"bbb5b78a-6001-415b-a1f9-45037d6a3045","userId":"1513505645016584192","executeType":"cell","msgId":"/helloworld.ipynb/c17b7abb-b82c-47d7-be0c-ea0c03beca65/6291","path":"/helloworld.ipynb","cellId":"c17b7abb-b82c-47d7-be0c-ea0c03beca65","cellType":"code","code":"print(1)","meta":{"uid":"1513505645016584192","id":"c17b7abb-b82c-47d7-be0c-ea0c03beca65","path":"/helloworld.ipynb","index":2},"kernel":"1647936446652","identity":"c66b2dc9-2412-4f74-b838-a6fbccc7194c","recordExecuteTime":"true","batchId":1650514702737}</p>
+
+<script>
+    const status = document.querySelector('#status')
+    const connectButton = document.querySelector('#connect')
+    connectButton.disabled = false;
+    const log = document.querySelector('#log')
+    const textInput = document.querySelector('#text')
+
+    /** @type {WebSocket | null} */
+    let socket = null
+    let websocketUrl = "ws://192.168.12.12:9007/api/v1/execute/ws/kernel/execute/";
+
+    function logStatus(msg, type = 'status') {
+        log.innerHTML += `<p class="msg msg--${type}">${msg}</p>`
+        log.scrollTop += 1000
+    }
+
+    function connect() {
+        disconnect()
+        logStatus('Connecting...')
+        // document.cookie = ';teamId=1';
+        socket = new WebSocket(websocketUrl)
+        // socket.on('header', headers => {
+        //     headers.push("Set-Cookie: teamId=123")
+        // })
+        socket.onopen = () => {
+            logStatus('Connected')
+            updateConnectionStatus()
+        }
+
+        socket.onmessage = (ev) => {
+            logStatus('Received: ' + ev.data, 'message')
+        }
+
+        socket.onclose = () => {
+            logStatus('Disconnected')
+            socket = null
+            updateConnectionStatus()
+        }
+    }
+
+    function disconnect() {
+        if (socket) {
+            logStatus('Disconnecting...')
+            socket.close()
+            socket = null
+
+            updateConnectionStatus()
+        }
+    }
+
+    function updateConnectionStatus() {
+        if (socket) {
+            status.style.backgroundColor = 'transparent'
+            status.style.color = 'green'
+            status.textContent = `connected`
+            connectButton.innerHTML = 'Disconnect'
+            textInput.focus()
+        } else {
+            status.style.backgroundColor = 'red'
+            status.style.color = 'white'
+            status.textContent = 'disconnected'
+            connectButton.textContent = 'Connect'
+        }
+    }
+
+    document.querySelector('#urlform').addEventListener('submit', (event)=>{
+        event.preventDefault()
+        // connectButton.disabled = false
+        websocketUrl = document.querySelector('#url').value
+    })
+
+    connectButton.addEventListener('click', () => {
+        if (socket) {
+            disconnect()
+        } else {
+            connect()
+        }
+        updateConnectionStatus()
+    })
+
+    document.querySelector('#chatform').addEventListener('submit', (ev) => {
+        ev.preventDefault()
+
+        const text = textInput.value
+
+        logStatus('sent: ' + text)
+        socket.send(text)
+
+        textInput.value = ''
+        textInput.focus()
+    })
+
+    updateConnectionStatus()
+</script>
+</body>
+</html>

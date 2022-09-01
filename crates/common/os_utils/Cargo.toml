@@ -1,0 +1,22 @@
+[package]
+license = "Apache-2.0"
+name = "os_utils"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+# usage = ["dep:sysinfo", "dep:nvml-wrapper"]
+
+[dependencies]
+# sysinfo = { version = "0.25", optional = true }
+# find cuda dylib at runtime by libloading
+# nvml-wrapper = { version = "0.8", optional = true }
+# https://docs.rs/cuda-runtime-sys/0.3.0-alpha.1/cuda_runtime_sys/fn.cudaMemGetInfo.html
+#cuda-runtime-sys = "0.3"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["sysinfoapi"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

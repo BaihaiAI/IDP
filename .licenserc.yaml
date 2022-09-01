@@ -1,0 +1,10 @@
+# used by license-eye in CI
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: BaihaiAI, Inc.
+
+  paths:
+    - 'crates/**/*.rs'
+
+  comment: on-failure

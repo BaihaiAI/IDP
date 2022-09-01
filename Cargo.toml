@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "crates/test_runner",
+    "crates/cache_io",
+
+    "crates/service/*",
+    "crates/vendor/*",
+    "crates/common/*",
+    "crates/ci/*",
+]
+
+[profile.release]
+lto = true
+# keep debug info for gdb
+debug = true

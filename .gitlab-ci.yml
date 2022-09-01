@@ -1,0 +1,12 @@
+# variables:
+#   GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - check
+
+check:
+  stage: check
+  #retry: 1
+  script:
+  - ./scripts/ci.sh
+  #- ./scripts/ci_integration_test.sh

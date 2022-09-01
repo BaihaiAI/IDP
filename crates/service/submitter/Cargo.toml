@@ -1,0 +1,23 @@
+[package]
+name = "submitter"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+kernel_common = { path = "../../common/kernel_common", default-features = false, features = [
+    "spawn",
+] }
+
+serde_json = "1.0"
+
+[target.'cfg(unix)'.dependencies]
+business = { path = "../../common/business" }
+os_utils = { path = "../../common/os_utils" }
+
+reqwest = { version = "0.11", default-features = false, features = [
+    "rustls-tls",
+] }
+
+[target.'cfg(windows)'.dependencies]
+tiny_http = "0.11.0"

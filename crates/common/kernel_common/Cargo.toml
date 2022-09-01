@@ -1,0 +1,26 @@
+[package]
+license = "Apache-2.0"
+name = "kernel_common"
+version = "1.0.0"
+edition = "2021"
+
+[features]
+default = []
+fifo = ["dep:libc"]
+tcp = ["dep:reqwest"]
+spawn = ["dep:err"]
+
+[dependencies]
+business = { path = "../business" }
+serde_helper = { path = "../serde_helper" }
+
+err = { path = "../err", optional = true }
+libc = { version = "0.2", optional = true }
+reqwest = { version = "0.11", default-features = false, features = [
+    "rustls-tls",
+    "json",
+    "blocking",
+], optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"

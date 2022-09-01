@@ -1,0 +1,8 @@
+[package]
+name = "cargo_toml_license_check"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+cargo = { version = '0.64', default-features = false }

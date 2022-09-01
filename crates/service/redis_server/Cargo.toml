@@ -1,0 +1,11 @@
+[package]
+name = "redis_server"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+business = { path = "../../common/business" }
+err = { path = "../../common/err" }
+
+resp = "1.0.3"

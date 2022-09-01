@@ -1,0 +1,15 @@
+.git
+target/debug/deps
+target/debug/build
+target/debug/examples
+target/debug/incremental
+target/debug/.fingerprint
+target/release/deps
+target/release/build
+target/release/examples
+target/release/incremental
+target/release/.fingerprint
+web/node_modules
+**/*.o
+**/*.rlib
+**/*.d

@@ -1,0 +1,37 @@
+[package]
+name = "idp_kernel"
+version = "1.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[features]
+default = ["tcp"]
+tcp = ["dep:tokio", "dep:tokio-tungstenite", "dep:futures-util"]
+fifo = ["kernel_common/fifo"]
+
+[dependencies]
+business = { path = "../../common/business" }
+kernel_common = { path = "../../common/kernel_common", default-features = false }
+logger = { path = "../../common/logger" }
+os_utils = { path = "../../common/os_utils" }
+
+futures-util = { version = "0.3", optional = true }
+serde_json = "1.0"
+urlencoding = "2.1"
+# we use tokio macros: tokio::select!
+libc = "0.2"
+pyo3 = "0.16"
+tokio = { version = "1.0", features = [
+    "macros",
+    "rt",
+    "time",
+    "sync",
+], optional = true }
+tokio-tungstenite = { version = "0.17", optional = true }
+tracing = "0.1"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser"] }
+
+[build-dependencies]
+git_version = { path = "../../common/git_version" }

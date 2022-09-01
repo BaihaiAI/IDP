@@ -1,0 +1,6 @@
+[formatting]
+indent_string = '    '
+
+[[rule]]
+keys = ["dependencies", "dev-dependencies", "build-dependencies"]
+formatting = { reorder_keys = true }
