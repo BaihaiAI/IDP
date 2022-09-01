@@ -24,7 +24,7 @@ use SIGSTOP/SIGCONT in standalone/non_k8s env?
 criu dump tips:
 1. can't run in vscode terminal
 2. can't use unix domain socket
-3. recomment disable tty, stdin/stdout to null
+3. recommend disable tty, stdin/stdout to null
 4. can't hold
 
 ```text
