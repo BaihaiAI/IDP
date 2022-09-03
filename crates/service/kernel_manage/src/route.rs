@@ -123,9 +123,7 @@ async fn service_route_inner(
         "/kernel/resume" => handler::resume(ctx, req).await?.to_hyper(),
 
         "/execute_record" => {
-            handler::execute_record::find_notebook_cell_id_execute_record(ctx, req)
-                .await?
-                .to_hyper()
+            handler::execute_record::find_notebook_cell_id_execute_record(ctx, req)?.to_hyper()
         }
 
         path => {

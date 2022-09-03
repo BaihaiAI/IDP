@@ -47,7 +47,7 @@ struct Req {
     cell_id: String,
 }
 
-pub async fn find_notebook_cell_id_execute_record(
+pub fn find_notebook_cell_id_execute_record(
     ctx: AppContext,
     req: Request<Body>,
 ) -> Result<Resp<Vec<ExecuteRecord>>, Error> {
@@ -59,7 +59,7 @@ pub async fn find_notebook_cell_id_execute_record(
     );
     let mut ret = Vec::new();
     for (_k, v) in ctx.execute_record_db.scan_prefix(prefix).flatten() {
-        if let Ok(record) = serde_json::from_slice::<ExecuteRecord>(&v.to_vec()) {
+        if let Ok(record) = serde_json::from_slice::<ExecuteRecord>(&v) {
             ret.push(record);
         }
     }
