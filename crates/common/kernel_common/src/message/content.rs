@@ -110,6 +110,7 @@ pub enum Content {
     RuntimeError {
         message: String,
     },
+    StartKernel {},
     // idp_kernel OOM killed or core dumped
     // KernelCoreDumped {
     // error_reason: String,

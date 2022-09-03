@@ -80,6 +80,11 @@ impl KernelEntry {
             header: header.clone(),
             resource: resource.clone(),
         })?;
+        ctx.output_to_ws_sender.send(kernel_common::Message {
+            header: header.clone(),
+            request: None,
+            content: kernel_common::Content::StartKernel {},
+        })?;
         #[cfg(feature = "tcp")]
         {
             let header = header.clone();
