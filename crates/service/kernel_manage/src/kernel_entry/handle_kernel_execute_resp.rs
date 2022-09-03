@@ -58,32 +58,24 @@ impl super::KernelCtx {
         {
             cell.execution_time = Some(duration.to_string());
 
-            #[derive(serde::Serialize, serde::Deserialize)]
-            struct TraceCodeExecute {
-                code: String,
-                data_source_list: Vec<common_model::api_model::ActiveDataObj>,
-                run_at: u64,
-                hearder: kernel_common::Header,
-            }
             let data_source_list =
                 common_model::api_model::get_develop_active_connect_data(resp.header.project_id)
                     .await
                     .map(|ret| ret.data)
                     .unwrap_or_default();
-            // FIXME multi ipynb write to same db has data race
-            let path = ".trace_code_execute.json";
-            let mut old_data = serde_json::from_str::<Vec<TraceCodeExecute>>(
-                &std::fs::read_to_string(path).unwrap_or_default(),
-            )
-            .unwrap_or_default();
-            old_data.push(TraceCodeExecute {
+            let run_record = crate::handler::execute_record::ExecuteRecord {
                 code: code.clone(),
                 data_source_list,
-                run_at,
-                hearder: resp.header.clone(),
-            });
-            let output = serde_json::to_string_pretty(&old_data).unwrap();
-            std::fs::write(path, output).unwrap();
+                duration_ms: duration,
+                run_at: chrono::NaiveDateTime::from_timestamp(run_at as _, 0),
+                header: resp.header.clone(),
+            };
+            if let Err(err) = self.execute_record_db.insert(
+                run_record.key().into_bytes(),
+                serde_json::to_vec(&run_record).unwrap(),
+            ) {
+                tracing::error!("{err}");
+            }
         }
         if let Some(output) = resp.content.warp_to_cell_output() {
             match cell.outputs {

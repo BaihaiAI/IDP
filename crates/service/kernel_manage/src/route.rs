@@ -95,7 +95,9 @@ async fn service_route_inner(
         "/version" => Response::builder()
             .body(Body::from(env!("VERSION").to_string()))
             .unwrap(),
-        _ if req_path.starts_with("/ws/kernel/execute") => handler::accept_execute_ws(ctx, req)?,
+        _ if req_path.starts_with("/ws/kernel/execute") => {
+            handler::accept_browser_execute_ws(ctx, req)?
+        }
         "/ws/kernel/connect" => {
             let kernel_info_str = req.headers()[kernel_common::KernelInfo::HTTP_HEADER]
                 .to_str()
@@ -119,6 +121,12 @@ async fn service_route_inner(
         "/kernel/shutdown_all" => handler::shutdown_all(ctx, req).await?.to_hyper(),
         "/kernel/pause" => handler::pause(ctx, req).await?.to_hyper(),
         "/kernel/resume" => handler::resume(ctx, req).await?.to_hyper(),
+
+        "/execute_record" => {
+            handler::execute_record::find_notebook_cell_id_execute_record(ctx, req)
+                .await?
+                .to_hyper()
+        }
 
         path => {
             tracing::debug!("GET {path} not found in route");

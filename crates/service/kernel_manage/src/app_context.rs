@@ -34,9 +34,9 @@ pub struct AppContext {
 
     pub kernel_entry_ops_tx: mpsc::Sender<KernelEntryOps>,
     // pub kernel_entry_get: mpsc::Sender<(Inode, oneshot::Sender<Option<Arc<KernelEntry>>>)>,
-    // pub kernel_entry_get_all: mpsc::Sender<(Inode, oneshot::Sender<Vec<Arc<KernelEntry>>>)>,
     // pub kernel_entry_delete: mpsc::Sender<Inode>,
     // pub kernel_entry_insert: mpsc::Sender<KernelEntry>,
+    pub execute_record_db: sled::Db,
 }
 
 #[derive(Debug)]
@@ -113,11 +113,14 @@ impl AppContext {
             }
         });
 
+        let sled_kv_db = sled::open("kernel_manage.db").expect("sled open");
+
         Self {
             output_to_ws_sender,
             kernel_ws_conn_take: kernel_ws_conn_take_tx,
             kernel_ws_conn_insert: kernel_ws_conn_insert_tx,
             kernel_entry_ops_tx,
+            execute_record_db: sled_kv_db,
         }
     }
 }

@@ -20,4 +20,4 @@ pub mod websocket_transport;
 
 pub(crate) use execute_req_model::ExecuteCodeReq;
 // use tokio::sync::broadcast::Receiver;
-pub use websocket_transport::accept_execute_ws;
+pub use websocket_transport::accept_browser_execute_ws;
