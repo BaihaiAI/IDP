@@ -12,5 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod pip_install;
 pub mod pip_list;
 pub mod search;
