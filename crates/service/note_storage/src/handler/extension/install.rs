@@ -31,7 +31,7 @@ pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, Err
     let recommended_extension_path =
         business::path_tool::recommended_extensions().join(&extension_name);
 
-    let extension_path = format!("{}/{}/", &installed_extensions_path, &extension_name);
+    let extension_path = format!("{}/{}", &installed_extensions_path, &req.name);
     std::fs::create_dir_all(&extension_path)?;
 
     common_tools::command_tools::copy(
@@ -42,7 +42,7 @@ pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, Err
     let jdata = std::fs::read_to_string(recommended_extension_path.join("config.json"))?;
     let mut new_extension_config = serde_json::from_str::<ExtensionResp>(&jdata)?;
 
-    let url = format!("{installed_extensions_path}/{extension_name}/");
+    let url = format!("{installed_extensions_path}/{extension_name}");
     new_extension_config.url = Some(url.clone());
 
     let extensions_config_path =
