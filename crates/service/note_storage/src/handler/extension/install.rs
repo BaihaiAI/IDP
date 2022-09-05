@@ -28,13 +28,15 @@ pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, Err
     tracing::info!(
         "run extensions install api, path:{installed_extensions_path} ,name:{extension_name}"
     );
-    let recommended_extension_path = business::path_tool::recommended_extensions()
-        .join(req.name)
-        .join(req.version);
+    let recommended_extension_path =
+        business::path_tool::recommended_extensions().join(&extension_name);
+
+    let extension_path = format!("{}/{}/", &installed_extensions_path, &extension_name);
+    std::fs::create_dir_all(&extension_path)?;
 
     common_tools::command_tools::copy(
         recommended_extension_path.to_str().unwrap(),
-        &installed_extensions_path,
+        &extension_path,
     )?;
 
     let jdata = std::fs::read_to_string(recommended_extension_path.join("config.json"))?;

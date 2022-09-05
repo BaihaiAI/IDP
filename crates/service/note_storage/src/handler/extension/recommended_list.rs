@@ -35,7 +35,7 @@ pub async fn recommended_list(
 
     for content in recommended_content.iter_mut() {
         let url = format!(
-            "{}/{}-{}/",
+            "{}/{}/{}/",
             recommended_extensions.to_str().unwrap(),
             content.name,
             content.version
