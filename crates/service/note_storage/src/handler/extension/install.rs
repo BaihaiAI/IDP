@@ -24,12 +24,13 @@ use crate::handler::extension::models::ExtensionResp;
 pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, ErrorTrace> {
     let installed_extensions_path =
         business::path_tool::user_extensions_path(req.team_id, req.user_id);
-    let extension_name = format!("{}-{}", req.name, req.version);
+    let extension_name = format!("{}/{}", req.name, req.version);
     tracing::info!(
         "run extensions install api, path:{installed_extensions_path} ,name:{extension_name}"
     );
-    let recommended_extension_path =
-        business::path_tool::recommended_extensions().join(&extension_name);
+    let recommended_extension_path = business::path_tool::recommended_extensions()
+        .join(req.name)
+        .join(req.version);
 
     common_tools::command_tools::copy(
         recommended_extension_path.to_str().unwrap(),

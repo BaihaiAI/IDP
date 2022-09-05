@@ -24,7 +24,7 @@ pub async fn uninstall(Query(req): Query<ExtensionReq>) -> Result<Rsp<()>, Error
     let extensions_path = business::path_tool::user_extensions_path(req.team_id, req.user_id);
     tracing::info!("run extensions uninstall api, path:{extensions_path}");
 
-    let extension_name = format!("{}-{}", req.name, req.version);
+    let extension_name = format!("{}/{}", req.name, req.version);
     let uninstall_extension_path = std::path::Path::new(&extensions_path).join(&extension_name);
     tracing::info!("uninstall_extension_name:{extension_name:?}");
 

@@ -111,11 +111,6 @@ async fn dir_export_(
         let is_dir = abs_export_path.is_dir();
         if !is_dir {
             return Err(ErrorTrace::new("dir not exist"));
-        } else {
-            let is_empty = abs_export_path.read_dir()?.next().is_none();
-            if is_empty {
-                return Err(ErrorTrace::new("dir is empty"));
-            }
         }
 
         let pos = export_path.rfind('/').unwrap();
