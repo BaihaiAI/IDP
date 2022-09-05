@@ -37,6 +37,7 @@ curl --location --request POST 'http://localhost:8082/api/v2/idp-note-rs/package
     "version": "2.9.2"
 }'
 */
+/// TODO cancel pip install command if frontend cancel request
 pub async fn pip_install(
     Json(PipInstallReq {
         package_name,
@@ -58,7 +59,7 @@ pub async fn pip_install(
         match cmd.output().await {
             Ok(output) => {
                 if output.status.success() {
-                    if let Err(err) = tx.send("ok".to_string()).await {
+                    if let Err(err) = tx.send("ok\n".to_string()).await {
                         tracing::error!("{err}");
                     }
                 } else {
@@ -83,7 +84,7 @@ pub async fn pip_install(
             if is_eof {
                 return None;
             }
-            match tokio::time::timeout(std::time::Duration::from_secs(1), rx.recv()).await {
+            match tokio::time::timeout(std::time::Duration::from_secs(2), rx.recv()).await {
                 Ok(output) => {
                     if let Some(output) = output {
                         Some((Ok(output), (rx, true)))
@@ -91,7 +92,7 @@ pub async fn pip_install(
                         None
                     }
                 }
-                Err(_timeout) => Some((Ok("keep_alive".to_string()), (rx, false))),
+                Err(_timeout) => Some((Ok("keep_alive\n".to_string()), (rx, false))),
             }
         },
     ))
