@@ -88,7 +88,7 @@ fn handle_connection(
         });
         r#"{"message":"ok"}"#
     } else if req_str.starts_with("GET /cluster/suggest") {
-        r#"{"code":21300000,"data":{"CPU":0.2,"GPU":0,"memory":214748364.8,"node:10.9.101.205":1.0,"node:10.9.115.195":1.0,"object_store_memory":4776877670.0},"message":"success"}"#
+        r#"{"code":21300000,"data":{"CPU":0.2,"GPU":0,"memory":214748364.8,"node:127.0.0.1":1.0,"node:10.9.115.195":1.0,"object_store_memory":4776877670.0},"message":"success"}"#
     } else {
         r#"{"message":"404"}"#
     };
@@ -126,7 +126,7 @@ fn handle_connection(
         ctx.insert(path, pid);
         r#"{"message":"ok"}"#
     } else if status_line.starts_with("GET /cluster/suggest") {
-        r#"{"code":21300000,"data":{"CPU":0.2,"GPU":0,"memory":214748364.8,"node:10.9.101.205":1.0,"node:10.9.115.195":1.0,"object_store_memory":4776877670.0},"message":"success"}"#
+        r#"{"code":21300000,"data":{"CPU":0.2,"GPU":0,"memory":214748364.8,"node:127.0.0.1":1.0,"node:10.9.115.195":1.0,"object_store_memory":4776877670.0},"message":"success"}"#
     } else {
         r#"{"message":"404"}"#
     };

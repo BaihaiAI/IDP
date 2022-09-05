@@ -58,4 +58,3 @@ popd
 
 tar zcf $dir.tar.gz $dir/
 rm -rf $dir
-echo "scp baihai@192.168.12.14:~/repos/idp-note/$dir.tar.gz ."
