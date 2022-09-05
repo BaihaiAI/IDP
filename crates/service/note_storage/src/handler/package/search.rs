@@ -1,17 +1,3 @@
-// Copyright 2022 BaihaiAI, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 use std::collections::HashMap;
 use std::fs;
 use std::io::BufRead;
@@ -22,19 +8,10 @@ use axum::extract::Query;
 use axum::Extension;
 use common_model::service::rsp::Rsp;
 use err::ErrorTrace;
-use serde::Serialize;
 use sqlx::FromRow;
 use tokio::sync::Mutex;
 
-use crate::api_model::TeamIdProjectIdQueryString;
-use crate::common::error::IdpGlobalError;
 type ProjectInfoMap = Arc<Mutex<HashMap<String, HashMap<String, String>>>>;
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct PackageInfo {
-    pub package_name: String,
-    pub version: String,
-}
 
 #[derive(serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -48,8 +25,8 @@ pub struct PackageSearchReq {
 
 #[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct PackageSearchOutput {
-    pub records: Vec<PackageSearchInfo>,
+pub struct PackageSearchRsp {
+    pub records: Vec<PackageSearchRspItem>,
     pub current: String,
     pub pages: String,
     pub size: String,
@@ -58,71 +35,11 @@ pub struct PackageSearchOutput {
 
 #[derive(serde::Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PackageSearchInfo {
+pub struct PackageSearchRspItem {
     pub version: Vec<String>,
     pub package_name: String,
     pub stable_version: String,
     pub installed_flag: bool,
-}
-
-pub async fn pip_list(
-    Query(TeamIdProjectIdQueryString {
-        project_id,
-        team_id,
-    }): Query<TeamIdProjectIdQueryString>,
-) -> Result<Rsp<Vec<PackageInfo>>, IdpGlobalError> {
-    let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
-    let py_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
-    let package_list = pip_list_(py_path).await?;
-
-    Ok(Rsp::success(package_list))
-}
-#[tracing::instrument]
-async fn pip_list_(py_path: String) -> std::io::Result<Vec<PackageInfo>> {
-    tracing::info!("--> pip_list");
-    let start = std::time::Instant::now();
-    let output = tokio::process::Command::new(py_path)
-        .arg("-m")
-        .arg("pip")
-        .arg("list")
-        .arg("--format")
-        .arg("freeze")
-        .output()
-        .await?;
-    tracing::debug!(
-        "--- pip_list after pip list command, time cost = {:?}",
-        start.elapsed()
-    );
-
-    if !output.status.success() {
-        let stderr = unsafe { String::from_utf8_unchecked(output.stderr) };
-        tracing::error!("{stderr}");
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("pip list error: {}", stderr),
-        ));
-    }
-
-    let stdout = unsafe { String::from_utf8_unchecked(output.stdout) };
-
-    let mut pip_list = vec![];
-
-    for line_str in stdout.lines() {
-        let (package_name, version) = match line_str.split_once("==") {
-            // if split_once failed, it means that line_str is not a package line,break;
-            // e.g. could not fetch URL https://pypi.douban.org
-            None => {
-                break;
-            }
-            Some((package_name, version)) => (package_name, version),
-        };
-        pip_list.push(PackageInfo {
-            package_name: package_name.to_string(),
-            version: version.to_string(),
-        });
-    }
-    tracing::debug!("<-- pip_list, timing = {:?}", start.elapsed());
-    Ok(pip_list)
 }
 
 #[allow(clippy::unused_async)]
@@ -130,7 +47,7 @@ pub async fn search(
     Query(package_search_req): Query<PackageSearchReq>,
     Extension(pg_option): Extension<Option<sqlx::PgPool>>,
     Extension(project_info_map): axum::extract::Extension<ProjectInfoMap>,
-) -> Result<Rsp<PackageSearchOutput>, err::ErrorTrace> {
+) -> Result<Rsp<PackageSearchRsp>, err::ErrorTrace> {
     tracing::info!("enter package_search function");
 
     match pg_option {
@@ -175,7 +92,7 @@ pub async fn get_package_map(project_info_map: ProjectInfoMap, saas_flag: bool) 
                 tracing::debug!("env_path->{:#?}", env_path);
 
                 let mut package_map: HashMap<String, String> = HashMap::new();
-                let pip_list_vec = pip_list_(env_path).await;
+                let pip_list_vec = super::pip_list::pip_list_(env_path).await;
                 let pip_list_vec = match pip_list_vec {
                     Ok(some) => some,
                     Err(err) => {
@@ -220,7 +137,7 @@ pub async fn saas_output(
     pg_pool: sqlx::PgPool,
     package_search_req: PackageSearchReq,
     project_info_map: Arc<Mutex<HashMap<String, HashMap<String, String>>>>,
-) -> Result<Rsp<PackageSearchOutput>, err::ErrorTrace> {
+) -> Result<Rsp<PackageSearchRsp>, err::ErrorTrace> {
     tracing::info!("enter saas_output function");
     let PackageSearchReq {
         team_id,
@@ -232,7 +149,7 @@ pub async fn saas_output(
     let package_info_key = format!("{team_id}+{project_id}");
     let package_map_default: HashMap<String, String> = HashMap::new();
 
-    let mut vec: Vec<PackageSearchInfo> = Vec::new();
+    let mut vec: Vec<PackageSearchRspItem> = Vec::new();
 
     let package_map: HashMap<String, String> = project_info_map
         .lock()
@@ -283,7 +200,7 @@ pub async fn saas_output(
             Some(version) => &stable_version == version,
             None => false,
         };
-        let package_info = PackageSearchInfo {
+        let package_info = PackageSearchRspItem {
             package_name,
             version: versions,
             stable_version,
@@ -292,7 +209,7 @@ pub async fn saas_output(
         vec.push(package_info);
     }
 
-    let package_search_output = PackageSearchOutput {
+    let package_search_output = PackageSearchRsp {
         records: vec,
         current: current.to_string(),
         pages: pages.to_string(),
@@ -305,7 +222,7 @@ pub async fn saas_output(
 pub async fn open_output(
     package_search_req: PackageSearchReq,
     project_info_map: Arc<Mutex<HashMap<String, HashMap<String, String>>>>,
-) -> Result<Rsp<PackageSearchOutput>, err::ErrorTrace> {
+) -> Result<Rsp<PackageSearchRsp>, err::ErrorTrace> {
     tracing::info!("enter open_output function");
 
     let PackageSearchReq {
@@ -318,7 +235,7 @@ pub async fn open_output(
     let package_info_key = format!("{team_id}+{project_id}");
     let package_map_default: HashMap<String, String> = HashMap::new();
 
-    let mut vec: Vec<PackageSearchInfo> = Vec::new();
+    let mut vec: Vec<PackageSearchRspItem> = Vec::new();
     let mut total: usize = 0;
     let current = current as usize;
     let size = size as usize;
@@ -375,7 +292,7 @@ pub async fn open_output(
             } else {
                 stable_version == package_map.get(package_name).unwrap()
             };
-            let package_info = PackageSearchInfo {
+            let package_info = PackageSearchRspItem {
                 version: version_list_str,
                 package_name: package_name.to_string(),
                 stable_version: stable_version.to_string(),
@@ -385,7 +302,7 @@ pub async fn open_output(
             total += 1;
         }
     }
-    vec.sort_by(|a, b| a.package_name.len().cmp(&b.package_name.len()));
+    vec.sort_unstable_by(|a, b| a.package_name.len().cmp(&b.package_name.len()));
 
     let pages = if total % size == 0 {
         total / size
@@ -393,11 +310,11 @@ pub async fn open_output(
         total / size + 1
     };
 
-    let mut records: Vec<PackageSearchInfo> = Vec::new();
+    let mut records: Vec<PackageSearchRspItem> = Vec::new();
 
     if current == pages {
         for item in vec.iter().skip(size * (current - 1)) {
-            let package_info = PackageSearchInfo {
+            let package_info = PackageSearchRspItem {
                 version: item.version.clone(),
                 package_name: item.package_name.clone(),
                 stable_version: item.stable_version.clone(),
@@ -407,7 +324,7 @@ pub async fn open_output(
         }
     } else {
         for item in vec.iter().take(size * current).skip(size * (current - 1)) {
-            let package_info = PackageSearchInfo {
+            let package_info = PackageSearchRspItem {
                 version: item.version.clone(),
                 package_name: item.package_name.clone(),
                 stable_version: item.stable_version.clone(),
@@ -417,7 +334,7 @@ pub async fn open_output(
         }
     };
 
-    let package_search_output = PackageSearchOutput {
+    let package_search_output = PackageSearchRsp {
         records,
         current: current.to_string(),
         pages: pages.to_string(),
@@ -426,19 +343,4 @@ pub async fn open_output(
     };
 
     Ok(Rsp::success(package_search_output))
-}
-
-#[cfg(tests)]
-mod tests {
-    use crate::handler::package::*;
-    #[tokio::test]
-    async fn test_pip_list() {
-        logger::init_logger();
-        let pip_command = business::path_tool::get_conda_env_python_path(
-            1516335541935689728,
-            "python39".to_string(),
-        );
-        let vec = pip_list_(pip_command).await.unwrap();
-        println!("{:?}", vec);
-    }
 }

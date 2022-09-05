@@ -240,8 +240,8 @@ pub async fn init_router(
                 .nest(
                     "/package",
                     Router::new()
-                        .route("/list", on(MethodFilter::GET, package::pip_list))
-                        .route("/search", on(MethodFilter::GET, package::search)),
+                        .route("/list", on(MethodFilter::GET, package::pip_list::pip_list))
+                        .route("/search", on(MethodFilter::GET, package::search::search)),
                 )
                 .route_layer(axum::extract::Extension(project_info_map))
                 .route_layer(axum::extract::Extension(pg_option))
