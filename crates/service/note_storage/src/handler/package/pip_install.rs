@@ -27,6 +27,16 @@ pub struct PipInstallReq {
     pub version: String,
 }
 
+/*
+curl --location --request POST 'http://localhost:8082/api/v2/idp-note-rs/package/install' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "teamId": "1565387256278454272",
+    "projectId": "100",
+    "packageName": "tensorflow-gpu",
+    "version": "2.9.2"
+}'
+*/
 pub async fn pip_install(
     Json(PipInstallReq {
         package_name,
@@ -73,18 +83,15 @@ pub async fn pip_install(
             if is_eof {
                 return None;
             }
-            tokio::select! {
-                // keep alive
-                _ = tokio::time::sleep(std::time::Duration::from_secs(5)) => {
-                    Some((Ok("keep_alive".to_string()), (rx, false) ))
-                },
-                r = rx.recv() => {
-                    if let Some(output) = r {
-                        Some( (Ok(output), (rx, true)) )
+            match tokio::time::timeout(std::time::Duration::from_secs(1), rx.recv()).await {
+                Ok(output) => {
+                    if let Some(output) = output {
+                        Some((Ok(output), (rx, true)))
                     } else {
                         None
                     }
                 }
+                Err(_timeout) => Some((Ok("keep_alive".to_string()), (rx, false))),
             }
         },
     ))
