@@ -42,7 +42,7 @@ pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, Err
     let jdata = std::fs::read_to_string(recommended_extension_path.join("config.json"))?;
     let mut new_extension_config = serde_json::from_str::<ExtensionResp>(&jdata)?;
 
-    let url = format!("{installed_extensions_path}/{extension_name}");
+    let url = format!("{installed_extensions_path}/{extension_name}/");
     new_extension_config.url = Some(url.clone());
 
     let extensions_config_path =

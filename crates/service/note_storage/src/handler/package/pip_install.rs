@@ -62,13 +62,11 @@ pub async fn pip_install(
                     if let Err(err) = tx.send("ok\n".to_string()).await {
                         tracing::error!("{err}");
                     }
-                } else {
-                    if let Err(err) = tx
-                        .send(String::from_utf8_lossy(&output.stderr).to_string())
-                        .await
-                    {
-                        tracing::error!("{err}");
-                    }
+                } else if let Err(err) = tx
+                    .send(String::from_utf8_lossy(&output.stderr).to_string())
+                    .await
+                {
+                    tracing::error!("{err}");
                 }
             }
             Err(err) => {
@@ -85,13 +83,7 @@ pub async fn pip_install(
                 return None;
             }
             match tokio::time::timeout(std::time::Duration::from_secs(2), rx.recv()).await {
-                Ok(output) => {
-                    if let Some(output) = output {
-                        Some((Ok(output), (rx, true)))
-                    } else {
-                        None
-                    }
-                }
+                Ok(output) => output.map(|output| (Ok(output), (rx, true))),
                 Err(_timeout) => Some((Ok("keep_alive\n".to_string()), (rx, false))),
             }
         },
