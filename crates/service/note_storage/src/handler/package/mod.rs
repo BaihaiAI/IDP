@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod add_req_to_pending;
-pub(crate) mod execute_req_model;
-pub mod sql_cell_wrapper;
-pub mod visual_cell_wrapper;
-pub mod websocket_transport;
-
-pub(crate) use execute_req_model::ExecuteCodeReq;
-// use tokio::sync::broadcast::Receiver;
-pub use websocket_transport::accept_browser_execute_ws;
+pub mod pip_install;
+pub mod pip_list;
+pub mod search;

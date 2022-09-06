@@ -80,6 +80,11 @@ impl KernelEntry {
             header: header.clone(),
             resource: resource.clone(),
         })?;
+        ctx.output_to_ws_sender.send(kernel_common::Message {
+            header: header.clone(),
+            request: None,
+            content: kernel_common::Content::StartKernel {},
+        })?;
         #[cfg(feature = "tcp")]
         {
             let header = header.clone();
@@ -171,6 +176,7 @@ impl KernelEntry {
         let (kernel_operate_tx, kernel_operate_rx) = channel::<KernelOperate>(15);
 
         let kernel_info = kernel_ws_conn.kernel_info.clone();
+        let execute_record_db = ctx.execute_record_db.clone();
         tokio::spawn({
             debug!("enter tokio::spawn, time cost = {:?}", start.elapsed());
             // start of **clone channel from outer scope**
@@ -218,6 +224,7 @@ impl KernelEntry {
                     .unwrap()
                     + shutdown_idle_interval_duration,
                 core_dump_cell_id: None,
+                execute_record_db,
             };
 
             kernel_main_loop::kernel_main_loop(
@@ -254,6 +261,7 @@ pub struct KernelCtx {
     kernel_shutdown_time: std::time::Duration,
 
     core_dump_cell_id: Option<String>, // kernel_info: kernel_common::KernelInfo,
+    execute_record_db: sled::Db,
 }
 
 impl KernelCtx {

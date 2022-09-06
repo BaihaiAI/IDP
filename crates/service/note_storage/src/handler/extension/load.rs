@@ -23,6 +23,7 @@ use axum::response::Response;
 use err::ErrorTrace;
 
 pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTrace> {
+    tracing::info!("access extensions load api");
     let mime_type = mime_guess::from_path(&path).first_or_text_plain();
     match std::fs::read_to_string(path) {
         Ok(body) => Ok(Response::builder()

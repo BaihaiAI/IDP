@@ -143,10 +143,10 @@ fn test_file_mime_type() {
         ("empty.sh", Mimetype::Text),
         ("bash.sh", Mimetype::Text),
         ("1.ipynb", Mimetype::Notebook),
-        ("bounding-box-20211122170445.ipynb", Mimetype::Notebook),
+        ("bounding-box.idpnb", Mimetype::Notebook),
         ("image-augmentation.idpnb", Mimetype::Notebook),
         ("image-augmentation.json", Mimetype::Notebook),
-        ("invalid.ipynb", Mimetype::Notebook),
+        ("invalid.idpnb", Mimetype::Notebook),
     ] {
         let path = test_cases_dir.join(filename);
         assert!(path.exists(), "{path:?} not exist");

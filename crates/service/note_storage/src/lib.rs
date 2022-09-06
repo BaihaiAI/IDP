@@ -19,7 +19,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use handler::package::get_package_map;
+use handler::package::search::get_package_map;
 use sqlx::Pool;
 use sqlx::Postgres;
 use test_runner as _;

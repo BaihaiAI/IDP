@@ -99,22 +99,15 @@ impl KernelCtx {
             return false;
         }
         tracing::warn!("shutdown idle kernel");
-        {
-            let team_id = self.header.team_id;
-            let project_id = self.header.project_id;
-            let kernel_cluster_node_ip = self.kernel_ws_conn.kernel_info.ip;
-            let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
-            tokio::spawn(async move {
-                let resp = match reqwest::get(format!("http://{kernel_cluster_node_ip}:9241/update?team_id={team_id}&project_id={project_id}&python_version={conda_env_name}")).await {
-                    Ok(resp) => resp,
-                    Err(err) => {
-                        tracing::error!("{err}");
-                        return;
-                    },
-                };
-                tracing::info!("resp.status = {}", resp.status());
-            });
-        }
+        let team_id = self.header.team_id;
+        let project_id = self.header.project_id;
+        let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
+        let python_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
+        std::process::Command::new(python_path)
+            .arg("-c")
+            .arg("__import__('baihai_aid').update()")
+            .spawn()
+            .unwrap();
         true
     }
 }

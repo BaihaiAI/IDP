@@ -22,7 +22,7 @@ use common_tools::io_tool::file_writer::FileSender;
 // use common_model::enums::store::PathType;
 use crate::common::error::ErrorTrace;
 
-/// upload_file_post
+/// NOTE file would lost execute permission after upload
 pub async fn upload_file_handler(
     mut multipart: Multipart,
     file_writer: FileSender, // ) -> Result<(HeaderMap, String)> {

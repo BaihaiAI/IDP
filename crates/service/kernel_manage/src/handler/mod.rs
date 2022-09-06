@@ -16,6 +16,7 @@ mod cell_state;
 pub mod execute_code;
 mod interrupt;
 // pub mod debug_kernel;
+pub mod execute_record;
 mod kernel_list;
 mod pause;
 mod pip_install;
@@ -25,7 +26,7 @@ mod shutdown_or_restart;
 mod vars;
 
 pub use cell_state::cell_state;
-pub use execute_code::accept_execute_ws;
+pub use execute_code::accept_browser_execute_ws;
 pub use execute_code::websocket_transport::accept_ws_kernel_connect;
 pub use interrupt::interrupt;
 pub use kernel_list::kernel_list;

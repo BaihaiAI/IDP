@@ -21,9 +21,9 @@ use super::models::ExtensionReq;
 pub async fn detail(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, ErrorTrace> {
     let extensions_path = business::path_tool::user_extensions_path(req.team_id, req.user_id);
     tracing::info!("run extensions detail api");
-    let extension_name = format!("{}-{}", req.name, req.version);
     let detail_extension = std::path::Path::new(&extensions_path)
-        .join(extension_name)
+        .join(req.name)
+        .join(req.version)
         .join("README.md");
     tracing::info!("detail_extension:{detail_extension:?}");
     match std::fs::read_to_string(detail_extension) {

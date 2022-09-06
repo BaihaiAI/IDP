@@ -338,7 +338,6 @@ pub async fn model_upload(
     let source = from_path.into_os_string().into_string().unwrap();
     tracing::debug!("source: {}", &source);
 
-    // let url = "http://test.baihai.co/0/api/v1/admin-rs/model-manage/upload".to_string();
     let url = "http://idp-admin-rs-svc:9092/api/v1/admin-rs/model-manage/upload".to_string();
 
     let http_client = reqwest::Client::new();
@@ -961,7 +960,6 @@ async fn get_full_datasource_data(
     team_id: u64,
 ) -> Result<DataSourceRet, reqwest::Error> {
     let echo_json: serde_json::Value = reqwest::Client::new()
-        // .post("https://idp.baihai.co/1/api/v1/command/datasource/list")
         .post(FULL_DATASOURCE_URL)
         .json(&serde_json::json!({
            "project": project,
@@ -985,7 +983,6 @@ async fn get_full_datasource_data(
 
 async fn get_develop_active_connect_data(project: String) -> Result<ActiveDataRet, reqwest::Error> {
     let echo_json: serde_json::Value = reqwest::Client::new()
-        // .post("https://idp.baihai.co/ga/api/v1/command/database/active")
         .post(ACTIVE_DATASOURCE_URL)
         .json(&serde_json::json!({ "project": project }))
         .send()

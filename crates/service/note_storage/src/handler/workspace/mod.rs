@@ -377,7 +377,6 @@ pub async fn model_upload(
     let source = from_path.into_os_string().into_string().unwrap();
     tracing::debug!("source: {}", &source);
 
-    // let url = "http://test.baihai.co/0/api/v1/admin-rs/model-manage/upload".to_string();
     let url = "http://idp-admin-rs-svc:9092/api/v1/admin-rs/model-manage/upload".to_string();
 
     let http_client = reqwest::Client::new();

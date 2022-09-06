@@ -110,7 +110,10 @@ pub fn accept_ws_kernel_connect(
     Ok(response)
 }
 
-pub fn accept_execute_ws(ctx: AppContext, req: Request<Body>) -> Result<Response<Body>, Error> {
+pub fn accept_browser_execute_ws(
+    ctx: AppContext,
+    req: Request<Body>,
+) -> Result<Response<Body>, Error> {
     if !hyper_tungstenite::is_upgrade_request(&req) {
         return Err(Error::new("not a ws upgrade request"));
     }
@@ -193,18 +196,23 @@ async fn handle_ws(
                 let req = serde_json::from_str::<ExecuteCodeReq>(&msg)?;
                 let req_header = req.header.clone();
                 // subscribe_list.insert(req.header.path.clone());
-                if let Err(err) = super::add_req_to_pending::add_req_to_pending(&ctx, req).await {
-                    tracing::warn!("{err:#?}");
-                    let msg = kernel_common::Message {
-                        content: kernel_common::Content::RuntimeError {
-                            message: err.message,
-                        },
-                        header: req_header,
-                        ..Default::default()
-                    };
-                    ws_write.send(Message::Text(serde_json::to_string(&msg).unwrap())).await?;
-                }
-                // subscribe_list.insert(to_subscribe);
+                let ws_write_tx = ctx.output_to_ws_sender.clone();
+                let ctx = ctx.clone();
+                tokio::spawn(async move {
+                    if let Err(err) = super::add_req_to_pending::add_req_to_pending(&ctx, req).await {
+                        tracing::warn!("{err:#?}");
+                        let msg = kernel_common::Message {
+                            content: kernel_common::Content::RuntimeError {
+                                message: err.message,
+                            },
+                            header: req_header,
+                            ..Default::default()
+                        };
+                        if let Err(err) = ws_write_tx.send(msg) {
+                            tracing::error!("{err}");
+                        }
+                    }
+                });
             }
             output_res = resp_receiver.recv() => {
                 let output = match output_res {

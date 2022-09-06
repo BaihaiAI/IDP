@@ -7,11 +7,14 @@ jobs:
   ci_check:
     runs-on: ubuntu-latest
     steps:
-      - name: typo
-        uses: crate-ci/typos@v1.12.0
+      - uses: actions/checkout@v3
+
+      - uses: crate-ci/typos@v1.12.0
       - name: Check License Header
         uses: apache/skywalking-eyes/header@main
-
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo fmt --check
+      - run: bash ./scripts/grep_chinese_in_rust_source_code.sh
+
       - run: cargo clippy --tests --workspace --all-targets --all-features
+      - run: cargo test
