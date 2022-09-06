@@ -125,7 +125,7 @@ pub fn spawn_kernel_process(header: Header) -> Result<std::process::Child, Error
         let python3_real_path = python3_real_path.trim_end();
         // let mut realpath_output = [0u8; libc::PATH_MAX];
         let mut realpath_output = [0u8; 4096];
-        tracing::info!("{python3_real_path}");
+        tracing::debug!("{python3_real_path}");
         let python3_real_path = format!("{python3_real_path}\0");
         unsafe {
             if realpath(
@@ -165,7 +165,7 @@ pub fn spawn_kernel_process(header: Header) -> Result<std::process::Child, Error
             std::env::var("LD_LIBRARY_PATH").unwrap_or_default()
         );
 
-        tracing::info!(
+        tracing::debug!(
             "which python3 = {python3_real_path}\nLD_LIBRARY_PATH = {ld_library_path:?}"
         );
         ld_library_path
@@ -243,10 +243,13 @@ fn submitter_port() -> u16 {
     }
 }
 
-#[tracing::instrument]
 #[cfg(feature = "tcp")]
 pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
     tracing::info!("--> spawn_kernel_process_tcp");
+    if !business::kubernetes::is_k8s() {
+        spawn_kernel_process(arg.header)?;
+        return Ok(());
+    }
     // let hostname = kernel_common::cluster_header_hostname(header.team_id);
     let url = format!("http://127.0.0.1:{}/start_kernel", submitter_port());
     let resp = reqwest::ClientBuilder::new()

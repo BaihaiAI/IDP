@@ -71,16 +71,16 @@ pub async fn new_file(
     Ok(Rsp::success(()))
 }
 
+/// FIXME url maybe not found
 #[test]
-#[ignore = "require backend deploy"]
-fn test_new_file() {
-    let resp = reqwest::blocking::ClientBuilder::new()
-        .build()
-        .unwrap()
+fn test_new_file_it() {
+    let ctx = test_runner::IntegrationTestCtx::get();
+    let resp = ctx
+        .client
         .post("http://127.0.0.1:3003/a/api/v2/idp-note-rs/workspace/file?teamId=12345")
         .json(&NewFileReq {
             path: "demo2.ipynb".to_string(),
-            project_id: 6789,
+            project_id: ctx.project_id,
         })
         .send()
         .unwrap();

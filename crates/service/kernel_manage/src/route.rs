@@ -69,7 +69,7 @@ async fn service_route_inner(
     let req_method = req.method();
     let req_path = req.uri().path().trim_start_matches(BASE_URL);
     if req_path == "/kernel/list" || req_path.starts_with("/ws/kernel/execute") {
-        tracing::trace!("{req_method} {req_path}");
+        tracing::debug!("{req_method} {req_path}");
     } else if let Some(query) = req.uri().query() {
         tracing::info!("{req_method} {req_path}?{query}");
     } else {

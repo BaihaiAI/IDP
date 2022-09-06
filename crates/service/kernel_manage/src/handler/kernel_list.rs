@@ -16,20 +16,24 @@ use super::prelude::*;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct Req {
+struct KernelListReq {
     project_id: ProjectId,
 }
 
 #[derive(serde::Serialize, Debug)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "camelCase")]
-pub struct Rsp {
-    state: &'static str,
+pub struct KernelListItem {
+    pub state: String,
     notebook_path: String,
-    inode: String,
+    pub inode: String,
 }
 
-pub async fn kernel_list(ctx: AppContext, req: Request<Body>) -> Result<Resp<Vec<Rsp>>, Error> {
-    let req = serde_urlencoded::from_str::<Req>(req.uri().query().unwrap_or_default())?;
+pub async fn kernel_list(
+    ctx: AppContext,
+    req: Request<Body>,
+) -> Result<Resp<Vec<KernelListItem>>, Error> {
+    let req = serde_urlencoded::from_str::<KernelListReq>(req.uri().query().unwrap_or_default())?;
 
     let mut ret = Vec::new();
     let (tx, rx) = tokio::sync::oneshot::channel();
@@ -53,8 +57,8 @@ pub async fn kernel_list(ctx: AppContext, req: Request<Body>) -> Result<Resp<Vec
             State::Running(_) => "busy",
             State::Paused { .. } => "pause",
         };
-        let kernel_state = Rsp {
-            state,
+        let kernel_state = KernelListItem {
+            state: state.to_string(),
             notebook_path: kernel.header.path.clone(),
             inode: inode.to_string(),
         };

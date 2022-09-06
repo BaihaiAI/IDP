@@ -17,7 +17,7 @@ pub mod execute_code;
 mod interrupt;
 // pub mod debug_kernel;
 pub mod execute_record;
-mod kernel_list;
+pub mod kernel_list;
 mod pause;
 mod pip_install;
 pub mod prelude;

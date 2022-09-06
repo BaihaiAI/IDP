@@ -308,40 +308,6 @@ pub async fn file_dir_copy(
     Ok(Rsp::success(()))
 }
 
-#[tokio::test]
-#[ignore]
-async fn test_model_upload_old() {
-    logger::init_logger();
-    model_upload(
-        "/a/c.sql".to_string(),
-        1531263673594372096,
-        1531263673594372096,
-        125,
-        "modelNB".to_string(),
-        "v1.0.2".to_string(),
-        "description?".to_string(),
-    )
-    .await
-    .unwrap();
-}
-
-#[tokio::test]
-#[ignore]
-async fn test_model_upload() {
-    logger::init_logger();
-    model_upload(
-        "/b/00_IDP_Model-9.5M.zip".to_string(),
-        1541360195295580160,
-        1541360195295580160,
-        100,
-        "IDP_Model".to_string(),
-        "v2.0.0".to_string(),
-        "ok".to_string(),
-    )
-    .await
-    .unwrap();
-}
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct ModelId {
     pub id: u32,

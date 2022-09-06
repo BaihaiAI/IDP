@@ -29,7 +29,7 @@ pub(crate) mod route;
 pub(crate) use app_context::AppContext;
 pub(crate) use error::Error;
 #[cfg(test)]
-mod ws_integration_tests;
+mod kernel_websocket_integration_tests;
 
 pub async fn main() {
     logger::init_logger();

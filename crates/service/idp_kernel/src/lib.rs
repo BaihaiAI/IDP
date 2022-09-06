@@ -76,8 +76,7 @@ fn kernel_manage_ws_req(
     req
 }
 
-#[cfg(feature = "tcp")]
-pub fn main() {
+pub fn main(args: Vec<String>) {
     use futures_util::SinkExt;
     use futures_util::StreamExt;
     use kernel_common::Content;
@@ -85,7 +84,6 @@ pub fn main() {
     use tokio_tungstenite::tungstenite::Message;
     logger::init_logger();
 
-    let args = std::env::args().collect::<Vec<_>>();
     if args.len() != 2 && args.len() != 3 {
         eprintln!("usage: kernel --version or kernel $header_json_str $ray_id");
         eprintln!("wrong args = {args:#?}");

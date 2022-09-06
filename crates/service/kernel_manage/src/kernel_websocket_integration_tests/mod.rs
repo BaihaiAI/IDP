@@ -12,7 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    let args = std::env::args().collect::<Vec<_>>();
-    idp_kernel::main(args);
-}
+mod black_box_test;
+mod white_box_test;

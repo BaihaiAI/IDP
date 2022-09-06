@@ -236,7 +236,6 @@ fn encode_bulk_str(s: &str) -> Vec<u8> {
 #[cfg(test)]
 mod redis_server_test {
     use std::net::TcpStream;
-    use std::time::Duration;
 
     use super::*;
 
@@ -283,8 +282,17 @@ mod redis_server_test {
         std::env::set_var("IDP_REDIS_PORT", redis_port.to_string());
         std::thread::spawn(main);
         // make sure server bind success
-        // TODO should use channel notify server bind success
-        std::thread::sleep(Duration::from_millis(120));
+        let mut retry = 0;
+        loop {
+            if retry == 100 {
+                panic!("TCP bind timeout");
+            }
+            if std::net::TcpStream::connect((std::net::Ipv4Addr::LOCALHOST, redis_port)).is_ok() {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(100));
+            retry += 1;
+        }
         let mut client = TestClient::new(get_test_connection());
         let test_data_1 = "LARGE_STRING-".repeat(10000);
         let test_data_2 = "large_string-".repeat(10000);
