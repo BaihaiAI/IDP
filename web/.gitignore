@@ -20,4 +20,4 @@ package-lock.json
 
 dll_plugins
 
-/config/global.js
+#/config/global.js
