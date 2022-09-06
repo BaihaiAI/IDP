@@ -19,7 +19,6 @@ use tracing::info;
 const K8S_SERVICE_API_BASE_URL: &str = "http://idp-k8s-service-svc:8084/api/command/k8s";
 
 /// /api/command/k8s/channel
-/// <https://baihai.coding.net/p/halo/wiki/3039>
 #[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct AddRouteReq {

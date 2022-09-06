@@ -1,6 +1,5 @@
 [package]
 license = "Apache-2.0"
-authors = ["Jin <huangjin@baihai.co>"]
 edition = "2021"
 name = "common_model"
 publish = false

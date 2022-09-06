@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! https://baihai.coding.net/p/halo/wiki/3039
 pub(crate) mod lstio_route;
 pub(crate) mod spawn_tensorboard_process;
 use std::collections::BTreeMap;
