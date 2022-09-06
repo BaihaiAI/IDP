@@ -105,7 +105,6 @@ fn ws_code_req(code: &str) -> ExecuteCodeReq {
 }
 
 fn connect(port: u16) -> WebSocket<MaybeTlsStream<TcpStream>> {
-    // const TEAM_ID: u64 = 12345;
     let url =
         format!("ws://127.0.0.1:{port}/api/v1/execute/ws/kernel/execute?projectId={PROJECT_ID}");
     // let bbbb = ws_tool::ClientBuilder::new(url).header("name", "v").connect(ws_tool::codec::WsStringCodec::check_fn).unwrap();

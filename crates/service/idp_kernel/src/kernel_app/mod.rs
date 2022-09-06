@@ -48,7 +48,7 @@ impl KernelApp {
 
     #[cfg(feature = "tcp")]
     pub fn new(
-        output_tx: tokio::sync::mpsc::UnboundedSender<Message>,
+        output_tx: crossbeam_channel::Sender<Message>,
         input_reply_receiver: std::sync::mpsc::Receiver<String>,
         args: kernel_common::Header,
     ) -> Self {

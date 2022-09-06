@@ -79,7 +79,7 @@ pub fn spawn_output_sender_thread(output_receiver: std::sync::mpsc::Receiver<Mes
 // sender 2. execute code
 #[cfg(feature = "tcp")]
 pub fn spawn_output_sender_thread(
-    output_tx: tokio::sync::mpsc::UnboundedSender<Message>,
+    output_tx: crossbeam_channel::Sender<Message>,
     output_receiver: std::sync::mpsc::Receiver<Message>,
 ) {
     std::thread::Builder::new()

@@ -2,11 +2,12 @@
 name = "idp_kernel"
 version = "1.1.0"
 edition = "2021"
+rust-version = "1.62"
 license = "Apache-2.0"
 
 [features]
 default = ["tcp"]
-tcp = ["dep:tokio", "dep:tokio-tungstenite", "dep:futures-util"]
+tcp = []
 fifo = ["kernel_common/fifo"]
 
 [dependencies]
@@ -15,20 +16,15 @@ kernel_common = { path = "../../common/kernel_common", default-features = false 
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }
 
-futures-util = { version = "0.3", optional = true }
 serde_json = "1.0"
 urlencoding = "2.1"
 # we use tokio macros: tokio::select!
 libc = "0.2"
 pyo3 = "0.16"
-tokio = { version = "1.0", features = [
-    "macros",
-    "rt",
-    "time",
-    "sync",
-], optional = true }
-tokio-tungstenite = { version = "0.17", optional = true }
+# tokio-tungstenite = { version = "0.17", optional = true }
 tracing = "0.1"
+ws-tool = { version = "0.5", default-features = false, features = ["sync"] }
+crossbeam-channel = "0.5"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser"] }
