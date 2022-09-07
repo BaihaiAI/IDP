@@ -37,11 +37,12 @@ use self::models::ExtensionResp;
 pub fn get_extensions_config<P: AsRef<Path>>(
     extension_config_path: P,
 ) -> Result<Vec<ExtensionResp>, ErrorTrace> {
-    let jdata = match std::fs::read_to_string(extension_config_path) {
+    let jdata = match std::fs::read_to_string(&extension_config_path) {
         Ok(jdata) => jdata,
         Err(err) => {
-            tracing::error!("{err}");
-            return Err(ErrorTrace::new(""));
+            let path = extension_config_path.as_ref();
+            tracing::error!("{err},path:{:?}", path);
+            return Err(ErrorTrace::new("extension config no exist"));
         }
     };
 
