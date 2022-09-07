@@ -9,7 +9,7 @@ scp -C target/debug/idp_kernel ucloud:/root/kernel_py38
 ssh ucloud "kubectl -n $namespace exec $pod -- bash -c 'pkill kernel_py38 || true'"
 ssh ucloud "kubectl -n $namespace exec $pod -- bash -c 'pkill kernel_py39 || true'"
 ssh ucloud "kubectl -n $namespace exec $pod -- sudo supervisorctl stop kernel_manage"
-for binary in kernel_manage; do
+for binary in kernel_manage kernel_py38; do
     ssh ucloud "kubectl -n $namespace cp /root/$binary $pod:/tmp/"
     ssh ucloud "kubectl -n $namespace exec $pod -- sudo mv /tmp/$binary /usr/local/bin/"
 done
