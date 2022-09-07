@@ -20,7 +20,9 @@ use std::net::TcpStream;
 
 use kernel_common::Content;
 use kernel_init::py_stdin::IS_WAITING_INPUT_REPLY;
+use tracing::error;
 use ws_tool::codec::WsStringCodec;
+use ws_tool::frame::OpCode;
 use ws_tool::stream::WsStream;
 
 // #[cfg(test)]
@@ -129,17 +131,21 @@ pub fn main(args: Vec<String>) {
                         let rsp = match rsp_res {
                             Ok(rsp) => rsp,
                             Err(err) => {
-                                tracing::error!("{err}");
+                                error!("{err}");
                                 continue;
                             },
                         };
                         let rsp = serde_json::to_string(&rsp).unwrap();
                         if let Err(err) = ws_w.send(rsp) {
-                            tracing::error!("{err}");
+                            error!("{err}");
                         }
                     }
                 }
             }
+            if let Err(err) = ws_w.send((OpCode::Close, "".to_string())) {
+                error!("{err}");
+            }
+            std::process::exit(0);
         })
         .unwrap();
 
@@ -180,7 +186,6 @@ fn handle_ws_msg(
         }
     };
     */
-
     let req = serde_json::from_str::<kernel_common::Message>(&msg).unwrap();
     match req.content {
         Content::ExecuteRequest(req_) => {
@@ -207,8 +212,9 @@ fn handle_ws_msg(
             {
                 tracing::error!("{}", std::io::Error::last_os_error());
             }
+            // FIXME windows not work
             #[cfg(windows)]
-            if unsafe {
+            unsafe {
                 let h_process = winapi::um::processthreadsapi::OpenProcess(
                     winapi::um::winnt::PROCESS_ALL_ACCESS,
                     0,
@@ -216,17 +222,11 @@ fn handle_ws_msg(
                 );
                 let u_exit_code = 0_u32;
                 winapi::um::processthreadsapi::TerminateProcess(h_process, u_exit_code)
-            } == 0
-            {
-                tracing::error!("{}", std::io::Error::last_os_error());
             }
             // #[cfg(windows)]
             // {
             //     let mut cmd = std::process::Command::new("python");
             //     let code_str = format!("import os;os.kill(os.getpid(),__import__('signal').CRTL_C_EVENT)",);
-            //     cmd.arg("-c").arg(code_str);
-            //     tracing::info!("cmd = {cmd:?}");
-            //     cmd.spawn().unwrap().wait().unwrap();
             // }
 
             if unsafe { IS_WAITING_INPUT_REPLY } {
@@ -238,8 +238,6 @@ fn handle_ws_msg(
         }
         Content::ShutdownRequest { .. } => {
             tracing::info!("recv ShutdownRequest");
-            // TODO ws send close frame
-            std::process::exit(0);
         }
         _ => {
             tracing::warn!("unsupported msg type");

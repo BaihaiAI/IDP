@@ -4,7 +4,7 @@ source scripts/k8s_env.sh
 
 cargo b --bin kernel_manage --bin idp_kernel
 scp -C target/debug/kernel_manage ucloud:/root/
-#scp -C target/debug/idp_kernel ucloud:/root/kernel_py38
+scp -C target/debug/idp_kernel ucloud:/root/kernel_py38
 
 ssh ucloud "kubectl -n $namespace exec $pod -- bash -c 'pkill kernel_py38 || true'"
 ssh ucloud "kubectl -n $namespace exec $pod -- bash -c 'pkill kernel_py39 || true'"

@@ -12,48 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// ask linux kernel by prctl syscall to send sigterm if parent process die in development environment
-/// if in release build when pause kernel pid would change by ptrace, kernel parent pid is 1 after resume
-// #[cfg(debug_assertions)]
-// fn sigterm_handler(_signum: libc::c_int) {
-//     // tracing::warn!("kernel receive SIGTERM(may be parent pid die/change), terminating...");
-//     std::process::exit(libc::EXIT_SUCCESS);
-// }
+// ask linux kernel by prctl syscall to send sigterm if parent process die in development environment
+// if in release build when pause kernel pid would change by ptrace, kernel parent pid is 1 after resume
 #[cfg(unix)]
-pub const INTERRUPT_SIGNAL: libc::c_int = libc::SIGINT;
+pub const INTERRUPT_SIGNAL: libc::c_int = libc::SIGUSR1;
 pub fn init_signal_handler(py: pyo3::Python) {
     // let syscall_resp = unsafe { libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGPWR) };
-    // if syscall_resp != 0 {
-    //     panic!("{}", std::io::Error::last_os_error());
-    // }
-    // let syscall_resp =
-    //     unsafe { libc::signal(libc::SIGTERM, sigterm_handler as libc::sighandler_t) };
+
+    // let syscall_resp = unsafe { libc::signal(INTERRUPT_SIGNAL, libc::SIG_IGN) };
+    // #[cfg(unix)]
     // if syscall_resp == libc::SIG_ERR {
     //     panic!("{}", std::io::Error::last_os_error());
     // }
-    #[cfg(unix)]
-    let syscall_resp = unsafe { libc::signal(INTERRUPT_SIGNAL, libc::SIG_IGN) };
-    #[cfg(unix)]
-    if syscall_resp == libc::SIG_ERR {
-        panic!("{}", std::io::Error::last_os_error());
-    }
 
     // init_python_signal_handler because we has overwrite process default signal handler,
     // and python would not keep default sigint behavior(raise KeyboardInterrupt)
-    py.eval(INIT_PYTHON_SIGINT_HANDLER, None, None).unwrap();
+    py.eval(
+        r#"__import__('signal').signal(
+        __import__('signal').SIGUSR1,
+        lambda signum, frame : (_ for _ in ()).throw(KeyboardInterrupt(frame))
+    )"#,
+        None,
+        None,
+    )
+    .unwrap();
 }
-
-const INIT_PYTHON_SIGINT_HANDLER: &str = r#"__import__('signal').signal(
-    __import__('signal').SIGINT,
-    lambda signum, frame : (_ for _ in ()).throw(KeyboardInterrupt(frame))
-)"#;
-#[cfg(not)]
-const INIT_PYTHON_SIGINT_HANDLER: &str = r#"
-import signal
-def _sighandler_(signum, frame):
-    raise KeyboardInterrupt(frame)
-signal.signal(signal.SIGUSR1, _sighandler_)
-"#;
 
 #[cfg(test)]
 const N_TIMES: u128 = 10;

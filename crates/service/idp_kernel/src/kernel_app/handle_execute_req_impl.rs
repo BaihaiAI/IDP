@@ -62,7 +62,7 @@ impl super::KernelApp {
                 .load_or_skip
                 .call1(py, pyo3::types::PyTuple::new(py, &[&session_file_path]))
             {
-                tracing::error!("load_or_skip {err}");
+                tracing::warn!("load_or_skip {err}");
             };
         }
 
