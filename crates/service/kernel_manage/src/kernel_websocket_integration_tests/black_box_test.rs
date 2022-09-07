@@ -41,7 +41,14 @@ struct RspDe<T> {
 fn deploy() -> u16 {
     let port = business::os_utils::get_unused_port();
     std::env::set_var("KERNEL_MANAGE_PORT", port.to_string());
-
+    /*
+    let mut cmd = std::process::Command::new("cargo");
+    cmd.arg("b").arg("--bin").arg("idp_kernel");
+    cmd.spawn()
+        .unwrap_or_else(|_| panic!("{cmd:?} spawn err"))
+        .wait()
+        .unwrap_or_else(|_| panic!("{cmd:?} wait err"));
+    */
     std::thread::Builder::new()
         .name("kernel_manage".to_string())
         .spawn(|| {
@@ -157,6 +164,7 @@ while True:
             .json::<RspDe<Vec<KernelListItem>>>()
             .unwrap();
         if let Some(kernel) = kernel_list.data.get(0) {
+            assert_eq!(kernel.state, "busy");
             break kernel.inode.clone();
         }
         retry += 1;
@@ -190,6 +198,7 @@ while True:
             break;
         }
         retry += 1;
+        std::thread::sleep(std::time::Duration::from_millis(500));
     }
 
     let shutdown_all_url = format!("{base_url}/kernel/shutdown_all?projectId={PROJECT_ID}");
