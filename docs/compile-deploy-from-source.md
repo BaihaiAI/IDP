@@ -4,36 +4,27 @@ title: Compile And Deploy IDP From Source
 
 # Compile And Deploy IDP From Source
 
-## System Requirement
+## System Requirements
 
-IDP is written in Rust, to build IDP from source you will need to install the following tools or system packages:
+You will need Git, Rustup, Python 3, the Node.js active LTS (v16+), yarn, and npm (v8+ but < 8.6). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
 
-SDK require:
+### Linux additional build dependencies
 
-- Rust Install with rustup
-- Python version > 3.6
-- nodejs version > 16 and with yarn installed
-- c++/g++ version support CXXFLAGS="--std=c++14"(if you want to compile web/terminal, because node-pty require C++ and python3 to compile)
-
-### Linux
-
-debian/ubuntu like distributions system packages require:
+If you are using Ubuntu/Debian, additionally install:
 
 > apt install build-essential python3-dev python3-pip openssl git libgit2-dev
 
-centos/fedora like distributions system packages require:
+If you are using Fedora/Centos, additionally install:
 
 > dnf install base-devel python3-devel python3-pip openssl-devel git libgit2-devel
 
-### Windows
+### Windows additional build dependencies
 
-support windows version >= 7 and x86_64 arch
+Install Visual Studio or the Microsoft C++ Build Tools
 
 ### macos
 
-macos can't use system bundle's python3 because it's static linked and no dylib.
-
-you must install python from brew or virtual env e.g. pyenv/conda
+macos can't use system bundle's python3 because it's static linked and no dylib, you can install python3 with dylib from conda/miniconda3/brew.
 
 copy .cargo/config.toml and edit it to where your python installed
 
@@ -50,7 +41,7 @@ rustflags = ["-L", "/opt/homebrew/lib/", "-C", "link-arg=-undefined", "-C", "lin
 PYO3_PYTHON="/opt/homebrew/bin/python3"
 ```
 
-#### conda's python
+#### macos conda config
 
 Modify .cargo/config/toml as follows:
 (note that you need to _replace_ `CONDA_PREFIX` with
@@ -61,7 +52,7 @@ the output of `echo $CONDA_PREFIX` from your terminal.)
 rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C", "link-arg=-Wl,-rpath,`CONDA_PREFIX`/lib"]
 ```
 
-## compile backend
+## compile Rust backend
 
 > cargo b
 
@@ -73,13 +64,5 @@ yarn install && yarn build
 ```
 
 ## build docker image
-
-require backend/web both compile
-
-if rust backend compile in debug build
-
-> docker build -t note -f Dockerfile --target debug .
-
-if rust backend compile in release build
 
 > docker build -t note -f Dockerfile --target release .
