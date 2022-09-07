@@ -4,7 +4,7 @@ title: Compile And Deploy IDP From Source
 
 # Compile And Deploy IDP From Source
 
-## System Require
+## System Requirement
 
 IDP is written in Rust, to build IDP from source you will need to install the following tools or system packages:
 
