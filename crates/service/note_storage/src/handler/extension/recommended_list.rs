@@ -42,17 +42,23 @@ pub async fn recommended_list(
         );
         content.url = Some(url);
     }
-    let mut resp = Vec::new();
-    if let Ok(installed_content) = super::get_extensions_config(installed_config_path) {
-        'a: for i in &recommended_content {
-            for j in &installed_content {
-                if i == j {
-                    continue 'a;
-                }
-            }
-            resp.push(i.clone())
-        }
-    };
 
-    Ok(Rsp::success(resp))
+    match super::get_extensions_config(&installed_config_path) {
+        Ok(installed_content) => {
+            let mut resp = Vec::new();
+            'a: for i in &recommended_content {
+                for j in &installed_content {
+                    if i == j {
+                        continue 'a;
+                    }
+                }
+                resp.push(i.clone())
+            }
+            Ok(Rsp::success(resp))
+        }
+        Err(err) => {
+            tracing::error!("{err},path:{:?}", installed_config_path);
+            Ok(Rsp::success(recommended_content))
+        }
+    }
 }

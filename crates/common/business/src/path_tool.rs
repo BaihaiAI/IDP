@@ -184,11 +184,9 @@ pub fn user_extensions_path(team_id: TeamId, user_id: UserId) -> String {
 
 pub fn recommended_extensions() -> PathBuf {
     if std::path::Path::new("/var/run/secrets/kubernetes.io").exists() {
-        std::path::Path::new("/home/ray/recommended-extensions").to_path_buf()
+        std::path::Path::new("/home/ray/extension-store").to_path_buf()
     } else {
-        STORE_PARENT_DIR
-            .join("store")
-            .join("recommended-extensions")
+        STORE_PARENT_DIR.join("store").join("extension-store")
     }
 }
 

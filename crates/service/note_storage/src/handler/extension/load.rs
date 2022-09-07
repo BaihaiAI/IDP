@@ -21,22 +21,42 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use err::ErrorTrace;
+use tokio::io::AsyncReadExt;
 
 pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTrace> {
     tracing::info!("access extensions load api");
     let mime_type = mime_guess::from_path(&path).first_or_text_plain();
-    match std::fs::read_to_string(path) {
+    tracing::info!("{:?}", mime_type);
+    let mime_type_str = mime_type.to_string();
+
+    if mime_type_str.starts_with("image") || mime_type_str.starts_with("application/gzip") {
+        let mut buf = Vec::new();
+        let mut f = tokio::fs::File::open(&path).await?;
+        f.read_to_end(&mut buf).await?;
+        return Ok(Response::builder()
+            .status(StatusCode::OK)
+            .header(
+                header::CONTENT_TYPE,
+                HeaderValue::from_str(&mime_type_str).unwrap(),
+            )
+            .body(body::boxed(Full::from(base64::encode(buf))))
+            .unwrap());
+    }
+    match std::fs::read_to_string(&path) {
         Ok(body) => Ok(Response::builder()
             .status(StatusCode::OK)
             .header(
                 header::CONTENT_TYPE,
-                HeaderValue::from_str(mime_type.as_ref()).unwrap(),
+                HeaderValue::from_str(&mime_type_str).unwrap(),
             )
             .body(body::boxed(Full::from(body)))
             .unwrap()),
-        Err(_) => Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(body::boxed(axum::body::Empty::new()))
-            .unwrap()),
+        Err(_) => {
+            tracing::error!("{path:?} load failed");
+            Ok(Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .body(body::boxed(axum::body::Empty::new()))
+                .unwrap())
+        }
     }
 }
