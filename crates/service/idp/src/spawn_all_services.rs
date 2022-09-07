@@ -122,6 +122,7 @@ pub fn spawn_all_services(args: &CliArgs) {
         })
         .unwrap();
 
+    /*
     let submitter_port = args.submitter_port;
     let terminal_shutdown_tx_clone = terminal_shutdown_tx.clone();
     std::thread::Builder::new()
@@ -133,6 +134,7 @@ pub fn spawn_all_services(args: &CliArgs) {
             submitter::main_(submitter_port);
         })
         .unwrap();
+    */
     let terminal_shutdown_tx_clone = terminal_shutdown_tx.clone();
     std::thread::Builder::new()
         .name("kernel_manage".to_string())

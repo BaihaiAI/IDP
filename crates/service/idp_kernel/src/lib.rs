@@ -68,7 +68,7 @@ fn kernel_manage_ws_connect(
 
     ws_tool::ClientBuilder::new(url)
         .header(kernel_common::KernelInfo::HTTP_HEADER, ascii_json_str)
-        .connect(ws_tool::codec::WsStringCodec::check_fn)
+        .connect(WsStringCodec::check_fn)
         .unwrap()
 }
 
@@ -102,21 +102,28 @@ pub fn main(args: Vec<String>) {
             let (ws_r_tx, ws_r_rx) = crossbeam_channel::unbounded();
             std::thread::Builder::new()
                 .name("ws_read".to_string())
-                .spawn(move || match ws_r.receive() {
-                    Ok(req) => {
-                        if let Err(err) = ws_r_tx.send(req) {
-                            tracing::error!("{err}");
+                .spawn(move || {
+                    loop {
+                        match ws_r.receive() {
+                            Ok(req) => {
+                                if let Err(err) = ws_r_tx.send(req) {
+                                    tracing::error!("{err}");
+                                }
+                            }
+                            Err(err) => {
+                                tracing::error!("{err}");
+                                break;
+                            }
                         }
-                    }
-                    Err(err) => {
-                        tracing::error!("{err}");
                     }
                 })
                 .unwrap();
             loop {
                 crossbeam_channel::select! {
                     recv(ws_r_rx) -> msg_res => {
-                        handle_ws_msg(msg_res, &execute_tx, &input_reply_tx);
+                        if handle_ws_msg(msg_res, &execute_tx, &input_reply_tx) {
+                            break;
+                        }
                     }
                     recv(output_rx) -> rsp_res => {
                         let rsp = match rsp_res {
@@ -152,14 +159,28 @@ fn handle_ws_msg(
         kernel_common::Header,
     )>,
     input_reply_tx: &std::sync::mpsc::Sender<String>,
-) {
+) -> bool {
     let msg = match msg_res {
         Ok(msg) => msg.data,
         Err(err) => {
             tracing::error!("{err}");
-            return;
+            return true;
         }
     };
+
+    /*
+    let msg = match msg.header().opcode() {
+        OpCode::Text => String::from_utf8(msg.payload().to_vec()).unwrap(),
+        OpCode::Close => {
+            return true;
+        }
+        _ => {
+            error!("receive unexpected opcode {:?}", msg.header().opcode());
+            return true;
+        }
+    };
+    */
+
     let req = serde_json::from_str::<kernel_common::Message>(&msg).unwrap();
     match req.content {
         Content::ExecuteRequest(req_) => {
@@ -217,14 +238,12 @@ fn handle_ws_msg(
         }
         Content::ShutdownRequest { .. } => {
             tracing::info!("recv ShutdownRequest");
-            // w.shutdown();
-            // if let Err(err) = w.send(Message::Close(None)).await {
-            //     tracing::error!("{err}");
-            // }
+            // TODO ws send close frame
             std::process::exit(0);
         }
         _ => {
             tracing::warn!("unsupported msg type");
         }
     };
+    false
 }

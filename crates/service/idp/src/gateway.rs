@@ -60,9 +60,7 @@ async fn handle_(
             proxy_pass(req, client_ip, args.terminal_port).await
         }
         _ if req_path.starts_with("/a/api/v1/command") => rsp_404(),
-        _ if req_path.starts_with("/a/api/v2/command") => rsp_404(),
         _ if req_path.starts_with("/0/api/v1") => rsp_404(),
-        _ if req_path.starts_with("/1/api/v1") => rsp_404(),
         _ => {
             // static file
             if req_path.contains("workspace") || req_path.contains("tensorboard") {

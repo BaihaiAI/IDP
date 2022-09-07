@@ -12,7 +12,7 @@ logger = { path = "../../common/logger" }
 lsp = { path = "../lsp" }
 note_storage = { path = "../note_storage" }
 redis_server = { path = "../redis_server" }
-submitter = { path = "../submitter" }
+#submitter = { path = "../submitter" }
 
 clap = { version = "3.2", default-features = false, features = [
     "std",

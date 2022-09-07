@@ -22,8 +22,8 @@ pub struct CliArgs {
     pub terminal_port: u16,
     #[clap(long, value_parser, value_name = "PORT", default_value = "7777")]
     pub lsp_port: u16,
-    #[clap(long, value_parser, value_name = "PORT", default_value = "9240")]
-    pub submitter_port: u16,
+    // #[clap(long, value_parser, value_name = "PORT", default_value = "9240")]
+    // pub submitter_port: u16,
     #[clap(long, value_parser, value_name = "PORT", default_value = "16379")]
     redis_port: u16,
     #[clap(long, value_parser, value_name = "PORT", default_value = "8082")]
@@ -40,7 +40,7 @@ impl CliArgs {
             }
         }
 
-        inner("SUBMITTER_PORT", self.submitter_port);
+        // inner("SUBMITTER_PORT", self.submitter_port);
         inner("IDP_REDIS_PORT", self.redis_port);
         inner("NOTE_STORAGE_PORT", self.note_storage_port);
         inner("KERNEL_MANAGE_PORT", self.kernel_manage_port);
@@ -54,7 +54,7 @@ impl Default for CliArgs {
             gateway_port: 3000,
             terminal_port: 8089,
             lsp_port: 7777,
-            submitter_port: 9240,
+            // submitter_port: 9240,
             redis_port: 16379,
             note_storage_port: 8082,
             kernel_manage_port: 9007,
