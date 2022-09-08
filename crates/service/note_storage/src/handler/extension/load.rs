@@ -29,7 +29,7 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
     tracing::info!("{:?}", mime_type);
     let mime_type_str = mime_type.to_string();
 
-    if mime_type_str.starts_with("image") || mime_type_str.starts_with("application/gzip") {
+    if mime_type_str.starts_with("image") {
         let mut buf = Vec::new();
         let mut f = tokio::fs::File::open(&path).await?;
         f.read_to_end(&mut buf).await?;
@@ -39,9 +39,28 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
                 header::CONTENT_TYPE,
                 HeaderValue::from_str(&mime_type_str).unwrap(),
             )
-            .body(body::boxed(Full::from(base64::encode(buf))))
+            .body(body::boxed(Full::from(buf)))
             .unwrap());
     }
+
+    if mime_type_str.starts_with("application/gzip") {
+        let mut buf = Vec::new();
+        let mut f = tokio::fs::File::open(&path).await?;
+        f.read_to_end(&mut buf).await?;
+        return Ok(Response::builder()
+            .status(StatusCode::OK)
+            .header(
+                header::CONTENT_TYPE,
+                HeaderValue::from_str(&mime_type_str).unwrap(),
+            )
+            .header(
+                header::CONTENT_ENCODING,
+                HeaderValue::from_str("gzip").unwrap(),
+            )
+            .body(body::boxed(Full::from(buf)))
+            .unwrap());
+    }
+
     match std::fs::read_to_string(&path) {
         Ok(body) => Ok(Response::builder()
             .status(StatusCode::OK)
