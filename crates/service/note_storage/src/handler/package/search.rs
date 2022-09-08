@@ -96,9 +96,13 @@ pub async fn get_package_map(project_info_map: ProjectInfoMap, saas_flag: bool) 
                 let team_id = team_id
                     .parse::<u64>()
                     .unwrap_or_else(|_| panic!("{project_path} team_id={team_id} parse err"));
-                let project_id = project_id
-                    .parse::<u64>()
-                    .unwrap_or_else(|_| panic!("{project_path} project_id={project_id} parse err"));
+                let project_id = match project_id.parse::<u64>() {
+                    Ok(id) => id,
+                    Err(err) => {
+                        tracing::error!("{project_path} project_id={project_id} parse err {err}");
+                        continue;
+                    }
+                };
 
                 //get env
                 let env_name = business::path_tool::project_conda_env(team_id, project_id);

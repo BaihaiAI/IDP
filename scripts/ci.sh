@@ -23,6 +23,8 @@ export RUSTFLAGS="-D warnings"
 # cargo c --tests maybe duplicate to cargo clippy --tests
 #cargo c --tests
 cargo clippy --tests --workspace --all-targets --all-features
+# kernel_manage test case require idp_kernel
+cargo b --bin idp_kernel
 cargo test
 
 cargo b --bin idp --bin idp_kernel

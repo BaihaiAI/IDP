@@ -17,4 +17,5 @@ jobs:
       - run: bash ./scripts/grep_chinese_in_rust_source_code.sh
 
       - run: cargo clippy --tests --workspace --all-targets --all-features
+      - run: cargo b --bin idp_kernel
       - run: cargo test
