@@ -18,14 +18,20 @@ use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
 
-use super::models::ExtensionReq;
+#[derive(Debug, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtensionReq {
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    pub team_id: u64,
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    pub user_id: u64,
+    pub name: String,
+}
 
 pub async fn uninstall(Query(req): Query<ExtensionReq>) -> Result<Rsp<()>, ErrorTrace> {
     let extensions_path = business::path_tool::user_extensions_path(req.team_id, req.user_id);
-    tracing::info!("run extensions uninstall api, path:{extensions_path}");
 
-    let extension_name = format!("{}/{}", req.name, req.version);
-    let uninstall_extension_path = std::path::Path::new(&extensions_path).join(&extension_name);
+    let uninstall_extension_path = std::path::Path::new(&extensions_path).join(&req.name);
     tracing::info!("run extensions uninstall api, path:{uninstall_extension_path:?}");
 
     if let Err(err) = std::fs::remove_dir_all(uninstall_extension_path) {
@@ -37,7 +43,7 @@ pub async fn uninstall(Query(req): Query<ExtensionReq>) -> Result<Rsp<()>, Error
         std::path::Path::new(&extensions_path).join("extensions_config.json");
 
     let mut content = super::get_extensions_config(&extensions_config_path)?;
-    content.retain(|extension| extension.name != req.name || extension.version != req.version);
+    content.retain(|extension| extension.name != req.name);
 
     let data = serde_json::to_string(&content)?;
     let mut f = std::fs::File::create(extensions_config_path)?;
