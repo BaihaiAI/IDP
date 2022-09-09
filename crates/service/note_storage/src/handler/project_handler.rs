@@ -173,54 +173,12 @@ pub async fn delete(team_id: u64, project_id: u64) -> Result<Rsp<()>, err::Error
         return Err(ErrorTrace::new(PROJECT_NOT_FOUND_FAIL_MSG).code(PROJECT_NOT_FOUND_FAIL_CODE));
     }
 
-    //clear the root mount
-    // bash /opt/terminal/clearRoot.sh /store/idp-note/projects/1
-    let output1 = Command::new("bash")
-        // .args(vec!["1"])
-        .arg("/opt/terminal/clearRoot.sh")
-        .arg(&project_path_)
-        .output()?;
-
-    let clear_root = "/opt/terminal/clearRoot.sh";
-    let clear_path = Path::new(clear_root);
-    if clear_path.exists() {
-        tracing::debug!("-----clear_path exist");
-    } else {
-        tracing::debug!("-----clear_path not exist");
-    }
-
-    if project_base_path.exists() {
-        tracing::debug!("-----project_path exist");
-
-        tracing::debug!(" project_base_path = {}", project_base_path.display());
-    } else {
-        tracing::debug!("-----project_path not exist");
-    }
-
-    if !output1.status.success() {
-        tracing::info!(
-            "output1.stdout {}",
-            String::from_utf8_lossy(&output1.stdout)
-        );
-        tracing::info!(
-            "output1.stderr {}",
-            String::from_utf8_lossy(&output1.stderr)
-        );
-        return Err(
-            ErrorTrace::new(PROJECT_UMOUNT_FILES_FAIL_MSG).code(PROJECT_UMOUNT_FILES_FAIL_CODE)
-        );
-    }
     delete_project_from_db_by_api(project_id.to_string()).await?;
 
     tracing::debug!("--> project_base_path={:?}", project_base_path);
     if project_base_path.exists() {
         // delete the project path and all files
         tokio::fs::remove_dir_all(project_path_).await?;
-
-        // return Err(IdpGlobalError::ErrorCodeMsg(
-        //     PROJECT_RM_FILES_FAIL_CODE,
-        //     PROJECT_RM_FILES_FAIL_MSG.to_string(),
-        // ));
     }
     Ok(Rsp::success(()))
 }
@@ -480,19 +438,6 @@ pub async fn new_project(
     .code;
 
     tracing::debug!("ret_business success ret_code:{:?}", ret_code);
-
-    // exec addRoot.sh for changeRoot of terminal
-    // let project_id = project_id_global.clone().parse::<u64>()?;
-
-    // let change_project_root = path_tool::project_root(team_id, project_id);
-
-    // tracing::debug!(
-    //     "exec addRoot.sh for changeRoot of terminal, change_project_root is {:?}",
-    //     change_project_root
-    // );
-    // if let Err(_error) = std::process::Command::new(bash /opt/terminal/addRoot.sh $change_project_root) {
-    //     return Err(ErrorTrace::new(PROJECT_CHANGE_ROOT_FAIL_MSG));
-    // }
 
     if parse_return_success_code(ret_code) {
         Ok("success".to_string())
