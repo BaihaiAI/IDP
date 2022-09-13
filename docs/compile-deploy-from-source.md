@@ -6,7 +6,7 @@ title: Compile And Deploy IDP From Source
 
 ## System Requirements
 
-You will need Git, Rustup, Python 3, the Node.js active LTS (v16+), yarn, and npm (v8+ but < 8.6). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
+You will need Git, Rustup, Python 3, the Node.js active LTS (v16.17.0), yarn, and npm (v8+ but < 8.6). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
 
 ### Linux additional build dependencies
 
@@ -56,9 +56,16 @@ rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C",
 
 ```
 cd web
-yarn install && yarn build
+yarn install && yarn install:terminal && yarn build
 cd ..
-cargo run --bin idp
+
+cd /opt/
+curl -O -L http://baihai.cn-bj.ufileos.com/docker-build/lsp_all.tgz
+tar zxf lsp_all.tgz
+rm lsp_all.tgz
+cd -
+
+cargo run b --bin idp --bin idp_kernel && ./target/debug/idp
 ```
 
 ---
