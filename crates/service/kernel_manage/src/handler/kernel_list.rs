@@ -51,7 +51,9 @@ pub async fn kernel_list(
             .kernel_operate_tx
             .send(KernelOperate::GetState(tx))
             .await?;
-        let kernel_state = rx.await.unwrap();
+        let kernel_state = rx
+            .await
+            .map_err(|_| ErrorTrace::new("KernelOperate::GetState panicked at recv error"))?;
         let state = match kernel_state {
             State::Idle => "idle",
             State::Running(_) => "busy",

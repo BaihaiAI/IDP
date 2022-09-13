@@ -20,6 +20,7 @@ use std::process;
 use std::time::Duration;
 use std::time::SystemTime;
 
+use err::ErrorTrace;
 use futures_util::stream::SplitSink;
 use futures_util::stream::SplitStream;
 use futures_util::SinkExt;
@@ -349,19 +350,40 @@ async fn accept_connection(
     conf_sender: Sender<CommandWithId>,
 ) {
     debug!("here comes new connection {}", peer);
-    let (ws_stream, project_id) = get_project_and_stream(peer, stream).await;
-    let project_id = project_id.strip_prefix('/').unwrap_or(&project_id);
-    let project_id = project_id.strip_prefix("executor").unwrap_or(project_id);
+    let (ws_stream, team_id_underscore_project_id) =
+        match get_project_and_stream(peer, stream).await {
+            Ok(x) => x,
+            Err(err) => {
+                error!("{err}");
+                return;
+            }
+        };
+    let team_id_underscore_project_id = team_id_underscore_project_id
+        .strip_prefix('/')
+        .unwrap_or(&team_id_underscore_project_id);
+    let team_id_underscore_project_id = team_id_underscore_project_id
+        .strip_prefix("executor")
+        .unwrap_or(team_id_underscore_project_id);
 
     // info!("get project with slash #{}#", project_id);
 
-    let parts = project_id.split_once('_').unwrap();
-    let team_id = parts.0.to_string();
-    let project_id = parts.1.to_string();
-    if project_id == "null" {
-        warn!("team_id: {}, project_id: {}", team_id, project_id);
+    let (team_id, project_id) = match team_id_underscore_project_id.split_once('_') {
+        Some(x) => x,
+        None => {
+            error!("invalid team_id_underscore_project_id {team_id_underscore_project_id}");
+            return;
+        }
+    };
+    if team_id.parse::<u64>().is_err() {
+        error!("invalid team_id {team_id}");
         return;
     }
+    if project_id.parse::<u64>().is_err() {
+        error!("invalid project_id {project_id}");
+        return;
+    }
+    let team_id = team_id.to_string();
+    let project_id = project_id.to_string();
 
     /* todo: need handle projectId here
        so using different lsp:
@@ -438,23 +460,16 @@ async fn accept_connection(
 async fn get_project_and_stream(
     peer: SocketAddr,
     stream: TcpStream,
-) -> (WebSocketStream<TcpStream>, String) {
+) -> Result<(WebSocketStream<TcpStream>, String), ErrorTrace> {
     let (header_tx, mut header_rx) = oneshot::channel();
-    let ws_stream = accept_hdr_async(stream, handle_handshake(header_tx, peer))
-        .await
-        .expect("Failed to accept");
+    let ws_stream = accept_hdr_async(stream, handle_handshake(header_tx, peer)).await?;
 
-    let uri = header_rx
-        .try_recv()
-        .map_err(|_| {
-            error!("handshake failed");
-        })
-        .expect("get uri failed");
+    let uri = header_rx.try_recv()?;
 
     info!("get new connect uri: {}", uri);
     let project_id_with_slash = String::from(uri.path());
     // info!("uri path: {}", project_id_with_slash);
-    (ws_stream, project_id_with_slash)
+    Ok((ws_stream, project_id_with_slash))
 }
 
 async fn check_idle_or_need_reset(
