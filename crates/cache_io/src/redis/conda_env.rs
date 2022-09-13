@@ -15,7 +15,6 @@
 use err::ErrorTrace;
 use err::Result;
 use redis::AsyncCommands;
-use redis::RedisResult;
 use redis::RedisWrite;
 use redis::ToRedisArgs;
 
@@ -25,12 +24,11 @@ use crate::CloneState;
 impl CacheService {
     pub async fn set_clone_state(&self, clone_key: &str, clone_state: CloneState) -> Result<()> {
         let key = format!("{}{}", crate::keys::CLONE_STATE_PREFIX, clone_key);
-        let _cache_result: RedisResult<()> = self
-            .pool
+        self.pool
             .get()
             .await?
-            .set_ex(key, clone_state, 60 * 60 * 24)
-            .await;
+            .set_ex::<_, _, ()>(key, clone_state, 60 * 60 * 24)
+            .await?;
         Ok(())
     }
 

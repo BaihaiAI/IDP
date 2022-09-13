@@ -52,16 +52,16 @@ the output of `echo $CONDA_PREFIX` from your terminal.)
 rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C", "link-arg=-Wl,-rpath,`CONDA_PREFIX`/lib"]
 ```
 
-## compile Rust backend
-
-> cargo b
-
-## compile web
+## compile and run
 
 ```
 cd web
 yarn install && yarn build
+cd ..
+cargo run --bin idp
 ```
+
+---
 
 ## build docker image
 
