@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use std::path::Path;
-use std::process::Command;
 
 use axum::extract::Multipart;
 use business::path_tool;
@@ -40,8 +39,6 @@ use crate::status_code::PROJECT_NAME_UNIQ_CREATE_FAIL_CODE_RESOURCE_API;
 use crate::status_code::PROJECT_NAME_UNIQ_CREATE_FAIL_MSG;
 use crate::status_code::PROJECT_NOT_FOUND_FAIL_CODE;
 use crate::status_code::PROJECT_NOT_FOUND_FAIL_MSG;
-use crate::status_code::PROJECT_UMOUNT_FILES_FAIL_CODE;
-use crate::status_code::PROJECT_UMOUNT_FILES_FAIL_MSG;
 use crate::status_code::SUCCESS_CODE;
 
 static FULL_PROJECT_NEW_URL: &str = "http://idp-resource-svc:10005/api/v1/project/new";
@@ -61,9 +58,8 @@ pub fn parse_return_success_code(retcode: u32) -> bool {
     false
 }
 
-// pub fn create_project_children_dir(project_root: String) {
-//     if let Err(_error) = cmd(sh /opt/idp-note/bin/cr_project_children  $project_root) {
-//     }
+// fn create_project_children_dir(project_root: String) {
+//     cmd(sh /opt/idp-note/bin/cr_project_children  $project_root)
 // }
 
 pub async fn create_project_children_dir_one_by_one(

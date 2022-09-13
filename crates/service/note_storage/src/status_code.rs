@@ -50,8 +50,5 @@ pub const PROJECT_CREATE_FINAL_FAIL_MSG: &str = "create project fail";
 pub const PROJECT_NOT_FOUND_FAIL_CODE: u32 = 41000404;
 pub const PROJECT_NOT_FOUND_FAIL_MSG: &str = "project not found";
 
-pub const PROJECT_UMOUNT_FILES_FAIL_CODE: u32 = 51000017;
-pub const PROJECT_UMOUNT_FILES_FAIL_MSG: &str = "project unmount fail";
-
 pub const UPLOAD_MODEL_ERROR_CODE: u32 = 41_000_100;
 pub const UPLOAD_MODEL_ERROR_MSG: &str = "upload model file failed.";
