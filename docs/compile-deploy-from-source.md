@@ -22,9 +22,9 @@ If you are using Fedora/Centos, additionally install:
 
 Install Visual Studio or the Microsoft C++ Build Tools
 
-### macos
+### macOS
 
-macos can't use system bundle's python3 because it's static linked and no dylib, you can install python3 with dylib from conda/miniconda3/brew.
+macOS can't use system bundle's python3 because it's static linked and no dylib, you can install python3 with dylib from conda/miniconda3/brew.
 
 copy .cargo/config.toml and edit it to where your python installed
 
@@ -32,7 +32,7 @@ copy .cargo/config.toml and edit it to where your python installed
 
 #### homebrew's python
 
-edit .cargo/config.toml to these and `brew install python3`
+edit .cargo/config.toml
 
 ```toml
 [target.x86_64-apple-darwin]
@@ -41,7 +41,7 @@ rustflags = ["-L", "/opt/homebrew/lib/", "-C", "link-arg=-undefined", "-C", "lin
 PYO3_PYTHON="/opt/homebrew/bin/python3"
 ```
 
-#### macos conda config
+#### macOS conda's python
 
 Modify .cargo/config/toml as follows:
 (note that you need to _replace_ `CONDA_PREFIX` with

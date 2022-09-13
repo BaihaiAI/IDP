@@ -8,7 +8,7 @@ cd $repo_root
 arch=${1:-arm64}
 #arch=x64
 
-dir=IDPStudio-macos-$arch-v$(date +'%y%m%d-%H%M%S')
+dir=IDPStudio-macOS-$arch-v$(date +'%y%m%d-%H%M%S')
 mkdir -p $dir/{bin,lib}
 
 cp -r docker_build/store $dir/store
