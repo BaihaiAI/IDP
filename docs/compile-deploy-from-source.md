@@ -30,6 +30,13 @@ copy .cargo/config.toml and edit it to where your python installed
 
 > cp .cargo/config.toml.example .cargo/config.toml
 
+#### Install Rust
+
+```toml
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+```
+
 #### homebrew's python
 
 edit .cargo/config.toml
