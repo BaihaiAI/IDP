@@ -63,19 +63,16 @@ pub async fn kernel_main_loop(
         }
     }
 
-    #[cfg(feature = "tcp")]
+    if let Err(err) = kernel_ctx
+        .kernel_ws_conn
+        .req
+        .send(Message {
+            content: Content::ShutdownRequest { restart: false },
+            ..Default::default()
+        })
+        .await
     {
-        if let Err(err) = kernel_ctx
-            .kernel_ws_conn
-            .req
-            .send(Message {
-                content: Content::ShutdownRequest { restart: false },
-                ..Default::default()
-            })
-            .await
-        {
-            tracing::error!("(maybe idp_kernel core dump) {err}");
-        }
+        tracing::error!("(maybe idp_kernel core dump) {err}");
     }
     kernel_ctx.shutdown();
     #[cfg(feature = "fifo")]

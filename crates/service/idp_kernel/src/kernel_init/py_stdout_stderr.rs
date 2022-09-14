@@ -59,6 +59,7 @@ impl PyStdoutStderr {
             .unwrap();
     }
 
+    #[cfg(not)]
     fn isatty(&self) -> bool {
         tracing::info!("--> isatty");
         true

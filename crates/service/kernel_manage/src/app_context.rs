@@ -155,11 +155,14 @@ fn kernel_entry_ops_handler(mapping: &mut HashMap<u64, Arc<KernelEntry>>, op: Ke
                 tracing::error!("send back to oneshot::channel rx fail");
             }
         }
-        KernelEntryOps::Delete(inode) => {
-            if mapping.remove(&inode).is_none() {
+        KernelEntryOps::Delete(inode) => match mapping.remove(&inode) {
+            Some(kernel_ws_conn) => {
+                tracing::debug!("remove {:?}", kernel_ws_conn.header);
+            }
+            None => {
                 tracing::error!("delete {inode} fail: not found");
             }
-        }
+        },
         KernelEntryOps::Insert(kernel) => {
             let kernel = Arc::new(*kernel);
             mapping.insert(kernel.inode, kernel);

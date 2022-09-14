@@ -238,6 +238,7 @@ fn handle_ws_msg(
         }
         Content::ShutdownRequest { .. } => {
             tracing::info!("recv ShutdownRequest");
+            return true;
         }
         _ => {
             tracing::warn!("unsupported msg type");
