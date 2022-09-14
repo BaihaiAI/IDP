@@ -97,9 +97,14 @@ pub async fn shutdown_or_restart(ctx: AppContext, req: Req) -> Result<Resp<Rsp>,
     _ = std::fs::remove_file(session_file_path);
     _ = std::fs::remove_file(vars_file_path);
 
-    let kernel = KernelEntry::new(header, resource, &ctx).await?;
+    let (tx, _rx) = tokio::sync::oneshot::channel();
     ctx.kernel_entry_ops_tx
-        .send(KernelEntryOps::Insert(Box::new(kernel)))
+        .send(KernelEntryOps::Insert {
+            header,
+            resource,
+            ctx: ctx.clone(),
+            tx,
+        })
         .await?;
 
     Ok(Resp::success(Rsp {

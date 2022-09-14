@@ -15,14 +15,19 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use err::ErrorTrace;
+use kernel_common::spawn_kernel_process::Resource;
 use kernel_common::typedef::Inode;
+use kernel_common::Header;
 use kernel_common::Message;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
+use tokio::sync::Mutex;
+use tracing::error;
 
 use crate::kernel_entry::KernelEntry;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppContext {
     pub output_to_ws_sender: tokio::sync::broadcast::Sender<kernel_common::Message>,
 
@@ -44,7 +49,12 @@ pub enum KernelEntryOps {
     Get(Inode, oneshot::Sender<Option<Arc<KernelEntry>>>),
     GetAll(oneshot::Sender<Vec<Arc<KernelEntry>>>),
     Delete(Inode),
-    Insert(Box<KernelEntry>),
+    Insert {
+        header: Header,
+        resource: Resource,
+        ctx: AppContext,
+        tx: oneshot::Sender<Result<Arc<KernelEntry>, ErrorTrace>>,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -84,7 +94,8 @@ impl AppContext {
 
         tokio::spawn(async move {
             let mut kernel_ws_conn_mapping = HashMap::<u64, KernelWsConn>::new();
-            let mut kernel_entry_mapping = HashMap::<u64, Arc<KernelEntry>>::new();
+            let kernel_entry_mapping =
+                Arc::new(Mutex::new(HashMap::<u64, Arc<KernelEntry>>::new()));
             loop {
                 tokio::select! {
                     Some(kernel) = kernel_ws_conn_insert_rx.recv() => {
@@ -107,7 +118,9 @@ impl AppContext {
                     }
 
                     Some(op) = kernel_entry_ops_rx.recv() => {
-                        kernel_entry_ops_handler(&mut kernel_entry_mapping, op);
+                        // kernel_entry_ops_handler may blocking so we spawn a new task
+                        // insert new kernel would wait kernel_ws_conn_take_rx, so we spawn kernel insert to new task prevent block kernel_ws_conn_take_rx
+                        tokio::spawn(kernel_entry_ops_handler(kernel_entry_mapping.clone(), op));
                     }
                 }
             }
@@ -125,9 +138,13 @@ impl AppContext {
     }
 }
 
-fn kernel_entry_ops_handler(mapping: &mut HashMap<u64, Arc<KernelEntry>>, op: KernelEntryOps) {
+async fn kernel_entry_ops_handler(
+    mapping: Arc<Mutex<HashMap<u64, Arc<KernelEntry>>>>,
+    op: KernelEntryOps,
+) {
     let op_fmt = format!("{op:?}");
     let start = std::time::Instant::now();
+    let mut mapping = mapping.lock().await;
     match op {
         KernelEntryOps::Get(inode, tx) => {
             // mapping.insert(inode, v);
@@ -152,7 +169,7 @@ fn kernel_entry_ops_handler(mapping: &mut HashMap<u64, Arc<KernelEntry>>, op: Ke
                 .map(Clone::clone)
                 .collect::<Vec<_>>();
             if tx.send(kernel_list).is_err() {
-                tracing::error!("send back to oneshot::channel rx fail");
+                error!("send back to oneshot::channel rx fail");
             }
         }
         KernelEntryOps::Delete(inode) => match mapping.remove(&inode) {
@@ -160,12 +177,29 @@ fn kernel_entry_ops_handler(mapping: &mut HashMap<u64, Arc<KernelEntry>>, op: Ke
                 tracing::debug!("remove {:?}", kernel_ws_conn.header);
             }
             None => {
-                tracing::error!("delete {inode} fail: not found");
+                error!("delete {inode} fail: not found");
             }
         },
-        KernelEntryOps::Insert(kernel) => {
-            let kernel = Arc::new(*kernel);
-            mapping.insert(kernel.inode, kernel);
+        KernelEntryOps::Insert {
+            header,
+            resource,
+            ctx,
+            tx,
+        } => {
+            match KernelEntry::new(header, resource, ctx).await {
+                Ok(kernel) => {
+                    let kernel = Arc::new(kernel);
+                    mapping.insert(kernel.inode, kernel.clone());
+                    if let Err(err) = tx.send(Ok(kernel)) {
+                        error!("{err:?}");
+                    }
+                }
+                Err(err) => {
+                    if let Err(err) = tx.send(Err(err)) {
+                        error!("{err:?}");
+                    }
+                }
+            };
         }
     }
     let time_cost = start.elapsed();
