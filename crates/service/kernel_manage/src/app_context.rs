@@ -153,7 +153,7 @@ async fn kernel_entry_ops_handler(
     mapping: Arc<RwLock<HashMap<u64, Arc<KernelEntry>>>>,
     op: KernelEntryOps,
 ) {
-    let op_fmt = format!("{}", op.variant());
+    let op_fmt = op.variant().to_string();
     let start = std::time::Instant::now();
     match op {
         KernelEntryOps::Get(inode, tx) => {
