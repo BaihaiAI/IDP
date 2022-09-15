@@ -45,6 +45,7 @@ pub struct ExtensionResp {
     pub description: Option<String>,
     pub publisher: Option<String>,
     pub icon: Option<String>,
+    pub title: Option<String>,
 }
 
 impl PartialEq for ExtensionResp {
