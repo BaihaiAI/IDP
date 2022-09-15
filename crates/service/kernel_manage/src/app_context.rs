@@ -32,9 +32,7 @@ pub struct AppContext {
     pub output_to_ws_sender: tokio::sync::broadcast::Sender<kernel_common::Message>,
 
     // kernel websocket connection
-    // #[cfg(feature = "tcp")]
     pub kernel_ws_conn_insert: mpsc::Sender<KernelWsConn>,
-    // #[cfg(feature = "tcp")]
     pub kernel_ws_conn_take: mpsc::Sender<(Inode, oneshot::Sender<Option<KernelWsConn>>)>,
 
     pub kernel_entry_ops_tx: mpsc::Sender<KernelEntryOps>,

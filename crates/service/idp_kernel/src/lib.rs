@@ -126,6 +126,18 @@ pub fn main(args: Vec<String>) {
                     }
                 })
                 .unwrap();
+            let (ws_ping_tx, ws_ping_rx) = crossbeam_channel::bounded(1);
+            std::thread::Builder::new()
+                .name("ws_ping".to_string())
+                .spawn(move || {
+                    loop {
+                        if let Err(err) = ws_ping_tx.send(()) {
+                            error!("{err}");
+                        }
+                        std::thread::sleep(std::time::Duration::from_millis(5000));
+                    }
+                })
+                .unwrap();
             loop {
                 crossbeam_channel::select! {
                     recv(ws_r_rx) -> msg_res => {
@@ -143,6 +155,11 @@ pub fn main(args: Vec<String>) {
                         };
                         let rsp = serde_json::to_string(&rsp).unwrap();
                         if let Err(err) = ws_w.send(rsp) {
+                            error!("{err}");
+                        }
+                    }
+                    recv(ws_ping_rx) -> _ => {
+                        if let Err(err) = ws_w.send((OpCode::Ping, "".to_string())) {
                             error!("{err}");
                         }
                     }
@@ -179,6 +196,10 @@ fn handle_ws_msg(
             return true;
         }
     };
+    if msg.is_empty() {
+        // it's a pong frame
+        return false;
+    }
 
     /*
     let msg = match msg.header().opcode() {

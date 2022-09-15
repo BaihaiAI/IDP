@@ -193,7 +193,7 @@ impl KernelEntry {
                     Ok(val) => val,
                     Err(_) => {
                         if header.pipeline_opt.is_some() {
-                            "15".to_string()
+                            "10".to_string()
                         } else {
                             "120".to_string()
                         }

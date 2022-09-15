@@ -29,7 +29,7 @@ pub async fn kernel_main_loop(
     mut kernel_operate_rx: Receiver<KernelOperate>,
 ) {
     let mut shutdown_idle_kernel_detect_interval =
-        tokio::time::interval(std::time::Duration::from_secs(120));
+        tokio::time::interval(std::time::Duration::from_secs(300));
     let mut output_rx = kernel_ctx.kernel_ws_conn.rsp.subscribe();
     loop {
         // let start = std::time::Instant::now();
