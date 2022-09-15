@@ -6,7 +6,7 @@ title: Compile And Deploy IDP From Source
 
 ## System Requirements
 
-You will need Git, Rustup, Python 3, the Node.js active LTS (v16+), yarn, and npm (v8+ but < 8.6). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
+You will need Git, Rustup, Python 3, the Node.js active LTS (v16.17.0), yarn, and npm (v8+). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
 
 ### Linux additional build dependencies
 
@@ -22,17 +22,24 @@ If you are using Fedora/Centos, additionally install:
 
 Install Visual Studio or the Microsoft C++ Build Tools
 
-### macos
+### macOS
 
-macos can't use system bundle's python3 because it's static linked and no dylib, you can install python3 with dylib from conda/miniconda3/brew.
+macOS can't use system bundle's python3 because it's static linked and no dylib, you can install python3 with dylib from conda/miniconda3/brew.
 
 copy .cargo/config.toml and edit it to where your python installed
 
 > cp .cargo/config.toml.example .cargo/config.toml
 
+#### Install Rust
+
+```toml
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+```
+
 #### homebrew's python
 
-edit .cargo/config.toml to these and `brew install python3`
+edit .cargo/config.toml
 
 ```toml
 [target.x86_64-apple-darwin]
@@ -41,7 +48,7 @@ rustflags = ["-L", "/opt/homebrew/lib/", "-C", "link-arg=-undefined", "-C", "lin
 PYO3_PYTHON="/opt/homebrew/bin/python3"
 ```
 
-#### macos conda config
+#### macOS conda's python
 
 Modify .cargo/config/toml as follows:
 (note that you need to _replace_ `CONDA_PREFIX` with
@@ -52,16 +59,23 @@ the output of `echo $CONDA_PREFIX` from your terminal.)
 rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C", "link-arg=-Wl,-rpath,`CONDA_PREFIX`/lib"]
 ```
 
-## compile Rust backend
-
-> cargo b
-
-## compile web
+## compile and run
 
 ```
 cd web
-yarn install && yarn build
+yarn install && yarn install:terminal && yarn build
+cd ..
+
+cd /opt/
+curl -O -L http://baihai.cn-bj.ufileos.com/docker-build/lsp_all.tgz
+tar zxf lsp_all.tgz
+rm lsp_all.tgz
+cd -
+
+cargo run b --bin idp --bin idp_kernel && ./target/debug/idp
 ```
+
+---
 
 ## build docker image
 

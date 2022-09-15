@@ -58,8 +58,6 @@ pub enum Content {
     /// execute_reply: frontend used to update execute_count
     ExecuteReply(ExecuteReply),
 
-    // FIXME: only kernel's parent process send SIGINT to kernel can make python thread interrupt
-    // if kernel raise SIGINT by itself python thread won't interrupt
     ShutdownRequest {
         restart: bool,
     },

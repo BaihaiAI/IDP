@@ -29,7 +29,7 @@ pub async fn kernel_main_loop(
     mut kernel_operate_rx: Receiver<KernelOperate>,
 ) {
     let mut shutdown_idle_kernel_detect_interval =
-        tokio::time::interval(std::time::Duration::from_secs(120));
+        tokio::time::interval(std::time::Duration::from_secs(300));
     let mut output_rx = kernel_ctx.kernel_ws_conn.rsp.subscribe();
     loop {
         // let start = std::time::Instant::now();
@@ -63,19 +63,16 @@ pub async fn kernel_main_loop(
         }
     }
 
-    #[cfg(feature = "tcp")]
+    if let Err(err) = kernel_ctx
+        .kernel_ws_conn
+        .req
+        .send(Message {
+            content: Content::ShutdownRequest { restart: false },
+            ..Default::default()
+        })
+        .await
     {
-        if let Err(err) = kernel_ctx
-            .kernel_ws_conn
-            .req
-            .send(Message {
-                content: Content::ShutdownRequest { restart: false },
-                ..Default::default()
-            })
-            .await
-        {
-            tracing::error!("(maybe idp_kernel core dump) {err}");
-        }
+        tracing::error!("(maybe idp_kernel core dump) {err}");
     }
     kernel_ctx.shutdown();
     #[cfg(feature = "fifo")]

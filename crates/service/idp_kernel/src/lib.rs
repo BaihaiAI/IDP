@@ -22,6 +22,7 @@ use kernel_common::Content;
 use kernel_init::py_stdin::IS_WAITING_INPUT_REPLY;
 use tracing::error;
 use ws_tool::codec::WsStringCodec;
+use ws_tool::errors::WsError;
 use ws_tool::frame::OpCode;
 use ws_tool::stream::WsStream;
 
@@ -114,9 +115,26 @@ pub fn main(args: Vec<String>) {
                             }
                             Err(err) => {
                                 tracing::error!("{err}");
-                                break;
+                                match err {
+                                    WsError::IOError(_err) => {
+                                        std::process::exit(1);
+                                    }
+                                    _ => break,
+                                }
                             }
                         }
+                    }
+                })
+                .unwrap();
+            let (ws_ping_tx, ws_ping_rx) = crossbeam_channel::bounded(1);
+            std::thread::Builder::new()
+                .name("ws_ping".to_string())
+                .spawn(move || {
+                    loop {
+                        if let Err(err) = ws_ping_tx.send(()) {
+                            error!("{err}");
+                        }
+                        std::thread::sleep(std::time::Duration::from_millis(5000));
                     }
                 })
                 .unwrap();
@@ -137,6 +155,11 @@ pub fn main(args: Vec<String>) {
                         };
                         let rsp = serde_json::to_string(&rsp).unwrap();
                         if let Err(err) = ws_w.send(rsp) {
+                            error!("{err}");
+                        }
+                    }
+                    recv(ws_ping_rx) -> _ => {
+                        if let Err(err) = ws_w.send((OpCode::Ping, "".to_string())) {
                             error!("{err}");
                         }
                     }
@@ -173,6 +196,10 @@ fn handle_ws_msg(
             return true;
         }
     };
+    if msg.is_empty() {
+        // it's a pong frame
+        return false;
+    }
 
     /*
     let msg = match msg.header().opcode() {
@@ -238,6 +265,7 @@ fn handle_ws_msg(
         }
         Content::ShutdownRequest { .. } => {
             tracing::info!("recv ShutdownRequest");
+            return true;
         }
         _ => {
             tracing::warn!("unsupported msg type");

@@ -17,7 +17,6 @@ use super::sql_cell_wrapper;
 use super::visual_cell_wrapper;
 use super::ExecuteCodeReq;
 use crate::app_context::KernelEntryOps;
-use crate::handler::prelude::KernelEntry;
 use crate::AppContext;
 use crate::Error;
 
@@ -38,7 +37,7 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
     }
     let req_msg = if let Some(input_reply) = req.input_reply {
         kernel_common::Message {
-            header,
+            header: header.clone(),
             content: kernel_common::Content::InputReply { value: input_reply },
             ..Default::default()
         }
@@ -53,7 +52,7 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
             }
         };
         kernel_common::Message {
-            header,
+            header: header.clone(),
             content: kernel_common::Content::ExecuteRequest(
                 kernel_common::content::ExecuteRequest {
                     code,
@@ -80,11 +79,18 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
             kernel.req_sender.send(req_msg).await?;
         }
         None => {
-            let kernel = KernelEntry::new(req.header.clone(), req.resource, ctx).await?;
-            kernel.req_sender.send(req_msg).await?;
+            let (tx, rx) = tokio::sync::oneshot::channel();
+            let resource = req.resource;
             ctx.kernel_entry_ops_tx
-                .send(KernelEntryOps::Insert(Box::new(kernel)))
+                .send(KernelEntryOps::Insert {
+                    header,
+                    resource,
+                    ctx: ctx.clone(),
+                    tx,
+                })
                 .await?;
+            let kernel = rx.await??;
+            kernel.req_sender.send(req_msg).await?;
         }
     }
 

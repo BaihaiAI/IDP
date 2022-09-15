@@ -69,7 +69,7 @@ impl KernelEntry {
     pub async fn new(
         header: Header,
         resource: Resource,
-        ctx: &crate::AppContext,
+        ctx: crate::AppContext,
     ) -> Result<Self, Error> {
         let start = std::time::Instant::now();
         tracing::info!("--> KernelEntry::new");
@@ -85,26 +85,24 @@ impl KernelEntry {
             request: None,
             content: kernel_common::Content::StartKernel {},
         })?;
-        #[cfg(feature = "tcp")]
-        {
-            let header = header.clone();
-            let resource = resource.clone();
-            kernel_common::spawn_kernel_process::req_submitter_spawn_kernel(SpawnKernel {
-                header,
-                resource,
-            })
-            .await?;
-        };
+        let header = header.clone();
+        let resource = resource.clone();
+        kernel_common::spawn_kernel_process::req_submitter_spawn_kernel(SpawnKernel {
+            header: header.clone(),
+            resource: resource.clone(),
+        })
+        .await?;
         #[cfg(feature = "fifo")]
         let kernel_info = KernelInfo { pid, ..kernel_info };
 
-        #[cfg(feature = "tcp")]
         let kernel_ws_conn = {
+            tracing::info!("enter wait kernel ws connect loop");
             let mut retry = 0;
             loop {
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 ctx.kernel_ws_conn_take.send((inode, tx)).await?;
                 if let Some(kernel) = rx.await? {
+                    tracing::info!("leave wait kernel ws connect loop");
                     break kernel;
                 }
                 retry += 1;
@@ -195,7 +193,7 @@ impl KernelEntry {
                     Ok(val) => val,
                     Err(_) => {
                         if header.pipeline_opt.is_some() {
-                            "15".to_string()
+                            "10".to_string()
                         } else {
                             "120".to_string()
                         }

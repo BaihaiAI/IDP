@@ -15,21 +15,24 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use err::ErrorTrace;
+use kernel_common::spawn_kernel_process::Resource;
 use kernel_common::typedef::Inode;
+use kernel_common::Header;
 use kernel_common::Message;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
+use tokio::sync::RwLock;
+use tracing::error;
 
 use crate::kernel_entry::KernelEntry;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppContext {
     pub output_to_ws_sender: tokio::sync::broadcast::Sender<kernel_common::Message>,
 
     // kernel websocket connection
-    // #[cfg(feature = "tcp")]
     pub kernel_ws_conn_insert: mpsc::Sender<KernelWsConn>,
-    // #[cfg(feature = "tcp")]
     pub kernel_ws_conn_take: mpsc::Sender<(Inode, oneshot::Sender<Option<KernelWsConn>>)>,
 
     pub kernel_entry_ops_tx: mpsc::Sender<KernelEntryOps>,
@@ -44,7 +47,23 @@ pub enum KernelEntryOps {
     Get(Inode, oneshot::Sender<Option<Arc<KernelEntry>>>),
     GetAll(oneshot::Sender<Vec<Arc<KernelEntry>>>),
     Delete(Inode),
-    Insert(Box<KernelEntry>),
+    Insert {
+        header: Header,
+        resource: Resource,
+        ctx: AppContext,
+        tx: oneshot::Sender<Result<Arc<KernelEntry>, ErrorTrace>>,
+    },
+}
+
+impl KernelEntryOps {
+    fn variant(&self) -> &'static str {
+        match self {
+            KernelEntryOps::Get(_, _) => "Get",
+            KernelEntryOps::GetAll(_) => "GetAll",
+            KernelEntryOps::Delete(_) => "Delete",
+            KernelEntryOps::Insert { .. } => "Insert",
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -84,7 +103,8 @@ impl AppContext {
 
         tokio::spawn(async move {
             let mut kernel_ws_conn_mapping = HashMap::<u64, KernelWsConn>::new();
-            let mut kernel_entry_mapping = HashMap::<u64, Arc<KernelEntry>>::new();
+            let kernel_entry_mapping =
+                Arc::new(RwLock::new(HashMap::<u64, Arc<KernelEntry>>::new()));
             loop {
                 tokio::select! {
                     Some(kernel) = kernel_ws_conn_insert_rx.recv() => {
@@ -107,7 +127,9 @@ impl AppContext {
                     }
 
                     Some(op) = kernel_entry_ops_rx.recv() => {
-                        kernel_entry_ops_handler(&mut kernel_entry_mapping, op);
+                        // kernel_entry_ops_handler may blocking so we spawn a new task
+                        // insert new kernel would wait kernel_ws_conn_take_rx, so we spawn kernel insert to new task prevent block kernel_ws_conn_take_rx
+                        tokio::spawn(kernel_entry_ops_handler(kernel_entry_mapping.clone(), op));
                     }
                 }
             }
@@ -125,18 +147,22 @@ impl AppContext {
     }
 }
 
-fn kernel_entry_ops_handler(mapping: &mut HashMap<u64, Arc<KernelEntry>>, op: KernelEntryOps) {
-    let op_fmt = format!("{op:?}");
+async fn kernel_entry_ops_handler(
+    mapping: Arc<RwLock<HashMap<u64, Arc<KernelEntry>>>>,
+    op: KernelEntryOps,
+) {
+    let op_fmt = op.variant().to_string();
     let start = std::time::Instant::now();
     match op {
         KernelEntryOps::Get(inode, tx) => {
-            // mapping.insert(inode, v);
+            let mapping = mapping.read().await;
             let kernel_opt = mapping.get(&inode).map(Clone::clone);
             if tx.send(kernel_opt).is_err() {
                 tracing::error!("send back to oneshot::channel rx fail");
             }
         }
         KernelEntryOps::GetAll(tx) => {
+            let mapping = mapping.read().await;
             let kernel_list = mapping
                 .values()
                 .filter(|x| {
@@ -152,36 +178,47 @@ fn kernel_entry_ops_handler(mapping: &mut HashMap<u64, Arc<KernelEntry>>, op: Ke
                 .map(Clone::clone)
                 .collect::<Vec<_>>();
             if tx.send(kernel_list).is_err() {
-                tracing::error!("send back to oneshot::channel rx fail");
+                error!("send back to oneshot::channel rx fail");
             }
         }
         KernelEntryOps::Delete(inode) => {
-            if mapping.remove(&inode).is_none() {
-                tracing::error!("delete {inode} fail: not found");
+            let mut mapping = mapping.write().await;
+            match mapping.remove(&inode) {
+                Some(kernel_ws_conn) => {
+                    tracing::debug!("remove {:?}", kernel_ws_conn.header);
+                }
+                None => {
+                    error!("delete {inode} fail: not found");
+                }
             }
         }
-        KernelEntryOps::Insert(kernel) => {
-            let kernel = Arc::new(*kernel);
-            mapping.insert(kernel.inode, kernel);
+        KernelEntryOps::Insert {
+            header,
+            resource,
+            ctx,
+            tx,
+        } => {
+            let mut mapping = mapping.write().await;
+            match KernelEntry::new(header, resource, ctx).await {
+                Ok(kernel) => {
+                    let kernel = Arc::new(kernel);
+                    mapping.insert(kernel.inode, kernel.clone());
+                    if let Err(err) = tx.send(Ok(kernel)) {
+                        error!("{err:?}");
+                    }
+                }
+                Err(err) => {
+                    if let Err(err) = tx.send(Err(err)) {
+                        error!("{err:?}");
+                    }
+                }
+            };
         }
     }
     let time_cost = start.elapsed();
-    if time_cost > std::time::Duration::from_millis(100) {
+    if time_cost > std::time::Duration::from_millis(500) {
         tracing::warn!("op = {op_fmt} slow query {:?}", time_cost);
     }
-}
-
-#[cfg(not)]
-fn ctx_dump_to_disk_path() -> String {
-    format!("/store/kernel_pod_{}_ctx.json", &*business::region::REGION)
-}
-
-#[cfg(not)]
-#[derive(serde::Serialize, serde::Deserialize)]
-struct KernelDump {
-    inode: Inode,
-    state: State,
-    header: kernel_common::Header,
 }
 
 #[cfg(not)]
@@ -189,7 +226,6 @@ pub async fn dump_ctx_to_disk_task(ctx: AppContext) {
     let mut interval = tokio::time::interval(std::time::Duration::from_secs(4));
     loop {
         let mut kernel_list = vec![];
-        // let mut coredump_closed_kernel_list = vec![];
         tracing::trace!("{}", line!());
         for (inode, kernel) in &*ctx.inode_kernel_mapping.read().await {
             tracing::trace!("{}", line!());
@@ -232,11 +268,6 @@ pub async fn dump_ctx_to_disk_task(ctx: AppContext) {
             .unwrap();
         }
 
-        // let mut mapping = ctx.inode_kernel_mapping.write().await;
-        // for inode in coredump_closed_kernel_list {
-        //     tracing::warn!("remove coredump kernel inode {inode}");
-        //     mapping.remove(&inode);
-        // }
         interval.tick().await;
     }
 }

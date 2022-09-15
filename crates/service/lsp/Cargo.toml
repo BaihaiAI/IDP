@@ -5,6 +5,7 @@ version = "0.1.1"
 edition = "2021"
 
 [dependencies]
+err = { path = "../../common/err" }
 business = { path = "../../common/business" }
 logger = { path = "../../common/logger" }
 
