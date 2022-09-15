@@ -6,7 +6,7 @@ title: Compile And Deploy IDP From Source
 
 ## System Requirements
 
-You will need Git, Rustup, Python 3, the Node.js active LTS (v16.17.0), yarn, and npm (v8+ but < 8.6). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
+You will need Git, Rustup, Python 3, the Node.js active LTS (v16.17.0), yarn, and npm (v8+). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
 
 ### Linux additional build dependencies
 

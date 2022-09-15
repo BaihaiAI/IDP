@@ -19,4 +19,6 @@ __pycache__
 dist
 *.tar.gz
 scripts/team_id.sh
-kernel_manage.db/
+
+kernel_manage.db
+crates/service/kernel_manage/kernel_manage.db

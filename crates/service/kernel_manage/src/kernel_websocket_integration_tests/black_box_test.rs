@@ -135,7 +135,7 @@ fn test_interrupt_request() {
         r#"
 import time
 while True:
-    print(time.ctime())
+    print('now = ', time.ctime())
     time.sleep(1)
     "#,
     );
@@ -143,7 +143,13 @@ while True:
     stream
         .write_message(WsMsg::Text(serde_json::to_string(&req).unwrap()))
         .unwrap();
-    let _execute_input = stream.read_message().unwrap().into_text().unwrap();
+    loop {
+        let rsp = stream.read_message().unwrap();
+        let rsp = rsp.to_text().unwrap();
+        if rsp.contains("now = ") {
+            break;
+        }
+    }
 
     let client = reqwest::blocking::Client::builder()
         .timeout(std::time::Duration::from_millis(1500))
@@ -154,7 +160,7 @@ while True:
     // alternative: use kernel_common hash API to get inode
     let mut retry = 0;
     let inode = loop {
-        if retry == 100 {
+        if retry == 20 {
             panic!("kernel list timeout");
         }
         let kernel_list = client
@@ -168,7 +174,7 @@ while True:
             break kernel.inode.clone();
         }
         retry += 1;
-        std::thread::sleep(std::time::Duration::from_millis(200));
+        std::thread::sleep(std::time::Duration::from_millis(100));
     };
 
     let kernel_interrupt_url = format!("{base_url}/kernel/interrupt?inode={inode}");
@@ -184,8 +190,8 @@ while True:
 
     let mut retry = 0;
     loop {
-        if retry > 100 {
-            panic!("kernel state not idle after interrupt")
+        if retry > 20 {
+            panic!("timeout: kernel state not idle after interrupt")
         }
         let kernel_list = client
             .get(&kernel_list_url)
@@ -194,11 +200,12 @@ while True:
             .json::<RspDe<Vec<KernelListItem>>>()
             .unwrap()
             .data;
+        dbg!(&kernel_list);
         if kernel_list[0].state == "idle" {
             break;
         }
         retry += 1;
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        std::thread::sleep(std::time::Duration::from_millis(100));
     }
 
     let shutdown_all_url = format!("{base_url}/kernel/shutdown_all?projectId={PROJECT_ID}");
