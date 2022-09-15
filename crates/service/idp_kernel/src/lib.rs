@@ -22,6 +22,7 @@ use kernel_common::Content;
 use kernel_init::py_stdin::IS_WAITING_INPUT_REPLY;
 use tracing::error;
 use ws_tool::codec::WsStringCodec;
+use ws_tool::errors::WsError;
 use ws_tool::frame::OpCode;
 use ws_tool::stream::WsStream;
 
@@ -114,7 +115,12 @@ pub fn main(args: Vec<String>) {
                             }
                             Err(err) => {
                                 tracing::error!("{err}");
-                                break;
+                                match err {
+                                    WsError::IOError(_err) => {
+                                        std::process::exit(1);
+                                    }
+                                    _ => break,
+                                }
                             }
                         }
                     }

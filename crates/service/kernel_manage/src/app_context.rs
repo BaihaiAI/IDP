@@ -57,6 +57,17 @@ pub enum KernelEntryOps {
     },
 }
 
+impl KernelEntryOps {
+    fn variant(&self) -> &'static str {
+        match self {
+            KernelEntryOps::Get(_, _) => "Get",
+            KernelEntryOps::GetAll(_) => "GetAll",
+            KernelEntryOps::Delete(_) => "Delete",
+            KernelEntryOps::Insert { .. } => "Insert",
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct KernelWsConn {
     pub inode: u64,
@@ -142,7 +153,7 @@ async fn kernel_entry_ops_handler(
     mapping: Arc<Mutex<HashMap<u64, Arc<KernelEntry>>>>,
     op: KernelEntryOps,
 ) {
-    let op_fmt = format!("{op:?}");
+    let op_fmt = format!("{}", op.variant());
     let start = std::time::Instant::now();
     let mut mapping = mapping.lock().await;
     match op {
@@ -203,7 +214,7 @@ async fn kernel_entry_ops_handler(
         }
     }
     let time_cost = start.elapsed();
-    if time_cost > std::time::Duration::from_millis(100) {
+    if time_cost > std::time::Duration::from_millis(500) {
         tracing::warn!("op = {op_fmt} slow query {:?}", time_cost);
     }
 }

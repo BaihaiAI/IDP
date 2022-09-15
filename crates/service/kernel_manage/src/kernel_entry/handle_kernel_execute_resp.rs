@@ -157,6 +157,7 @@ impl super::KernelCtx {
 
     fn persist_cell_output(&self, req: PartialUpdateCellReq) -> Result<(), crate::Error> {
         use common_model::entity::notebook::Notebook;
+        tracing::info!("--> persist_cell_output");
         if self.header.pipeline_opt.is_some() {
             let dst_path = self.header.ipynb_abs_path();
             tracing::info!("persist_cell_output pipeline dst_path={dst_path:?}");
@@ -191,6 +192,7 @@ impl super::KernelCtx {
                 put_cell_update_req(req, team_id).await;
             });
         }
+        tracing::info!("<-- persist_cell_output");
         Ok(())
     }
 }
