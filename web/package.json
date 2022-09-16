@@ -170,5 +170,9 @@
 		"webpack": "^5.73.0",
 		"webpack-dev-server": "^4.9.2",
 		"webpack-merge": "^5.8.0"
+	},
+	"engines": {
+		"npm": ">=8.0.0",
+		"node": ">=16.0.0"
 	}
 }
