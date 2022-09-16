@@ -12,4 +12,4 @@ tar zxf lsp_all.tgz
 rm lsp_all.tgz
 cd -
 
-cargo run b --bin idp --bin idp_kernel && ./target/debug/idp
+cargo b --bin idp --bin idp_kernel && ./target/debug/idp
