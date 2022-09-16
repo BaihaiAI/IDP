@@ -62,17 +62,7 @@ rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C",
 ## compile and run
 
 ```
-cd web
-yarn install && yarn install:terminal && yarn build
-cd ..
-
-cd /opt/
-curl -O -L http://baihai.cn-bj.ufileos.com/docker-build/lsp_all.tgz
-tar zxf lsp_all.tgz
-rm lsp_all.tgz
-cd -
-
-cargo run b --bin idp --bin idp_kernel && ./target/debug/idp
+./scripts/build.sh
 ```
 
 ---
