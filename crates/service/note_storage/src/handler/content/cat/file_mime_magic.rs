@@ -42,6 +42,12 @@ pub fn get_mime_type<P: AsRef<Path>>(path: P) -> Result<String, ErrorTrace> {
         error!("{err}");
         return Err(ErrorTrace::new(&err));
     }
+    let path_extension = path.extension().unwrap();
+    if path_extension == "xlsx" || path_extension == "docx" {
+        let err = format!("path: {:?} file type is not supported", &path);
+        error!("{err}");
+        return Err(ErrorTrace::new(&err));
+    }
     Ok(tree_magic::from_filepath(path))
 }
 
