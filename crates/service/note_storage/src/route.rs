@@ -27,7 +27,7 @@ use tower_cookies::CookieManagerLayer;
 use crate::api::http::v2::pipeline;
 use crate::api::http::v2::project;
 use crate::api::http::v2::workspace;
-use crate::handler::content as content_handler;
+use crate::handler::{content as content_handler, team_handler};
 use crate::handler::content::content_entrance as content;
 use crate::handler::environment;
 use crate::handler::extension as extension_handler;
@@ -147,6 +147,11 @@ pub async fn init_router(
                     Router::new()
                         .route("/uploadbigfile", on(MethodFilter::POST, note::upload_file))
                         .route_layer(axum::extract::Extension(file_writer)),
+                )
+                .nest(
+                    "/team",
+                    Router::new()
+                        .route("/init", on(MethodFilter::POST, team_handler::init_team))
                 )
                 .nest(
                     "/extensions",

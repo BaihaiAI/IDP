@@ -27,3 +27,4 @@ pub mod snapshot;
 pub mod state;
 pub mod tensorboard;
 pub mod workspace;
+pub mod team_handler;
