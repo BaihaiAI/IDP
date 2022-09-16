@@ -55,9 +55,9 @@ pub fn spawn_all_services(args: &CliArgs) {
     for path in [
         #[cfg(unix)]
         format!("{}/lsp/node/bin/node", exe_parent_dir_str),
-        "/opt/lsp/node/bin/node".to_string(),
         #[cfg(windows)]
         format!(r"{}\lsp\node\node.exe", exe_parent_dir_str),
+        "/opt/lsp/node/bin/node".to_string(),
     ] {
         let path = Path::new(&path);
         if path.exists() {

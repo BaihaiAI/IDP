@@ -63,6 +63,7 @@ rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C",
 
 ```
 ./scripts/build.sh
+./target/release/idp
 ```
 
 ---
