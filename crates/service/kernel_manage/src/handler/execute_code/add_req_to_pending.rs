@@ -14,7 +14,6 @@
 
 use super::execute_req_model;
 use super::sql_cell_wrapper;
-use super::visual_cell_wrapper;
 use super::ExecuteCodeReq;
 use crate::app_context::KernelEntryOps;
 use crate::AppContext;
@@ -47,13 +46,10 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
             execute_req_model::CellTypeMeta::Sql(sql_cell) => {
                 sql_cell_wrapper::sql2python(sql_cell, &req)
             }
-            execute_req_model::CellTypeMeta::Visualization(visual_cell) => {
-                visual_cell_wrapper::vis2python(visual_cell)
-            }
-            execute_req_model::CellTypeMeta::Visualization2(dict) => {
-                visual_cell_wrapper::vis2python2(
-                    dict["df_name"].as_str().unwrap(),
-                    &serde_json::to_string(dict).unwrap(),
+            execute_req_model::CellTypeMeta::Visualization { df_name, chart } => {
+                format!(
+                    "__import__('baihai_aid').draw_dataframe({df_name}, '{}')",
+                    serde_json::to_string(chart).unwrap()
                 )
             }
         };

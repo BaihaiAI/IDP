@@ -54,8 +54,31 @@ pub struct ExecuteCodeReq {
 pub enum CellTypeMeta {
     Code {},
     Sql(SqlCell),
-    Visualization(VisualCell),
-    Visualization2(serde_json::Map<String, serde_json::Value>),
+    /**
+    ```text
+    {
+        "df_name": "df_0",
+        "id": "54606155-6a2d-48c2-b0e0-8e981915deb1",
+        "index": 4,
+        "chart": {
+            "pic_type": "",
+            "title": "",
+            "x": "",
+            "y": "",
+            "color": "",
+            "size": "",
+            "hover_data": "",
+            "facet_col": "",
+            "facet_row": "",
+            "text": ""
+        }
+    }
+    ```
+    */
+    Visualization {
+        df_name: String,
+        chart: std::collections::HashMap<String, String>,
+    },
 }
 
 #[derive(Deserialize, Debug)]
@@ -67,6 +90,7 @@ pub struct SqlCell {
     pub data_source: String,
 }
 
+#[cfg(not)]
 #[derive(Deserialize, Debug)]
 #[cfg_attr(test, derive(serde::Serialize))]
 pub struct VisualCell {

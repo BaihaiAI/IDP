@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::execute_req_model::VisualCell;
-
-pub fn vis2python2(df_var_name: &str, req: &str) -> String {
-    format!("__import__('baihai_aid').draw_dataframe2({df_var_name}, '{req}')",)
-}
-
+#[cfg(not)]
 pub fn vis2python(req: &VisualCell) -> String {
     let df_name = req.df_name.as_deref().unwrap_or("df_0");
     let show_table = req
@@ -43,6 +38,7 @@ pub fn vis2python(req: &VisualCell) -> String {
     draw_code
 }
 
+#[cfg(not)]
 #[test]
 fn test_de_visualization_req() {
     let code = r#"{"teamId":"1","projectId":"1","region":"ga","session":"bbb5b78a-6001-415b-a1f9-45037d6a3045","userId":"1483269813963870208","executeType":"cell","msgId":"/😂.ipynb/cbf310a3-fa54-46c7-9ac9-eadb62dce290/1962","path":"/😂.ipynb","cellId":"cbf310a3-fa54-46c7-9ac9-eadb62dce290","cellType":"visualization","code":"","meta":{"uid":"1483269813963870208","id":"cbf310a3-fa54-46c7-9ac9-eadb62dce290","path":"/store/idp-note/projects/1/5c8faa04-498d-4755-b000-d3dd81633814/share.ipynb","index":12,"x_col":"a","y_col":"b","color_col":"c","pic_type":"line","df_name":"df_0","show_table":""},"kernel":"1642058392722","identity":"87b86aa9-9d3c-4d04-a8b7-181c80da622b","recordExecuteTime":"true","batchId":1650877776285}"#;
