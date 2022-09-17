@@ -223,6 +223,7 @@ impl KernelEntry {
                     + shutdown_idle_interval_duration,
                 core_dump_cell_id: None,
                 execute_record_db,
+                last_persist_output: std::time::Instant::now(),
             };
 
             kernel_main_loop::kernel_main_loop(
@@ -257,6 +258,7 @@ pub struct KernelCtx {
 
     shutdown_idle_interval_duration: std::time::Duration,
     kernel_shutdown_time: std::time::Duration,
+    last_persist_output: std::time::Instant,
 
     core_dump_cell_id: Option<String>, // kernel_info: kernel_common::KernelInfo,
     execute_record_db: sled::Db,

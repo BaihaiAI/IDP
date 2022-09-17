@@ -15,6 +15,7 @@
 use common_model::api_model::PartialUpdateCellReq;
 use common_model::entity::cell::CellUpdate;
 use common_model::entity::cell::Updates;
+use tracing::error;
 
 use super::prelude::*;
 use crate::handler::prelude::State;
@@ -74,7 +75,7 @@ impl super::KernelCtx {
                 run_record.key().into_bytes(),
                 serde_json::to_vec(&run_record).unwrap(),
             ) {
-                tracing::error!("{err}");
+                error!("{err}");
             }
         }
         if let Some(output) = resp.content.warp_to_cell_output() {
@@ -105,7 +106,7 @@ impl super::KernelCtx {
                     let mut rsp = req;
                     rsp.content = Content::ReplyOnStop {};
                     if let Err(err) = self.output_to_ws_sender.send(rsp) {
-                        tracing::error!("{err}");
+                        error!("{err}");
                     }
                 }
                 self.update(State::Idle);
@@ -114,8 +115,16 @@ impl super::KernelCtx {
             }
         }
         if let Err(err) = self.output_to_ws_sender.send(resp.clone()) {
-            tracing::error!("{err}");
+            error!("{err}");
         };
+
+        if self.last_persist_output.elapsed() > std::time::Duration::from_secs(3) {
+            if let Err(err) = self.persist_cell_output() {
+                error!("{err}");
+            }
+            self.last_persist_output = std::time::Instant::now();
+        }
+
         tracing::trace!(
             "<-- handle_kernel_execute_resp, time cost = {:?}",
             start.elapsed()
@@ -134,30 +143,33 @@ impl super::KernelCtx {
                 .duration_since(std::time::SystemTime::UNIX_EPOCH)
                 .unwrap()
                 + self.shutdown_idle_interval_duration;
-            let mut req = PartialUpdateCellReq {
-                path: self.header.path.clone(),
-                project_id: self.header.project_id,
-                cells: Vec::new(),
-            };
-            for (cell_id, update) in std::mem::take(&mut self.cell_update) {
-                req.cells.push(CellUpdate {
-                    id: cell_id,
-                    updates: update,
-                });
-            }
+
+            /*
             if !req.cells.is_empty() {
                 if let Err(err) = self.persist_cell_output(req) {
                     tracing::error!("{err:#?}");
                 }
             }
+            */
         }
         self.state = new_state;
-        // self.state.report_state_to_redis_and_pg(need_update_run_start).unwrap();
     }
 
-    fn persist_cell_output(&self, req: PartialUpdateCellReq) -> Result<(), crate::Error> {
+    fn persist_cell_output(&mut self) -> Result<(), crate::Error> {
         use common_model::entity::notebook::Notebook;
         tracing::debug!("--> persist_cell_output");
+
+        let mut req = PartialUpdateCellReq {
+            path: self.header.path.clone(),
+            project_id: self.header.project_id,
+            cells: Vec::new(),
+        };
+        for (cell_id, update) in std::mem::take(&mut self.cell_update) {
+            req.cells.push(CellUpdate {
+                id: cell_id,
+                updates: update,
+            });
+        }
         if self.header.pipeline_opt.is_some() {
             let dst_path = self.header.ipynb_abs_path();
             tracing::info!("persist_cell_output pipeline dst_path={dst_path:?}");
