@@ -55,6 +55,7 @@ pub enum CellTypeMeta {
     Code {},
     Sql(SqlCell),
     Visualization(VisualCell),
+    Visualization2(serde_json::Map<String, serde_json::Value>),
 }
 
 #[derive(Deserialize, Debug)]

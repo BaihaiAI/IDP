@@ -14,6 +14,10 @@
 
 use super::execute_req_model::VisualCell;
 
+pub fn vis2python2(df_var_name: &str, req: &str) -> String {
+    format!("__import__('baihai_aid').draw_dataframe2({df_var_name}, '{req}')",)
+}
+
 pub fn vis2python(req: &VisualCell) -> String {
     let df_name = req.df_name.as_deref().unwrap_or("df_0");
     let show_table = req

@@ -50,6 +50,12 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
             execute_req_model::CellTypeMeta::Visualization(visual_cell) => {
                 visual_cell_wrapper::vis2python(visual_cell)
             }
+            execute_req_model::CellTypeMeta::Visualization2(dict) => {
+                visual_cell_wrapper::vis2python2(
+                    dict["df_name"].as_str().unwrap(),
+                    &serde_json::to_string(dict).unwrap(),
+                )
+            }
         };
         kernel_common::Message {
             header: header.clone(),
