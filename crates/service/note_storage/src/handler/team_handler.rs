@@ -37,8 +37,8 @@ pub async fn init_team_handler(
 ) -> Result<Rsp<()>, err::ErrorTrace> {
     tracing::debug!("access init_team_handler api");
     let team_dir =  format!("/store/{team_id}");
-    let mut cmd = std::process::Command::new("/opt/terminal/addRoot.sh");
-    cmd.arg(team_dir);
+    let mut cmd = std::process::Command::new("sh");
+    cmd.arg("/opt/terminal/addRoot.sh").arg(team_dir);
     tracing::info!("cmd = {cmd:?}");
     let output = cmd.output()?;
     if !output.status.success() {
