@@ -27,7 +27,7 @@ use tower_cookies::CookieManagerLayer;
 use crate::api::http::v2::pipeline;
 use crate::api::http::v2::project;
 use crate::api::http::v2::workspace;
-use crate::handler::{content as content_handler, team_handler};
+use crate::handler::content as content_handler;
 use crate::handler::content::content_entrance as content;
 use crate::handler::environment;
 use crate::handler::extension as extension_handler;
@@ -37,6 +37,7 @@ use crate::handler::package;
 use crate::handler::pipeline_handler;
 use crate::handler::snapshot;
 use crate::handler::state;
+use crate::handler::team_handler;
 use crate::handler::workspace as workspace_handler;
 
 pub async fn init_router(
@@ -150,8 +151,7 @@ pub async fn init_router(
                 )
                 .nest(
                     "/team",
-                    Router::new()
-                        .route("/init", on(MethodFilter::POST, team_handler::init_team))
+                    Router::new().route("/init", on(MethodFilter::POST, team_handler::init_team)),
                 )
                 .nest(
                     "/extensions",

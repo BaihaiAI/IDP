@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use common_model::service::rsp::Rsp;
-use crate::common::error::ErrorTrace;
 use axum::Json;
+use common_model::service::rsp::Rsp;
+
+use crate::common::error::ErrorTrace;
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,20 +24,15 @@ pub struct TeamReq {
     pub team_id: i64,
 }
 
-
-pub async fn init_team(
-    Json(payload): Json<TeamReq>,
-) -> Result<Rsp<()>, err::ErrorTrace> {
+pub async fn init_team(Json(payload): Json<TeamReq>) -> Result<Rsp<()>, err::ErrorTrace> {
     tracing::debug!("access init_team api");
     let team_id = payload.team_id;
     init_team_handler(team_id).await
 }
 
-pub async fn init_team_handler(
-    team_id: i64,
-) -> Result<Rsp<()>, err::ErrorTrace> {
+pub async fn init_team_handler(team_id: i64) -> Result<Rsp<()>, err::ErrorTrace> {
     tracing::debug!("access init_team_handler api");
-    let team_dir =  format!("/store/{team_id}");
+    let team_dir = format!("/store/{team_id}");
     let mut cmd = std::process::Command::new("sh");
     cmd.arg("/opt/terminal/addRoot.sh").arg(team_dir);
     tracing::info!("cmd = {cmd:?}");

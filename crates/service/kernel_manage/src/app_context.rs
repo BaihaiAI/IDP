@@ -22,7 +22,7 @@ use kernel_common::Header;
 use kernel_common::Message;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
-use tokio::sync::RwLock;
+use tokio::sync::Mutex;
 use tracing::error;
 
 use crate::kernel_entry::KernelEntry;
@@ -103,8 +103,9 @@ impl AppContext {
 
         tokio::spawn(async move {
             let mut kernel_ws_conn_mapping = HashMap::<u64, KernelWsConn>::new();
+            // can't use RwLock here, use RwLock run_all_cell sometime 3st cell would run before 2nd cell
             let kernel_entry_mapping =
-                Arc::new(RwLock::new(HashMap::<u64, Arc<KernelEntry>>::new()));
+                Arc::new(Mutex::new(HashMap::<u64, Arc<KernelEntry>>::new()));
             loop {
                 tokio::select! {
                     Some(kernel) = kernel_ws_conn_insert_rx.recv() => {
@@ -148,21 +149,20 @@ impl AppContext {
 }
 
 async fn kernel_entry_ops_handler(
-    mapping: Arc<RwLock<HashMap<u64, Arc<KernelEntry>>>>,
+    mapping: Arc<Mutex<HashMap<u64, Arc<KernelEntry>>>>,
     op: KernelEntryOps,
 ) {
     let op_fmt = op.variant().to_string();
     let start = std::time::Instant::now();
+    let mut mapping = mapping.lock().await;
     match op {
         KernelEntryOps::Get(inode, tx) => {
-            let mapping = mapping.read().await;
             let kernel_opt = mapping.get(&inode).map(Clone::clone);
             if tx.send(kernel_opt).is_err() {
                 tracing::error!("send back to oneshot::channel rx fail");
             }
         }
         KernelEntryOps::GetAll(tx) => {
-            let mapping = mapping.read().await;
             let kernel_list = mapping
                 .values()
                 .filter(|x| {
@@ -181,24 +181,20 @@ async fn kernel_entry_ops_handler(
                 error!("send back to oneshot::channel rx fail");
             }
         }
-        KernelEntryOps::Delete(inode) => {
-            let mut mapping = mapping.write().await;
-            match mapping.remove(&inode) {
-                Some(kernel_ws_conn) => {
-                    tracing::debug!("remove {:?}", kernel_ws_conn.header);
-                }
-                None => {
-                    error!("delete {inode} fail: not found");
-                }
+        KernelEntryOps::Delete(inode) => match mapping.remove(&inode) {
+            Some(kernel_ws_conn) => {
+                tracing::debug!("remove {:?}", kernel_ws_conn.header);
             }
-        }
+            None => {
+                error!("delete {inode} fail: not found");
+            }
+        },
         KernelEntryOps::Insert {
             header,
             resource,
             ctx,
             tx,
         } => {
-            let mut mapping = mapping.write().await;
             match KernelEntry::new(header, resource, ctx).await {
                 Ok(kernel) => {
                     let kernel = Arc::new(kernel);
