@@ -12,5 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod black_box_test;
-mod white_box_test;
+mod test_kernel_operate;

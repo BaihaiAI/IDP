@@ -190,7 +190,7 @@ while True:
 
     let mut retry = 0;
     loop {
-        if retry > 20 {
+        if retry > 50 {
             panic!("timeout: kernel state not idle after interrupt")
         }
         let kernel_list = client
@@ -200,7 +200,6 @@ while True:
             .json::<RspDe<Vec<KernelListItem>>>()
             .unwrap()
             .data;
-        dbg!(&kernel_list);
         if kernel_list[0].state == "idle" {
             break;
         }
