@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod detail;
+mod init_install;
 mod install;
 mod installed_list;
 mod load;
@@ -25,6 +26,7 @@ use std::path::Path;
 
 pub use detail::detail;
 use err::ErrorTrace;
+pub use init_install::init_install;
 pub use install::install;
 pub use installed_list::installed_list;
 pub use load::load;

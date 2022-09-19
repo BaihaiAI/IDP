@@ -174,6 +174,10 @@ pub async fn init_router(
                             "/uninstall",
                             on(MethodFilter::GET, extension_handler::uninstall),
                         )
+                        .route(
+                            "/initInstall",
+                            on(MethodFilter::GET, extension_handler::init_install),
+                        )
                         .route("/detail", on(MethodFilter::GET, extension_handler::detail)),
                 )
                 .nest(

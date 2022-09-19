@@ -48,11 +48,11 @@ pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, Err
     let extensions_config_path =
         std::path::Path::new(&installed_extensions_path).join("extensions_config.json");
 
-    let mut content = super::get_extensions_config(&extensions_config_path)?;
+    let mut contents = super::get_extensions_config(&extensions_config_path)?;
 
-    content.push(new_extension_config);
+    contents.push(new_extension_config);
 
-    let data = serde_json::to_string(&content).unwrap();
+    let data = serde_json::to_string(&contents).unwrap();
     let mut f = std::fs::File::create(extensions_config_path).unwrap();
     f.write_all(data.as_bytes()).unwrap();
 

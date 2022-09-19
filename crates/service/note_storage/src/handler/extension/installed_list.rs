@@ -22,7 +22,16 @@ use super::models::ListReq;
 pub async fn installed_list(
     Query(req): Query<ListReq>,
 ) -> Result<Rsp<Vec<ExtensionResp>>, ErrorTrace> {
-    let extensions_path = business::path_tool::user_extensions_path(req.team_id, req.user_id);
+    let team_id = req.team_id;
+    let user_id = req.user_id;
+    installed_list_handler(team_id, user_id).await
+}
+
+pub async fn installed_list_handler(
+    team_id: u64,
+    user_id: u64,
+) -> Result<Rsp<Vec<ExtensionResp>>, ErrorTrace> {
+    let extensions_path = business::path_tool::user_extensions_path(team_id, user_id);
 
     let extension_config_path =
         std::path::Path::new(&extensions_path).join("extensions_config.json");
