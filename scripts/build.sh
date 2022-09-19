@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -exu
 
-script_dir=$(dirname -- $(readlink -f -- "$0"))
-# get parent dir of ./scripts/ci.sh
-repo_root=$(dirname $script_dir)
+# readlink -f not support in macOS
+#script_dir=$(dirname -- $(readlink -f -- "$0"))
+#repo_root=$(dirname $script_dir)
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)
 cd $repo_root
 
 mkdir -p target/release/lsp
