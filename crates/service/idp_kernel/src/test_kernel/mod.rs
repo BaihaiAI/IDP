@@ -18,7 +18,6 @@ pub use kernel_common::Message;
 
 // mod test_adtk;
 // mod test_compile_error;
-// mod test_interrupt;
 // mod test_lets_plot;
 // mod test_matplotlib;
 // mod test_pandas;

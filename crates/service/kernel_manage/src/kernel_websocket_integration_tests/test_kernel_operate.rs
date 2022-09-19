@@ -160,7 +160,7 @@ while True:
     // alternative: use kernel_common hash API to get inode
     let mut retry = 0;
     let inode = loop {
-        if retry == 20 {
+        if retry == 10 {
             panic!("kernel list timeout");
         }
         let kernel_list = client
@@ -190,7 +190,7 @@ while True:
 
     let mut retry = 0;
     loop {
-        if retry > 50 {
+        if retry > 250 {
             panic!("timeout: kernel state not idle after interrupt")
         }
         let kernel_list = client
