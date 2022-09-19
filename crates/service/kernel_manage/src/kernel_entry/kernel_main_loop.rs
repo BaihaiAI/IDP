@@ -99,12 +99,15 @@ impl KernelCtx {
         let team_id = self.header.team_id;
         let project_id = self.header.project_id;
         let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
-        let python_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
+        let _python_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
+        // current baihai_aid version update maybe uninstall numpy
+        /*
         std::process::Command::new(python_path)
             .arg("-c")
             .arg("__import__('baihai_aid').update()")
             .spawn()
             .unwrap();
+        */
         true
     }
 }
