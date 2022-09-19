@@ -144,13 +144,11 @@ impl super::KernelCtx {
                 .unwrap()
                 + self.shutdown_idle_interval_duration;
 
-            /*
-            if !req.cells.is_empty() {
-                if let Err(err) = self.persist_cell_output(req) {
+            if !self.cell_update.is_empty() {
+                if let Err(err) = self.persist_cell_output() {
                     tracing::error!("{err:#?}");
                 }
             }
-            */
         }
         self.state = new_state;
     }
