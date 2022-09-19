@@ -176,7 +176,7 @@ pub async fn init_router(
                         )
                         .route(
                             "/initInstall",
-                            on(MethodFilter::GET, extension_handler::init_install),
+                            on(MethodFilter::POST, extension_handler::init_install),
                         )
                         .route("/detail", on(MethodFilter::GET, extension_handler::detail)),
                 )

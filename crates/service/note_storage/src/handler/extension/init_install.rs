@@ -14,15 +14,15 @@
 
 use std::io::Write;
 
-use axum::extract::Query;
+use axum::Json;
 use common_model::Rsp;
 use err::ErrorTrace;
 
 use super::models::ListReq;
 
-pub async fn init_install(Query(req): Query<ListReq>) -> Result<Rsp<()>, ErrorTrace> {
-    let team_id = req.team_id;
-    let user_id = req.user_id;
+pub async fn init_install(Json(payload): Json<ListReq>) -> Result<Rsp<()>, ErrorTrace> {
+    let team_id = payload.team_id;
+    let user_id = payload.user_id;
     init_install_handler(team_id, user_id).await
 }
 
