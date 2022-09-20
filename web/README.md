@@ -10,18 +10,12 @@
 - react-redux
 
 ### install
-- yarn 
-- or
-- npm run install
+- yarn install
 
 ### start command：
-- npm run start:open
-- or
 - yarn start
 
 ### build command:
-- npm run build:open
-- or
 - yarn build:open
 
 ### support development：
