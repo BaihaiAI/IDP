@@ -101,5 +101,3 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
 
     Ok(())
 }
-
-// fn req_context

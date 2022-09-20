@@ -93,71 +93,13 @@ def load_or_skip(path: str) -> str:
 
 
 def after_run(session_path, var_path):
-    _save_vars(var_path)
     try:
+        import baihai_aid
+        baihai_aid.save_vars(var_path)
         import dill
         dill.dump_session(session_path)
     except ModuleNotFoundError:
         pass
-
-
-def _save_vars(path):
-    ret = []
-    import __main__ as _main_module
-
-    for f in dir(_main_module):
-        if (
-            not f.startswith("_")
-            and f != "In"
-            and f != "Out"
-            and (not f.startswith("baihai_aid"))
-        ):
-            aim = eval("_main_module.%s" % f)
-            t, v, m = _type2json(aim)
-            if t:
-                item = {"name": f, "type": t, "value": v, "meta": m}
-                ret.append(item)
-    with open(path, "w") as fd:
-        json.dump(ret, fd)
-
-
-def _type2json(x):
-    type_name = type(x).__qualname__
-    # if type(x) == pandas.core.frame.DataFrame:
-    if type_name == 'DataFrame':
-        meta = {'columns': list(x.columns)}
-        return "dataframe", x.to_json(force_ascii=False), json.dumps(meta)
-
-    try:
-        import numpy
-        import pandas
-        if type(x) == numpy.ndarray or type(x) == pandas.core.arrays:
-            y = pandas.DataFrame.from_dict(x)
-            meta = {"columns": list(y.columns)}
-            return "array", y.to_json(force_ascii=False), json.dumps(meta)
-    except ModuleNotFoundError:
-        pass
-
-    if type(x) == dict:
-        return "dict", str(x), None
-    
-    # type_str = str(type(x))
-    # dict(x) after_run TypeError: 'function' object is not iterable
-    # y = pandas.DataFrame.from_dict(dict(x), orient='index')
-    # meta = {'columns': list(y.columns)}
-    # return type_str, y.to_json(force_ascii=False), json.dumps(meta)
-    if _is_jsonable(x):
-        return type(x).__name__, x, "{}"
-    else:
-        return None, 1, "{}"
-
-
-def _is_jsonable(x):
-    try:
-        json.dumps(x)
-        return True
-    except:
-        return False
 
 
 class GraphicObj:
