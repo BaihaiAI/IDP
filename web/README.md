@@ -1,6 +1,6 @@
 ![](http://baihai.cn-bj.ufileos.com/models/idp_logo.jpg)
 
-### main configuration of the project ：
+## main configuration of the project ：
 - react 18+
 - webpack 5+
 - react-router-dom 6
@@ -9,24 +9,24 @@
 - redux
 - react-redux
 
-### install
+## install
 - yarn install
 - yarn install:terminal
 
-### start command：
+## start command：
 - yarn start:open
 
-### build command:
+## build command:
 - yarn build:open
 
-### support development：
+## support development：
 - *.css
 - *.less
 - js/jsx
 - ts/tsx
 
 
-### project Directory：
+## project Directory：
 ```
 idp-studio
 ├─.eslintrc.js 
