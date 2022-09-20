@@ -4,17 +4,17 @@
 - react-router-dom 6+
 
 ### install
-yarn or npm run install
+- yarn or npm run install
 
 ### start command：
-npm run start:open
-or
-yarn start
+- npm run start:open
+- or
+- yarn start
 
 ### build command:
-npm run build:open
-or
-yarn build:open
+- npm run build:open
+- or
+- yarn build:open
 
 ### support development：
 - *.css
