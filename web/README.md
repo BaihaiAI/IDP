@@ -14,7 +14,7 @@
 - yarn install:terminal
 
 ### start command：
-- yarn start
+- yarn start:open
 
 ### build command:
 - yarn build:open
