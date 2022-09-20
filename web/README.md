@@ -1,10 +1,16 @@
 ### main configuration of the project ：
 - react 18+
 - webpack 5+
-- react-router-dom 6+
+- react-router-dom 6
+- react-router
+- antd
+- redux
+- react-redux
 
 ### install
-- yarn or npm run install
+- yarn 
+- or
+- npm run install
 
 ### start command：
 - npm run start:open
