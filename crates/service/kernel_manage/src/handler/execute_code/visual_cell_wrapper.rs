@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(not)]
-pub fn vis2python(req: &VisualCell) -> String {
+pub fn vis2python(req: &super::execute_req_model::VisualCell) -> String {
     let df_name = req.df_name.as_deref().unwrap_or("df_0");
     let show_table = req
         .show_table

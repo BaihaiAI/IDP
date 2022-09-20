@@ -54,6 +54,7 @@ pub struct ExecuteCodeReq {
 pub enum CellTypeMeta {
     Code {},
     Sql(SqlCell),
+    Visualization(VisualCell),
     /**
     ```text
     {
@@ -75,7 +76,7 @@ pub enum CellTypeMeta {
     }
     ```
     */
-    Visualization {
+    Visualization2 {
         df_name: String,
         chart: std::collections::HashMap<String, String>,
     },
@@ -90,7 +91,6 @@ pub struct SqlCell {
     pub data_source: String,
 }
 
-#[cfg(not)]
 #[derive(Deserialize, Debug)]
 #[cfg_attr(test, derive(serde::Serialize))]
 pub struct VisualCell {
