@@ -46,10 +46,10 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
             execute_req_model::CellTypeMeta::Sql(sql_cell) => {
                 sql_cell_wrapper::sql2python(sql_cell, &req)
             }
-            execute_req_model::CellTypeMeta::Visualization(req) => {
+            execute_req_model::CellTypeMeta::VisualizationOld(req) => {
                 crate::handler::execute_code::visual_cell_wrapper::vis2python(&req)
             }
-            execute_req_model::CellTypeMeta::Visualization2 { df_name, chart } => {
+            execute_req_model::CellTypeMeta::Visualization { df_name, chart } => {
                 format!(
                     "__import__('baihai_aid').draw_dataframe({df_name}, '{}')",
                     serde_json::to_string(chart).unwrap()
