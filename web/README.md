@@ -11,6 +11,7 @@
 
 ### install
 - yarn install
+- yarn install:terminal
 
 ### start command：
 - yarn start
