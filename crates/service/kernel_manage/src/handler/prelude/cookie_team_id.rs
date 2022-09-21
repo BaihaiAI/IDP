@@ -30,8 +30,7 @@ pub fn team_id_from_cookie(req: &Request<Body>) -> Result<u64, Error> {
 
 fn parse_team_id_from_cookies(cookies: &str) -> Result<TeamId, Error> {
     let mut user_id_opt = None;
-    for cookie in cookies.split(';') {
-        let cookie = cookie.trim_start();
+    for cookie in cookies.split("; ") {
         match cookie.split_once('=') {
             Some((k, v)) => {
                 if k == "teamId" {
