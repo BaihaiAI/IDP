@@ -47,7 +47,7 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
                 sql_cell_wrapper::sql2python(sql_cell, &req)
             }
             execute_req_model::CellTypeMeta::VisualizationOld(req) => {
-                crate::handler::execute_code::visual_cell_wrapper::vis2python(&req)
+                crate::handler::execute_code::visual_cell_wrapper::vis2python(req)
             }
             execute_req_model::CellTypeMeta::Visualization { df_name, chart } => {
                 format!(

@@ -1436,9 +1436,9 @@ pub async fn export_as(
         project_id,
         business::business_term::ProjectFolder::TMP,
     );
-    tmp_path.push(crate::business_::path_tool::get_relative_path(Path::new(
-        &path,
-    )));
+    let relative_path = crate::business_::path_tool::get_relative_path(Path::new(&path));
+    let file_name_path = relative_path.file_name().unwrap();
+    tmp_path.push(file_name_path);
     info!("export_as {base_path:?}");
     let mut abs_path = base_path;
     abs_path.push(crate::business_::path_tool::get_relative_path(Path::new(
