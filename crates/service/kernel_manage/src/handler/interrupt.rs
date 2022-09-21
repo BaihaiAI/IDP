@@ -31,6 +31,9 @@ pub async fn interrupt(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, 
         .send(KernelOperate::GetState(tx))
         .await?;
     let state = rx.await?;
+    if matches!(state, State::Idle) {
+        return Ok(Resp::success(()));
+    }
     if !matches!(state, State::Running(_)) {
         return Err(Error::new(&format!(
             "only running kernel can interrupt, current state is {state:?}"
