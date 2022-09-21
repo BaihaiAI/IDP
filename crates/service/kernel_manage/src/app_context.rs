@@ -22,7 +22,7 @@ use kernel_common::Header;
 use kernel_common::Message;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
-use tokio::sync::Mutex;
+// use tokio::sync::Mutex;
 use tracing::error;
 
 use crate::kernel_entry::KernelEntry;
@@ -104,8 +104,7 @@ impl AppContext {
         tokio::spawn(async move {
             let mut kernel_ws_conn_mapping = HashMap::<u64, KernelWsConn>::new();
             // can't use RwLock here, use RwLock run_all_cell sometime 3st cell would run before 2nd cell
-            let kernel_entry_mapping =
-                Arc::new(Mutex::new(HashMap::<u64, Arc<KernelEntry>>::new()));
+            let mut kernel_entry_mapping = HashMap::<u64, Arc<KernelEntry>>::new();
             loop {
                 tokio::select! {
                     Some(kernel) = kernel_ws_conn_insert_rx.recv() => {
@@ -130,7 +129,7 @@ impl AppContext {
                     Some(op) = kernel_entry_ops_rx.recv() => {
                         // kernel_entry_ops_handler may blocking so we spawn a new task
                         // insert new kernel would wait kernel_ws_conn_take_rx, so we spawn kernel insert to new task prevent block kernel_ws_conn_take_rx
-                        tokio::spawn(kernel_entry_ops_handler(kernel_entry_mapping.clone(), op));
+                        kernel_entry_ops_handler(&mut kernel_entry_mapping, op).await;
                     }
                 }
             }
@@ -149,12 +148,11 @@ impl AppContext {
 }
 
 async fn kernel_entry_ops_handler(
-    mapping: Arc<Mutex<HashMap<u64, Arc<KernelEntry>>>>,
+    mapping: &mut HashMap<u64, Arc<KernelEntry>>,
     op: KernelEntryOps,
 ) {
     let op_fmt = op.variant().to_string();
     let start = std::time::Instant::now();
-    let mut mapping = mapping.lock().await;
     match op {
         KernelEntryOps::Get(inode, tx) => {
             let kernel_opt = mapping.get(&inode).map(Clone::clone);

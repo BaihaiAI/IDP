@@ -198,21 +198,22 @@ async fn handle_ws(
                 // subscribe_list.insert(req.header.path.clone());
                 let ws_write_tx = ctx.output_to_ws_sender.clone();
                 let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    if let Err(err) = super::add_req_to_pending::add_req_to_pending(&ctx, req).await {
-                        tracing::warn!("{err:#?}");
-                        let msg = kernel_common::Message {
-                            content: kernel_common::Content::RuntimeError {
-                                message: err.message,
-                            },
-                            header: req_header,
-                            ..Default::default()
-                        };
-                        if let Err(err) = ws_write_tx.send(msg) {
-                            tracing::error!("{err}");
-                        }
+                // NOTE add send req to kernel queue must BLOCKING, otherwise run all cell order maybe wrong
+                // tokio::spawn(async move {
+                if let Err(err) = super::add_req_to_pending::add_req_to_pending(&ctx, req).await {
+                    tracing::warn!("{err:#?}");
+                    let msg = kernel_common::Message {
+                        content: kernel_common::Content::RuntimeError {
+                            message: err.message,
+                        },
+                        header: req_header,
+                        ..Default::default()
+                    };
+                    if let Err(err) = ws_write_tx.send(msg) {
+                        tracing::error!("{err}");
                     }
-                });
+                }
+                // });
             }
             output_res = resp_receiver.recv() => {
                 let output = match output_res {
