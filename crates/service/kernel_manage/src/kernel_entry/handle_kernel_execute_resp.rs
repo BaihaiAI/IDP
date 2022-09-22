@@ -162,10 +162,10 @@ impl super::KernelCtx {
             project_id: self.header.project_id,
             cells: Vec::new(),
         };
-        for (cell_id, update) in std::mem::take(&mut self.cell_update) {
+        for (cell_id, update) in &self.cell_update {
             req.cells.push(CellUpdate {
-                id: cell_id,
-                updates: update,
+                id: cell_id.clone(),
+                updates: update.clone(),
             });
         }
         if self.header.pipeline_opt.is_some() {
