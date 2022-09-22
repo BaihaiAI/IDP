@@ -193,10 +193,25 @@ async fn handle_ws(
                     Message::Close(_) => break,
                     _ => continue,
                 };
-                let req = serde_json::from_str::<ExecuteCodeReq>(&msg)?;
+                let ws_write_tx = ctx.output_to_ws_sender.clone();
+                let req = match serde_json::from_str::<ExecuteCodeReq>(&msg) {
+                    Ok(req) => req,
+                    Err(err) => {
+                        tracing::error!("{err}");
+                        let msg = kernel_common::Message {
+                            content: kernel_common::Content::RuntimeError {
+                                message: err.to_string(),
+                            },
+                            ..Default::default()
+                        };
+                        if let Err(err) = ws_write_tx.send(msg) {
+                            tracing::error!("{err}");
+                        }
+                        continue;
+                    },
+                };
                 let req_header = req.header.clone();
                 // subscribe_list.insert(req.header.path.clone());
-                let ws_write_tx = ctx.output_to_ws_sender.clone();
                 let ctx = ctx.clone();
                 // NOTE add send req to kernel queue must BLOCKING, otherwise run all cell order maybe wrong
                 // tokio::spawn(async move {

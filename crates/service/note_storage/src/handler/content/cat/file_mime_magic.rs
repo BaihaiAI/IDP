@@ -42,12 +42,6 @@ pub fn get_mime_type<P: AsRef<Path>>(path: P) -> Result<String, ErrorTrace> {
         error!("{err}");
         return Err(ErrorTrace::new(&err));
     }
-    let path_extension = path.extension().unwrap();
-    if path_extension == "xlsx" || path_extension == "docx" {
-        let err = format!("path: {:?} file type is not supported", &path);
-        error!("{err}");
-        return Err(ErrorTrace::new(&err));
-    }
     Ok(tree_magic::from_filepath(path))
 }
 
@@ -65,21 +59,35 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
         f.read_to_end(&mut buf).await?;
         return Ok(CatRspBody::Text(base64::encode(buf)));
     }
+    let file_ext = match path.extension() {
+        Some(ext) => ext.to_str().unwrap(),
+        None => "",
+    };
     if mime_type_str == "application/zip" {
+        if file_ext.starts_with("doc") || file_ext.starts_with("xls") || file_ext.starts_with("ppt")
+        {
+            return Err(
+                ErrorTrace::new(&format!("this file ext {file_ext} not support"))
+                    .code(ErrorTrace::CODE_WARNING),
+            );
+        }
         return Ok(CatRspBody::Zip(
             super::get_zip_file_list::preview_zip_file_list(&path.to_path_buf())?,
         ));
     }
     if mime_type_str == "application/gzip" {
+        if file_ext.starts_with("doc") || file_ext.starts_with("xls") || file_ext.starts_with("ppt")
+        {
+            return Err(
+                ErrorTrace::new(&format!("this file ext {file_ext} not support"))
+                    .code(ErrorTrace::CODE_WARNING),
+            );
+        }
         return Ok(CatRspBody::Zip(
             super::get_zip_file_list::preview_gzip_file_list(&path.to_path_buf())?,
         ));
     }
 
-    let file_ext = match path.extension() {
-        Some(ext) => ext.to_str().unwrap(),
-        None => "",
-    };
     if mime_type_str == "application/x-ipynb+json" || file_ext == "ipynb" || file_ext == "idpnb" {
         let mut notebook = redis_cache.read_notebook(&path, project_id).await?;
         notebook.set_inode(inode);

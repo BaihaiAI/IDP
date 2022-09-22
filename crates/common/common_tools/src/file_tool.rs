@@ -67,7 +67,7 @@ pub async fn write_notebook_to_disk<P: AsRef<Path>>(
     write_large_to_nfs(path, serde_json::to_string(&notebook)?, Mimetype::Notebook).await
 }
 
-pub async fn read_notebook_from_disk<P: AsRef<Path>>(path: P) -> std::io::Result<Notebook> {
+pub async fn read_notebook_from_disk<P: AsRef<Path>>(path: P) -> Result<Notebook, ErrorTrace> {
     let notebook_str = match tokio::fs::read_to_string(&path).await {
         Ok(str) => str,
         Err(_) => {
@@ -80,11 +80,10 @@ pub async fn read_notebook_from_disk<P: AsRef<Path>>(path: P) -> std::io::Result
     let mut notebook = match serde_json::from_str::<Notebook>(&notebook_str) {
         Ok(notebook) => notebook,
         Err(_) => {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                // format!("notebook de err {:?} {err}", path.as_ref()),
-                format!("this is an invalid ipynb {:?}", path.as_ref()),
-            ));
+            return Err(
+                ErrorTrace::new(&format!("invalid notebook format {:?}", path.as_ref()))
+                    .code(ErrorTrace::CODE_WARNING),
+            );
         }
     };
 
