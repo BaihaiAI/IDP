@@ -320,14 +320,14 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
         }
         let outputs = &mut cell.outputs;
 
+        let useless_keys = ["execution_state", "originData", "originText"];
+
         for kvs in outputs.iter_mut() {
             // remove useless kv
-            if kvs.contains_key("originData") {
-                kvs.remove("originData");
-            }
-
-            if kvs.contains_key("originText") {
-                kvs.remove("originText");
+            for useless_key in useless_keys {
+                if kvs.contains_key(useless_key) {
+                    kvs.remove(useless_key);
+                }
             }
 
             // change symbol from CamelCase to snake_case
@@ -357,6 +357,7 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
                 }
             }
         }
+        outputs.retain(|output| !output.is_empty());
     }
 
     tracing::info!("file_tool::write_notebook_to_disk({result_file}");
@@ -436,6 +437,16 @@ pub fn get_job_pipeline_store_path(
     target_path_string += path.as_str();
     target_path_string
     // Path::new(&target_path_string).to_path_buf()
+}
+
+#[cfg(test)]
+#[tokio::test]
+async fn test_export_helper() {
+    let raw = "/tmp/a.ipynb".to_string();
+    // be care of : move cross device
+    // let tmp = "/home/liuzhe/tmp".to_string();
+    let tmp = "/tmp".to_string();
+    make_validate_ipynb(tmp, raw).await.unwrap();
 }
 
 #[cfg(test)]
