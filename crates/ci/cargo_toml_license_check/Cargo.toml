@@ -5,4 +5,4 @@ name = "cargo_toml_license_check"
 version = "0.1.0"
 
 [dependencies]
-cargo = { version = '0.64', default-features = false }
+cargo = { version = '0.65', default-features = false }

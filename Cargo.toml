@@ -6,7 +6,7 @@ members = [
     "crates/service/*",
     "crates/vendor/*",
     "crates/common/*",
-    "crates/ci/*",
+    # "crates/ci/*",
 ]
 
 [workspace.package]
