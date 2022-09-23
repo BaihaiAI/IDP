@@ -1,6 +1,6 @@
 edition = "2021"
-version = "Two"
-imports_granularity = "Item"
-reorder_imports = true
 group_imports = "StdExternalCrate"
+imports_granularity = "Item"
 overflow_delimited_expr = true
+reorder_imports = true
+version = "Two"

@@ -1,8 +1,8 @@
 [package]
+edition.workspace = true
+license.workspace = true
 name = "idp"
-version = "0.1.0"
-edition = "2021"
-license = "Apache-2.0"
+version.workspace = true
 
 [dependencies]
 business = { path = "../../common/business" }

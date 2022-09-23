@@ -1,13 +1,13 @@
 [package]
+edition = "2021"
 license = "Apache-2.0"
 name = "common_tools"
 version = "0.1.0"
-edition = "2021"
 
 [features]
+cookie = ["tower-cookies"]
 default = ["io", "cookie"]
 io = ["chrono"]
-cookie = ["tower-cookies"]
 no_axum = []
 
 [dependencies]

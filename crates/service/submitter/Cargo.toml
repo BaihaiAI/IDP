@@ -1,8 +1,8 @@
 [package]
+edition.workspace = true
+license.workspace = true
 name = "submitter"
-version = "0.1.0"
-edition = "2021"
-license = "Apache-2.0"
+version.workspace = true
 
 [dependencies]
 kernel_common = { path = "../../common/kernel_common", default-features = false, features = [

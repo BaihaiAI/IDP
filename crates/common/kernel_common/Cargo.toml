@@ -1,14 +1,14 @@
 [package]
+edition = "2021"
 license = "Apache-2.0"
 name = "kernel_common"
 version = "1.0.0"
-edition = "2021"
 
 [features]
 default = []
 fifo = ["dep:libc"]
-tcp = ["dep:reqwest"]
 spawn = ["dep:err"]
+tcp = ["dep:reqwest"]
 
 [dependencies]
 business = { path = "../business" }

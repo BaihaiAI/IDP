@@ -1,4 +1,3 @@
-too-many-arguments-threshold = 12
 await-holding-invalid-types = [
     # https://onesignal.com/blog/solving-memory-leaks-in-rust/
     "tracing::trace::Entered",
@@ -9,3 +8,4 @@ await-holding-invalid-types = [
 disallowed-methods = [
     { path = "std::iter::Iterator::zip", reason = "if a.len() > b.len(), a.zip(b) would lost some elements in a" },
 ]
+too-many-arguments-threshold = 12

@@ -1,14 +1,13 @@
 [package]
+edition.workspace = true
+license.workspace = true
 name = "idp_kernel"
-version = "1.1.0"
-edition = "2021"
-rust-version = "1.62"
-license = "Apache-2.0"
+version.workspace = true
 
 [features]
 default = ["tcp"]
-tcp = []
 fifo = ["kernel_common/fifo"]
+tcp = []
 
 [dependencies]
 business = { path = "../../common/business" }
@@ -16,15 +15,13 @@ kernel_common = { path = "../../common/kernel_common", default-features = false 
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }
 
-serde_json = "1.0"
-urlencoding = "2.1"
-# we use tokio macros: tokio::select!
+crossbeam-channel = "0.5"
 libc = "0.2"
 pyo3 = "0.16"
-# tokio-tungstenite = { version = "0.17", optional = true }
+serde_json = "1.0"
 tracing = "0.1"
+urlencoding = "2.1"
 ws-tool = { version = "0.5", default-features = false, features = ["sync"] }
-crossbeam-channel = "0.5"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser"] }
