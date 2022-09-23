@@ -11,9 +11,9 @@ redis = ["cache_io/redis"]
 [dependencies]
 business = { path = "../../common/business" }
 cache_io = { path = "../../cache_io" }
-common_model = { path = "../../common/model", features = ["axum"] }
+common_model = { path = "../../common/model" }
 common_tools = { path = "../../common/common_tools" }
-err = { path = "../../common/err", features = ["axum"] }
+err = { path = "../../common/err" }
 kernel_common = { path = "../../common/kernel_common" }
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }

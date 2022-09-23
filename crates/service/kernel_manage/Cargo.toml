@@ -11,8 +11,8 @@ tcp = ["dep:reqwest", "kernel_common/tcp", "kernel_common/spawn"]
 
 [dependencies]
 business = { path = "../../common/business" }
-common_model = { path = "../../common/model" }
-err = { path = "../../common/err" }
+common_model = { path = "../../common/model", default-features = false }
+err = { path = "../../common/err", default-features = false }
 kernel_common = { path = "../../common/kernel_common", default-features = false }
 logger = { path = "../../common/logger" }
 serde_helper = { path = "../../common/serde_helper" }

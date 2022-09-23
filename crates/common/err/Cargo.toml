@@ -1,12 +1,12 @@
 [package]
-edition = "2021"
-license = "Apache-2.0"
+edition.workspace = true
+license.workspace = true
 name = "err"
-version = "0.1.0"
+version.workspace = true
 
 [features]
 axum = ["dep:axum", "dep:serde_json", "dep:tracing"]
-default = []
+default = ["axum"]
 
 [dependencies]
 axum = { version = "0.5", default-features = false, features = [
