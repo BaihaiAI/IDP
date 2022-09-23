@@ -12,7 +12,7 @@ cargo fmt --check
 taplo fmt --check
 $HOME/go/bin/license-eye header check
 #cargo install --path ./crates/ci/cargo_toml_license_check
-cargo_toml_license_check
+#cargo_toml_license_check
 if grep --perl-regexp '[\p{Han}]' --include "*.rs" --line-number ./crates -r; then
     echo "error: found chinese in rs source file break our code style" 1>&2
     exit 1
