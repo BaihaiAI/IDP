@@ -14,6 +14,8 @@
 
 use axum::body::StreamBody;
 use axum::extract::Json;
+use common_model::service::rsp::CODE_FAIL;
+use common_model::Rsp;
 use futures::stream::Stream;
 
 #[derive(serde::Deserialize)]
@@ -59,17 +61,31 @@ pub async fn pip_install(
         match cmd.output().await {
             Ok(output) => {
                 if output.status.success() {
-                    if let Err(err) = tx.send("ok\n".to_string()).await {
+                    if let Err(err) = tx
+                        .send(serde_json::to_string(&Rsp::success(())).unwrap())
+                        .await
+                    {
                         tracing::error!("{err}");
                     }
                 } else if let Err(err) = tx
-                    .send(String::from_utf8_lossy(&output.stderr).to_string())
+                    .send(
+                        serde_json::to_string(
+                            &Rsp::success(())
+                                .message(&String::from_utf8_lossy(&output.stderr))
+                                .code(CODE_FAIL),
+                        )
+                        .unwrap(),
+                    )
                     .await
                 {
                     tracing::error!("{err}");
                 }
             }
             Err(err) => {
+                let err = serde_json::to_string(
+                    &Rsp::success(()).message(&err.to_string()).code(CODE_FAIL),
+                )
+                .unwrap();
                 if let Err(err) = tx.send(format!("err\n{err}")).await {
                     tracing::error!("{err}");
                 }
