@@ -55,14 +55,7 @@ impl TestContext {
     const FAKE_INODE: u64 = 0;
     pub fn new() -> Self {
         logger::init_logger();
-        // std::env::set_var(
-        //     "MPLBACKEND",
-        //     format!(
-        //         "module://{}.backend",
-        //         crate::kernel_init::init_python::MPL_BACKEND_PKG
-        //     ),
-        // );
-        std::env::set_var("MPLBACKEND", "module://baihai_mpl_backend.backend");
+        std::env::set_var("MPLBACKEND", "module://baihai_matplotlib_backend");
 
         // use fork in development
         // use fork+exec in production mode for better performance
