@@ -1409,6 +1409,9 @@ async fn convert_ipynb_to_py(
             continue;
         };
         for source in cell.source {
+            if source.starts_with('!') {
+                continue;
+            }
             if bw.write_all(source.as_bytes()).is_err() {
                 return Err(ErrorTrace::new("convert ipynb to py failed"));
             };
