@@ -24,7 +24,7 @@ use err::ErrorTrace;
 use tokio::io::AsyncReadExt;
 
 pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTrace> {
-    tracing::info!("access extensions load api");
+    tracing::info!("access extensions load api path:{}", path);
     let mime_type = mime_guess::from_path(&path).first_or_text_plain();
     tracing::info!("{:?}", mime_type);
     let mime_type_str = mime_type.to_string();
@@ -67,6 +67,14 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
             .header(
                 header::CONTENT_TYPE,
                 HeaderValue::from_str(&mime_type_str).unwrap(),
+            )
+            .header(
+                header::ACCEPT_RANGES,
+                HeaderValue::from_str("bytes").unwrap(),
+            )
+            .header(
+                header::CONNECTION,
+                HeaderValue::from_str("keep-alive").unwrap(),
             )
             .body(body::boxed(Full::from(body)))
             .unwrap()),
