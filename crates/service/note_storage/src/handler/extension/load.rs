@@ -76,6 +76,10 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
                 header::CONNECTION,
                 HeaderValue::from_str("keep-alive").unwrap(),
             )
+            .header(
+                header::ACCESS_CONTROL_MAX_AGE,
+                HeaderValue::from_str("7200").unwrap(),
+            )
             .body(body::boxed(Full::from(body)))
             .unwrap()),
         Err(_) => {
