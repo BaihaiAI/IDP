@@ -25,12 +25,6 @@ use crate::business_term::TeamId;
 use crate::business_term::UserId;
 
 static STORE_PARENT_DIR: Lazy<PathBuf> = Lazy::new(|| {
-    if crate::kubernetes::is_k8s() {
-        // k8s deploy
-        let path = Path::new("/");
-        return path.to_path_buf();
-    }
-    // let home_dir = dirs::home_dir().unwrap()
     #[cfg(unix)]
     let home_dir = std::env::var("HOME").unwrap();
     #[cfg(windows)]
@@ -39,6 +33,25 @@ static STORE_PARENT_DIR: Lazy<PathBuf> = Lazy::new(|| {
     if !dir.exists() {
         tracing::warn!("{dir:?} not exists, creating");
         std::fs::create_dir(&dir).unwrap();
+    }
+
+    let custom_python_packages = dir.join("custom_python_packages");
+    if !custom_python_packages.exists() {
+        std::fs::create_dir(&custom_python_packages).unwrap();
+    }
+    std::fs::write(
+        custom_python_packages.join("baihai_matplotlib_backend.py"),
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../service/idp_kernel/baihai_matplotlib_backend.py"
+        )),
+    )
+    .unwrap();
+
+    if crate::kubernetes::is_k8s() {
+        // k8s deploy
+        let path = Path::new("/");
+        return path.to_path_buf();
     }
 
     if !dir.join("store").exists() {
@@ -73,19 +86,6 @@ static STORE_PARENT_DIR: Lazy<PathBuf> = Lazy::new(|| {
         }
     }
     assert!(dir.join("store").exists());
-
-    let custom_python_packages = dir.join("custom_python_packages");
-    _ = std::fs::create_dir(&custom_python_packages);
-    const BAIHAI_MPL: &str = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../service/idp_kernel/baihai_matplotlib_backend.py"
-    ));
-    std::fs::write(
-        custom_python_packages.join("baihai_matplotlib_backend.py"),
-        BAIHAI_MPL,
-    )
-    .unwrap();
-    assert!(dir.join("custom_python_packages").exists());
 
     dir
 });
