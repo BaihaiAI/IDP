@@ -76,6 +76,7 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
         ));
     }
     if mime_type_str == "application/gzip" {
+        /*
         if file_ext.starts_with("doc") || file_ext.starts_with("xls") || file_ext.starts_with("ppt")
         {
             return Err(
@@ -83,6 +84,7 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
                     .code(ErrorTrace::CODE_WARNING),
             );
         }
+        */
         return Ok(CatRspBody::Zip(
             super::get_zip_file_list::preview_gzip_file_list(&path.to_path_buf())?,
         ));
