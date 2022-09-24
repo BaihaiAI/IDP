@@ -75,18 +75,16 @@ static STORE_PARENT_DIR: Lazy<PathBuf> = Lazy::new(|| {
     assert!(dir.join("store").exists());
 
     let custom_python_packages = dir.join("custom_python_packages");
-    if !custom_python_packages.exists() {
-        std::fs::create_dir(&custom_python_packages).unwrap();
-        const BAIHAI_MPL: &str = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../../service/idp_kernel/baihai_matplotlib_backend.py"
-        ));
-        std::fs::write(
-            custom_python_packages.join("baihai_matplotlib_backend.py"),
-            BAIHAI_MPL,
-        )
-        .unwrap();
-    }
+    _ = std::fs::create_dir(&custom_python_packages);
+    const BAIHAI_MPL: &str = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../service/idp_kernel/baihai_matplotlib_backend.py"
+    ));
+    std::fs::write(
+        custom_python_packages.join("baihai_matplotlib_backend.py"),
+        BAIHAI_MPL,
+    )
+    .unwrap();
     assert!(dir.join("custom_python_packages").exists());
 
     dir

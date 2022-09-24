@@ -76,12 +76,11 @@ async fn main() {
     let open_cmd = "open";
     #[cfg(windows)]
     let open_cmd = "cmd";
-    if let Err(err) = std::process::Command::new(open_cmd)
-        .arg("/C")
-        .arg("start")
-        .arg(format!("http://{addr}"))
-        .spawn()
-    {
+    let mut cmd = std::process::Command::new(open_cmd);
+    #[cfg(windows)]
+    cmd.arg("/C").arg("start");
+
+    if let Err(err) = cmd.arg(format!("http://{addr}")).spawn() {
         tracing::warn!("open browser err: {open_cmd} {err}");
     }
 

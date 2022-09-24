@@ -103,7 +103,6 @@ pub fn init_python(
     )
     .unwrap();
 
-    // k8s pod ensure `module://baihai_mpl_backend.backend` but standalone version is not
     #[cfg(not)]
     if !business::kubernetes::is_k8s() {
         if let Ok(baihai_matplotlib_backend) = pyo3::types::PyModule::from_code(
