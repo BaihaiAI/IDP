@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::body::Full;
-use axum::body::{self};
 use axum::extract::Path;
 use axum::http::header;
 use axum::http::HeaderValue;
@@ -21,7 +19,6 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use err::ErrorTrace;
-use tokio::io::AsyncReadExt;
 
 pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTrace> {
     tracing::info!("access extensions load api path:{}", path);
@@ -30,64 +27,46 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
     let mime_type_str = mime_type.to_string();
 
     if mime_type_str.starts_with("image") {
-        let mut buf = Vec::new();
-        let mut f = tokio::fs::File::open(&path).await?;
-        f.read_to_end(&mut buf).await?;
+        let f = tokio::fs::File::open(&path).await?;
+        let stream = tokio_util::io::ReaderStream::new(f);
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header(
                 header::CONTENT_TYPE,
                 HeaderValue::from_str(&mime_type_str).unwrap(),
             )
-            .body(body::boxed(Full::from(buf)))
+            .body(axum::body::StreamBody::new(stream))
             .unwrap());
     }
 
     if mime_type_str.starts_with("application/gzip") {
-        let mut buf = Vec::new();
-        let mut f = tokio::fs::File::open(&path).await?;
-        f.read_to_end(&mut buf).await?;
+        let f = tokio::fs::File::open(&path).await?;
+        let stream = tokio_util::io::ReaderStream::new(f);
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header(
                 header::CONTENT_TYPE,
                 HeaderValue::from_str(&mime_type_str).unwrap(),
             )
-            .header(
-                header::CONTENT_ENCODING,
-                HeaderValue::from_str("gzip").unwrap(),
-            )
-            .body(body::boxed(Full::from(buf)))
+            .header(header::CONTENT_ENCODING, HeaderValue::from_static("gzip"))
+            .body(axum::body::StreamBody::new(stream))
             .unwrap());
     }
 
-    match tokio::fs::read_to_string(&path).await {
-        Ok(body) => Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header(
-                header::CONTENT_TYPE,
-                HeaderValue::from_str(&mime_type_str).unwrap(),
-            )
-            .header(
-                header::ACCEPT_RANGES,
-                HeaderValue::from_str("bytes").unwrap(),
-            )
-            .header(
-                header::CONNECTION,
-                HeaderValue::from_str("keep-alive").unwrap(),
-            )
-            .header(
-                header::ACCESS_CONTROL_MAX_AGE,
-                HeaderValue::from_str("7200").unwrap(),
-            )
-            .body(body::boxed(Full::from(body)))
-            .unwrap()),
-        Err(_) => {
-            tracing::error!("{path:?} load failed");
-            Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .body(body::boxed(axum::body::Empty::new()))
-                .unwrap())
-        }
-    }
+    let f = tokio::fs::File::open(&path).await?;
+    let stream = tokio_util::io::ReaderStream::new(f);
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .header(
+            header::CONTENT_TYPE,
+            HeaderValue::from_str(&mime_type_str).unwrap(),
+        )
+        .header(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"))
+        .header(header::CONNECTION, HeaderValue::from_static("keep-alive"))
+        .header(
+            header::ACCESS_CONTROL_MAX_AGE,
+            HeaderValue::from_static("7200"),
+        )
+        .body(axum::body::StreamBody::new(stream))
+        .unwrap())
 }
