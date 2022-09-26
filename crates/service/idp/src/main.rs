@@ -15,6 +15,7 @@
 #![deny(unused_crate_dependencies)]
 use std::path::Path;
 
+use gateway::TOKEN;
 use hyper::server::conn::AddrStream;
 use hyper::service::make_service_fn;
 use hyper::service::service_fn;
@@ -52,7 +53,6 @@ async fn main() {
     let web_dir = web_dir.expect("web dir not found, please yarn build first");
     tracing::info!("web_dir = {web_dir:?}");
 
-    // std::thread::scope(f)
     spawn_all_services::spawn_all_services(&args);
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], gateway_port));
@@ -80,7 +80,7 @@ async fn main() {
     #[cfg(windows)]
     cmd.arg("/C").arg("start");
 
-    if let Err(err) = cmd.arg(format!("http://{addr}")).spawn() {
+    if let Err(err) = cmd.arg(format!("http://{addr}?token={}", &*TOKEN)).spawn() {
         tracing::warn!("open browser err: {open_cmd} {err}");
     }
 

@@ -23,6 +23,12 @@ use once_cell::sync::Lazy;
 
 use crate::cli_args::CliArgs;
 
+pub(crate) static TOKEN: Lazy<String> = Lazy::new(|| {
+    use rand::Rng;
+    let token = rand::thread_rng().gen_range(10u64.pow(15)..10u64.pow(18));
+    format!("{token:#02x}")
+});
+
 pub async fn gateway_handler(
     client_ip: std::net::IpAddr,
     req: Request<Body>,
@@ -42,6 +48,35 @@ async fn handle_(
     // println!("{client_ip} {req_path}");
     match req_path {
         _ if req_path.starts_with("/a/api/v2/idp-note-rs") => {
+            let cookie = match req.headers().get(hyper::http::header::COOKIE) {
+                Some(cookie) => match cookie.to_str() {
+                    Ok(cookie) => cookie,
+                    Err(_) => {
+                        return rsp_401("cookie to_str err");
+                    }
+                },
+                None => return rsp_401("no cookie"),
+            };
+            let mut token = None;
+            for kv in cookie.split("; ") {
+                if let Some((k, v)) = kv.split_once('=') {
+                    if k == "token" {
+                        token = Some(v.to_string());
+                        break;
+                    }
+                }
+            }
+            let token = match token {
+                Some(token) => token,
+                None => return rsp_401("token key not found in cookie"),
+            };
+            if token != *TOKEN {
+                dbg!(req.uri().query(), "");
+                return Response::builder()
+                    .status(StatusCode::UNAUTHORIZED)
+                    .body(Body::from("UNAUTHORIZED"))
+                    .unwrap();
+            }
             uri_rewrite_remove_region(&mut req);
             // hyper would tokio spawn coroutinue to handler, so we doesn't need to spawn
             proxy_pass(req, client_ip, args.note_storage_port).await
@@ -157,5 +192,12 @@ fn rsp_404() -> Response<Body> {
     Response::builder()
         .status(StatusCode::NOT_FOUND)
         .body(Body::empty())
+        .unwrap()
+}
+
+fn rsp_401(reason: &'static str) -> Response<Body> {
+    Response::builder()
+        .status(StatusCode::UNAUTHORIZED)
+        .body(Body::from(reason))
         .unwrap()
 }
