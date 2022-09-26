@@ -56,6 +56,9 @@ tokio = { version = "1.0.1", features = [
 tokio-util = { version = "0.7", features = ["io", "codec"] }
 toml = "0.5.8"
 tower-cookies = { version = "0.7" }
+tower-http = { version = "0.3", default-features = false, features = [
+    "compression-gzip",
+] }
 tracing = "0.1.29"
 tree_magic = "0.2.3"
 urlencoding = "2.1"

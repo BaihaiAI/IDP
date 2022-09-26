@@ -156,7 +156,11 @@ pub async fn init_router(
                 .nest(
                     "/extensions",
                     Router::new()
-                        .route("/load/*path", axum::routing::get(extension_handler::load))
+                        .route(
+                            "/load/*path",
+                            axum::routing::get(extension_handler::load)
+                                .layer(tower_http::compression::CompressionLayer::new()),
+                        )
                         .route(
                             "/recommendedList",
                             on(MethodFilter::GET, extension_handler::recommended_list),
