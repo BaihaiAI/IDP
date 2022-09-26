@@ -9,8 +9,8 @@ cd $repo_root
 binary=note_storage
 target=${1:-glibc}
 if [ $target == "musl" ]; then
-cargo b --bin $binary --target x86_64-unknown-linux-musl
-scp -C target/x86_64-unknown-linux-musl/debug/$binary ucloud:/root/
+cargo b --bin $binary --target x86_64-unknown-linux-musl --release
+scp -C target/x86_64-unknown-linux-musl/release/$binary ucloud:/root/
 else
 cargo b --bin $binary
 scp -C target/debug/$binary ucloud:/root/

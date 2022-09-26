@@ -21,9 +21,8 @@ use axum::response::Response;
 use err::ErrorTrace;
 
 pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTrace> {
-    tracing::info!("access extensions load api path:{}", path);
+    let start = std::time::Instant::now();
     let mime_type = mime_guess::from_path(&path).first_or_text_plain();
-    tracing::info!("{:?}", mime_type);
     let mime_type_str = mime_type.to_string();
 
     if mime_type_str.starts_with("image") {
@@ -39,7 +38,7 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
             .unwrap());
     }
 
-    if mime_type_str.starts_with("application/gzip") {
+    if mime_type_str == "application/gzip" {
         let f = tokio::fs::File::open(&path).await?;
         let stream = tokio_util::io::ReaderStream::new(f);
         return Ok(Response::builder()
@@ -48,24 +47,22 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
                 header::CONTENT_TYPE,
                 HeaderValue::from_str(&mime_type_str).unwrap(),
             )
-            .header(header::CONTENT_ENCODING, HeaderValue::from_static("gzip"))
+            // .header(header::CONTENT_ENCODING, HeaderValue::from_static("gzip"))
             .body(axum::body::StreamBody::new(stream))
             .unwrap());
     }
 
     let f = tokio::fs::File::open(&path).await?;
     let stream = tokio_util::io::ReaderStream::new(f);
+    tracing::info!(
+        "extension/load: {path} load time cost {:?}",
+        start.elapsed()
+    );
     Ok(Response::builder()
         .status(StatusCode::OK)
         .header(
             header::CONTENT_TYPE,
             HeaderValue::from_str(&mime_type_str).unwrap(),
-        )
-        .header(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"))
-        .header(header::CONNECTION, HeaderValue::from_static("keep-alive"))
-        .header(
-            header::ACCESS_CONTROL_MAX_AGE,
-            HeaderValue::from_static("7200"),
         )
         .body(axum::body::StreamBody::new(stream))
         .unwrap())
