@@ -61,7 +61,7 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
             .unwrap());
     }
 
-    match std::fs::read_to_string(&path) {
+    match tokio::fs::read_to_string(&path).await {
         Ok(body) => Ok(Response::builder()
             .status(StatusCode::OK)
             .header(
