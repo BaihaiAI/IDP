@@ -34,7 +34,6 @@ use crate::api_model::workspace::GlobalSearchResult;
 use crate::api_model::workspace::ModelUploadReq;
 use crate::api_model::workspace::WorkspaceFile;
 use crate::api_model::workspace::WorkspaceMove;
-use crate::api_model::workspace::WorkspacePathRto;
 use crate::api_model::TeamIdQueryString;
 use crate::app_context::AppContext;
 use crate::common::error::IdpGlobalError;
@@ -172,17 +171,6 @@ pub async fn model_upload(Json(payload): Json<ModelUploadReq>) -> Result<Rsp<()>
     .await
 
     // Ok(Res::success_without_data())
-}
-
-pub async fn dir_zip(Json(payload): Json<WorkspacePathRto>) -> impl IntoResponse {
-    info!("access workspace dir_zip api");
-
-    let (path, project_id, team_id) = (payload.path, payload.project_id, payload.team_id);
-    info!("path: {:?}", path);
-    info!("project_id: {:?}", project_id);
-    tracing::info!("team_id: {:?}", team_id);
-
-    workspace_handler::dir_zip(path, team_id, project_id).await
 }
 
 pub async fn dir_lazy_load(

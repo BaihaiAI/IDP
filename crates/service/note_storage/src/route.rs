@@ -110,7 +110,10 @@ pub async fn init_router(
                             "/model/upload",
                             on(MethodFilter::POST, workspace::model_upload),
                         )
-                        .route("/dir/zip", on(MethodFilter::POST, workspace::dir_zip))
+                        .route(
+                            "/dir/zip",
+                            on(MethodFilter::POST, workspace_handler::compress::dir_zip),
+                        )
                         .route(
                             "/dir/browse",
                             on(MethodFilter::POST, workspace::dir_lazy_load),

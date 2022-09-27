@@ -62,14 +62,6 @@ pub struct WorkspaceFile {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WorkspacePathRto {
-    pub path: String,
-    pub project_id: u64,
-    pub team_id: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct DirLazyLoadPara {
     pub path: Vec<String>,
     pub team_id: String,

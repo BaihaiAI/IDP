@@ -24,6 +24,7 @@ use once_cell::sync::Lazy;
 use crate::cli_args::CliArgs;
 
 pub(crate) static TOKEN: Lazy<String> = Lazy::new(|| {
+    // alternative: use libc::rand() ?
     use rand::Rng;
     let token = rand::thread_rng().gen_range(10u64.pow(15)..10u64.pow(18));
     format!("{token:#02x}")
@@ -45,7 +46,6 @@ async fn handle_(
     args: CliArgs,
 ) -> Response<Body> {
     let req_path = req.uri().path();
-    // println!("{client_ip} {req_path}");
     match req_path {
         _ if req_path.starts_with("/a/api/v2/idp-note-rs") => {
             let cookie = match req.headers().get(hyper::http::header::COOKIE) {
@@ -197,6 +197,9 @@ fn rsp_404() -> Response<Body> {
 fn rsp_401(reason: &'static str) -> Response<Body> {
     Response::builder()
         .status(StatusCode::UNAUTHORIZED)
-        .body(Body::from(reason))
+        .header(hyper::http::header::CONTENT_TYPE, "text/html".to_string())
+        .body(Body::from(format!(
+            "<h1>HTTP 401 UNAUTHORIZED</h1><h2>token invalid or missing</h2><h3>{reason}</h3>"
+        )))
         .unwrap()
 }
