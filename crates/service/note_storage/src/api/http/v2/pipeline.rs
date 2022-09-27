@@ -440,6 +440,7 @@ pub fn get_job_pipeline_store_path(
 }
 
 #[cfg(test)]
+#[cfg(macos)]
 #[tokio::test]
 async fn test_export_helper() {
     let raw = "/tmp/a.ipynb".to_string();
