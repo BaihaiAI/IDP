@@ -71,12 +71,12 @@ async fn handle_(
                 None => return rsp_401("token key not found in cookie"),
             };
             if token != *TOKEN {
-                dbg!(req.uri().query(), "");
                 return Response::builder()
                     .status(StatusCode::UNAUTHORIZED)
                     .body(Body::from("UNAUTHORIZED"))
                     .unwrap();
             }
+
             uri_rewrite_remove_region(&mut req);
             // hyper would tokio spawn coroutinue to handler, so we doesn't need to spawn
             proxy_pass(req, client_ip, args.note_storage_port).await
@@ -94,7 +94,6 @@ async fn handle_(
             uri_rewrite_remove_region(&mut req);
             proxy_pass(req, client_ip, args.terminal_port).await
         }
-        _ if req_path.starts_with("/a/api/v1/command") => rsp_404(),
         _ if req_path.starts_with("/0/api/v1") => rsp_404(),
         _ => {
             // static file

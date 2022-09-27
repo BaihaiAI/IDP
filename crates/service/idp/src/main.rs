@@ -80,10 +80,11 @@ async fn main() {
     #[cfg(windows)]
     cmd.arg("/C").arg("start");
 
-    if let Err(err) = cmd.arg(format!("http://{addr}?token={}", &*TOKEN)).spawn() {
+    let url = format!("http://{addr}?token={}", &*TOKEN);
+    if let Err(err) = cmd.arg(&url).spawn() {
         tracing::warn!("open browser err: {open_cmd} {err}");
     }
-
+    tracing::info!("{url}");
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);
     }
