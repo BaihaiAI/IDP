@@ -35,7 +35,6 @@ use business::business_term::TeamId;
 use business::path_tool;
 use business::path_tool::get_nbconvert_by_team_id;
 use cache_io::CacheService;
-use chrono::prelude::Utc;
 use common_model::enums::mime::Mimetype;
 use common_model::service::rsp::Rsp;
 pub use dir_export::dir_export;
@@ -229,6 +228,14 @@ pub async fn file_dir_copy(
     team_id: u64,
     project_id: u64,
 ) -> Result<Rsp<()>, ErrorTrace> {
+    #[inline]
+    fn get_unix_timestamp_ms() -> i64 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64
+    }
+
     info!("copy file /dir..");
     let base_path = path_tool::get_store_path(
         team_id,
@@ -450,11 +457,6 @@ pub async fn model_upload(
             UPLOAD_MODEL_ERROR_MSG,
         ))
     }
-}
-
-pub fn get_unix_timestamp_ms() -> i64 {
-    let now = Utc::now();
-    now.timestamp_millis()
 }
 
 #[cfg(unix)]

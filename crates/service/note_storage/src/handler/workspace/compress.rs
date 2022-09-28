@@ -80,17 +80,7 @@ async fn dir_zip_(path: String, team_id: String, project_id: u64) -> Result<Rsp<
 
     let path = &parent_path.join(&generate_filename);
     if path.exists() {
-        let file = generate_filename.file_stem().unwrap().to_string_lossy();
-        let mut num = 1;
-        loop {
-            let a = format!("{}/{file}({num}).zip", parent_path.to_string_lossy());
-            if std::path::Path::new(&a).exists() {
-                num += 1;
-                continue;
-            }
-            generate_filename = std::path::Path::new(&a).to_path_buf();
-            break;
-        }
+        generate_filename = super::decompress::rename_path_if_path_exist(path.clone());
     }
 
     info!("parent_path-->{:#?}", parent_path);

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 
 use axum::Json;
@@ -124,23 +125,65 @@ fn extract_gzip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace
     for file in ar.entries()? {
         let mut file = file?;
         let outpath = extract_to.join(file.path()?);
+
+        /*
         if let Some(p) = outpath.parent() {
             if !p.exists() {
                 fs::create_dir_all(&p)?;
             }
         }
-        let mut outfile = fs::File::create(&outpath)?;
-        std::io::copy(&mut file, &mut outfile)?;
+        */
+        if outpath.to_str().unwrap().ends_with('/') {
+            if !outpath.exists() {
+                fs::create_dir(outpath)?;
+            }
+        } else {
+            let mut outfile = if outpath.exists() {
+                dbg!(rename_path_if_path_exist(outpath.clone()));
+                fs::File::create(rename_path_if_path_exist(outpath))?
+            } else {
+                fs::File::create(&outpath)?
+            };
+            std::io::copy(&mut file, &mut outfile)?;
+        }
     }
     Ok(())
+}
+
+/**
+ * ## used in
+ * 1. file/dir copy
+ * 2. compress
+ * 3. decompress
+*/
+pub fn rename_path_if_path_exist(path: PathBuf) -> PathBuf {
+    if !path.exists() {
+        return path;
+    }
+    let parent_dir = path.parent().unwrap();
+    let path_without_ext = path.file_stem().unwrap().to_str().unwrap();
+    let ext = path.extension().map(|ext| ext.to_str().unwrap());
+
+    let mut replica = 1;
+    loop {
+        let path = if let Some(ext) = ext {
+            format!("{path_without_ext}({replica}).{ext}")
+        } else {
+            format!("{path_without_ext}({replica})")
+        };
+        let path = parent_dir.join(path);
+        if !Path::new(&path).exists() {
+            break path;
+        }
+        replica += 1;
+    }
 }
 
 #[test]
 #[ignore]
 fn test_extract_gzip() {
-    use std::path::Path;
     extract_gzip(
-        Path::new("/home/w/Downloads/newFile.idpnb.tar.gz").to_path_buf(),
+        Path::new("/home/w/Downloads/otis.tar.gz").to_path_buf(),
         Path::new("/home/w/Downloads").to_path_buf(),
     )
     .unwrap();
