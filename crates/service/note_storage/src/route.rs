@@ -95,6 +95,10 @@ pub async fn init_router(
                             "/file/example",
                             on(MethodFilter::POST, workspace::example_project),
                         )
+                        .route(
+                            "/file/decompress",
+                            on(MethodFilter::POST, workspace_handler::decompress::unzip),
+                        )
                         .route("/move", on(MethodFilter::POST, workspace::file_dir_move))
                         .route("/copy", on(MethodFilter::POST, workspace::file_dir_copy))
                         .route(
@@ -132,10 +136,6 @@ pub async fn init_router(
                     Router::new()
                         .route("/new", on(MethodFilter::POST, project::new))
                         .route("/delete", on(MethodFilter::POST, project::delete))
-                        // .route(
-                        //     "/ray-chown-fix",
-                        //     on(MethodFilter::POST, project::ray_chown_fix_one_time),
-                        // )
                         .route_layer(axum::extract::Extension(file_writer.clone()))
                 })
                 .nest(
@@ -213,17 +213,6 @@ pub async fn init_router(
                             "/restore",
                             on(MethodFilter::POST, snapshot::post_snapshot_restore),
                         )
-                    // .route(
-                    //     "/download",
-                    //     get_service(ServeDir::new(db_path)).handle_error(
-                    //         |error: std::io::Error| async move {
-                    //             (
-                    //                 axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                    //                 format!("Snapshot download error: {}", error),
-                    //             )
-                    //         },
-                    //     ),
-                    // )
                 })
                 .nest(
                     "/content",
@@ -295,11 +284,4 @@ pub async fn init_router(
         )
         .route_layer(CookieManagerLayer::new())
         .layer(axum::extract::Extension(ctx))
-    // .layer(
-    //     tower_http::trace::TraceLayer::new_for_http(),
-    //     // .on_request(
-    //     // |req: &axum::http::Request<_>, _span: &tracing::Span| {
-    //     //     tracing::info!("{} {}", req.method(), req.uri());
-    //     // })
-    // )
 }

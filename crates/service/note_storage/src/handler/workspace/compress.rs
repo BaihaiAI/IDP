@@ -23,9 +23,9 @@ use tracing::info;
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspacePathRto {
-    pub path: String,
-    pub project_id: u64,
     pub team_id: String,
+    pub project_id: u64,
+    pub path: String,
 }
 
 pub async fn dir_zip(Json(payload): Json<WorkspacePathRto>) -> impl axum::response::IntoResponse {
