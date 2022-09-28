@@ -75,7 +75,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
-        let outpath = match file.enclosed_name() {
+        let mut outpath = match file.enclosed_name() {
             Some(path) => extract_to.join(path),
             None => continue,
         };
@@ -89,7 +89,9 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
 
         if (*file.name()).ends_with('/') {
             info!("File {} extracted to \"{}\"", i, outpath.display());
-            fs::create_dir_all(&outpath)?;
+            if !outpath.exists() {
+                fs::create_dir_all(&outpath)?;
+            }
         } else {
             info!(
                 "File {} extracted to \"{}\" ({} bytes)",
@@ -101,6 +103,9 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
                 if !p.exists() {
                     fs::create_dir_all(&p)?;
                 }
+            }
+            if outpath.exists() {
+                outpath = rename_path_if_path_exist(outpath);
             }
             let mut outfile = fs::File::create(&outpath)?;
             std::io::copy(&mut file, &mut outfile)?;
@@ -139,7 +144,6 @@ fn extract_gzip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace
             }
         } else {
             let mut outfile = if outpath.exists() {
-                dbg!(rename_path_if_path_exist(outpath.clone()));
                 fs::File::create(rename_path_if_path_exist(outpath))?
             } else {
                 fs::File::create(&outpath)?
@@ -184,6 +188,16 @@ pub fn rename_path_if_path_exist(path: PathBuf) -> PathBuf {
 fn test_extract_gzip() {
     extract_gzip(
         Path::new("/home/w/Downloads/otis.tar.gz").to_path_buf(),
+        Path::new("/home/w/Downloads").to_path_buf(),
+    )
+    .unwrap();
+}
+
+#[test]
+#[ignore]
+fn test_extract_zip() {
+    extract_zip(
+        Path::new("/home/w/Downloads/dist.zip").to_path_buf(),
         Path::new("/home/w/Downloads").to_path_buf(),
     )
     .unwrap();
