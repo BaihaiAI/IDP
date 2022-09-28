@@ -69,7 +69,7 @@ async fn dir_zip_(path: String, team_id: String, project_id: u64) -> Result<Rsp<
 
     let abs_export_path_str = abs_export_path
         .to_str()
-        .ok_or(ErrorTrace::new("path to str err"))?;
+        .ok_or_else(|| ErrorTrace::new("path to str err"))?;
     info!("abs_export_path_str: {:?}", abs_export_path_str);
 
     let parent_path = &abs_export_path.parent().unwrap();

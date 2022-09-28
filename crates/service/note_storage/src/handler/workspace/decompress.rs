@@ -90,7 +90,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
         if (*file.name()).ends_with('/') {
             info!("File {} extracted to \"{}\"", i, outpath.display());
             if !outpath.exists() {
-                fs::create_dir_all(&outpath)?;
+                fs::create_dir(&outpath)?;
             }
         } else {
             info!(
@@ -101,7 +101,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
             );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p)?;
+                    fs::create_dir(&p)?;
                 }
             }
             if outpath.exists() {
