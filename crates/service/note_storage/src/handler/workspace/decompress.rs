@@ -60,7 +60,10 @@ pub async fn unzip(
         extract_zip(abs_path, extract_to)?;
         return Ok(Rsp::success(()));
     }
-    if mime == "application/gzip" {}
+    if mime == "application/gzip" {
+        extract_gzip(abs_path, extract_to)?;
+        return Ok(Rsp::success(()));
+    }
     Err(ErrorTrace::new("not a zip archive").code(ErrorTrace::CODE_WARNING))
 }
 
@@ -85,7 +88,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
 
         if (*file.name()).ends_with('/') {
             info!("File {} extracted to \"{}\"", i, outpath.display());
-            fs::create_dir_all(&outpath).unwrap();
+            fs::create_dir_all(&outpath)?;
         } else {
             info!(
                 "File {} extracted to \"{}\" ({} bytes)",
@@ -95,11 +98,11 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
             );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p).unwrap();
+                    fs::create_dir_all(&p)?;
                 }
             }
-            let mut outfile = fs::File::create(&outpath).unwrap();
-            std::io::copy(&mut file, &mut outfile).unwrap();
+            let mut outfile = fs::File::create(&outpath)?;
+            std::io::copy(&mut file, &mut outfile)?;
         }
 
         // Get and Set permissions
@@ -108,10 +111,37 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
             use std::os::unix::fs::PermissionsExt;
 
             if let Some(mode) = file.unix_mode() {
-                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode))?;
             }
         }
     }
 
     Ok(())
+}
+
+fn extract_gzip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace> {
+    let mut ar = tar::Archive::new(flate2::read::GzDecoder::new(std::fs::File::open(abs_path)?));
+    for file in ar.entries()? {
+        let mut file = file?;
+        let outpath = extract_to.join(file.path()?);
+        if let Some(p) = outpath.parent() {
+            if !p.exists() {
+                fs::create_dir_all(&p)?;
+            }
+        }
+        let mut outfile = fs::File::create(&outpath)?;
+        std::io::copy(&mut file, &mut outfile)?;
+    }
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn test_extract_gzip() {
+    use std::path::Path;
+    extract_gzip(
+        Path::new("/home/w/Downloads/newFile.idpnb.tar.gz").to_path_buf(),
+        Path::new("/home/w/Downloads").to_path_buf(),
+    )
+    .unwrap();
 }
