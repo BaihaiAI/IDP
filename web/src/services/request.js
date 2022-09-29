@@ -11,6 +11,7 @@ import {
 import ExtraRequestConfig, { needRequestErrMsg } from "./extraRequestConfig"
 import extraRequestConfig from "./extraRequestConfig"
 import {getTeamId,userId} from "../store/cookie"
+import cookie from 'react-cookies';
 
 const JSONBig = require("json-bigint")
 
