@@ -111,6 +111,9 @@ function interceptorsRequestUseResolve(config) {
   ) {
     config.data = qs.stringify(config.data)
   }
+  if (Boolean(process.env.NODE_OPEN)) {
+    config.headers["Cookie"] = cookie.load('token')
+  }
   const url = config.url.split('?')[0]
   const qsStr = config.url.split('?')[1]
 
