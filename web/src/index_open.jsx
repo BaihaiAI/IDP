@@ -18,6 +18,11 @@ import { ConfigProvider } from "antd";
 let pages = require.context("../extension", true, /\/.*config\.json$/);
 pages.keys().map((key, index, arr) => {});
 
+(function(){
+    const token = new URLSearchParams(window.location.search).get('token');
+    cookie.save('token', token);
+})()
+
 function render(props) {
     const { container } = props;
     ReactDOM.render(<ConfigProvider locale={cookie.load('locale') === 'zhCN' ? zhCN : enUS}>
