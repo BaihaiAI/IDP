@@ -30,12 +30,15 @@ import {
   SearchOutlined,
 } from "@ant-design/icons"
 import MySqlIcon from "../../assets/logo/sql.svg"
-import PostgreSqllIcon from "./postgerSQL.svg"
+import PostgreSqllIcon from "./svgicons/postgerSQL.svg"
+import SparkIcon from './svgicons/spark.svg'
+import hiveIcon from './svgicons/hive.svg'
+
 
 import "./WorkspaceLeft.less"
-import {useDebounceEffect, useDebounceFn, useMemoizedFn} from "ahooks"
+import { useDebounceEffect, useDebounceFn, useMemoizedFn } from "ahooks"
 import classNames from "classnames"
-import {findFileOrDirName, mergeArray} from "../../utils"
+import { findFileOrDirName, mergeArray } from "../../utils"
 import { addDeleteNodeKey, removeDeleteNodeKey } from "./keymap"
 import Icons from "../Icons/Icons"
 import ReconnectionDataBase from './ReconnectionDataBase'
@@ -43,9 +46,12 @@ import ReconnectionCloudDataBase from "./ReconnectionCloudDataBase"
 import FileTreeCollapse from "./components/FileTreeCollapse"
 import FileTreeList from "./components/FileTreeList"
 import useShowFooter from "../../utils/hook/useShowFooter"
-
+import { region, userDir, userId } from '../../store/cookie'
 import { useClipboard } from 'use-clipboard-copy'
-
+import terminalApi from '../../services/terminalApi'
+import userExtensionConfig from '../../../config/user-extension-config';
+import terminal from "@/idp/lib/terminal"
+import { observer } from "mobx-react"
 
 const { DirectoryTree } = Tree
 
@@ -66,21 +72,21 @@ function createExpandedKeyArr(string) {
 
 export const objectStorageType = (name) => {
   let storageType;
-  switch(name){
+  switch (name) {
     case 'aliyun s3':
-      storageType='阿里云 OSS'
+      storageType = '阿里云 OSS'
       break
     case 'amazon s3':
-      storageType='Amazon S3'
+      storageType = 'Amazon S3'
       break
     case 'ucloud s3':
-      storageType='Ucloud S3'
+      storageType = 'Ucloud S3'
       break
     case 'ucloud nfs':
-      storageType='Ucloud NFS'
+      storageType = 'Ucloud NFS'
       break
     default:
-      storageType=''
+      storageType = ''
       break
   }
   return storageType
@@ -88,7 +94,7 @@ export const objectStorageType = (name) => {
 
 const cloudNameMethods = (title) => {
   let cloudName;
-  switch(title){
+  switch (title) {
     case 'ucloud nfs':
       cloudName = 'ucloud'
       break
@@ -125,7 +131,9 @@ const FileTree = (props, ref) => {
     clickNotebookState,
     handlerCutFileKey,
     handlerCopyFileKey,
-    handlerStickFileKey
+    handlerStickFileKey,
+    updateUnzpiDisabled,
+    unzpiDisabled
   } = props
 
   const isShowFooter = useShowFooter()
@@ -135,7 +143,7 @@ const FileTree = (props, ref) => {
   const [preExpandedKeys, setPreExpandedKeys] = useState([]) //为根目录折叠展开缓存数据
 
   const [menuState, setMenuState] = useState(
-    /CUT_COPY_FILE|CUT_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|EXPORT_IPYNB|EXPORT_HTML|EXPORT_PDF|EXPORT_PYTHON|TENSORBOARD|COMPRESSED_TO_ZIP|PUBLISH_MODEL/
+    /CUT_COPY_FILE|CUT_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|EXPORT_IDPNB|EXPORT_IPYNB|EXPORT_HTML|EXPORT_PDF|EXPORT_PYTHON|TENSORBOARD|COMPRESSED_TO_ZIP|PUBLISH_MODEL|UNZIP/
   )
   const [filePath, setFilePath] = useState("")
   const [relativePathData, setRelativePathData] = useState("")
@@ -184,7 +192,7 @@ const FileTree = (props, ref) => {
   /*end 数据源树相关的内容*/
 
   /*目录树相关逻辑 start*/
-  const ContextMenu = useMemoizedFn(()=>{
+  const ContextMenu = useMemoizedFn((a, b) => {
     return (
       <Menu id={contextMenu.menuId} theme={theme.light}>
         {contextMenu.items.map((item) => {
@@ -206,24 +214,25 @@ const FileTree = (props, ref) => {
               <Item
                 key={item.key}
                 style={{ display: menuState.test(item.key) ? "" : "none" }}
-                onClick={()=>{
+                onClick={() => {
                   clipboard.copy(relativePathData)
                 }}
               >
-                  <span>{item.name}</span>
+                <span>{item.name}</span>
               </Item>
             ) : (
               <Item
                 key={item.key}
                 style={{ display: menuState.test(item.key) ? "" : "none" }}
-                onClick={()=>{
+                onClick={() => {
                   clipboard.copy(filePath)
                 }}
               >
-                  <span>{item.name}</span>
+                <span>{item.name}</span>
               </Item>
             )
           }
+
           if (item.key.startsWith("EXPORT") && menuState.test(item.key)) {
             const fileName = findFileOrDirName(filePath)
             return (fileName.includes(".ipynb") || fileName.includes(".idpnb")) ? (
@@ -238,7 +247,8 @@ const FileTree = (props, ref) => {
                       key={childrenItem.key}
                       onClick={childrenItem.handler}
                       style={{
-                        display: menuState.test(childrenItem.key) ? "" : "none",
+                        display: menuState.test(childrenItem.key)
+                          && ((childrenItem.name !== '.ipynb' && childrenItem.name !== '.idpnb') || fileName.endsWith(childrenItem.name)) ? "" : "none",
                       }}
                     >
                       {childrenItem.name}
@@ -277,6 +287,17 @@ const FileTree = (props, ref) => {
                 onClick={item.handler}
                 style={{ display: menuState.test(item.key) ? "" : "none" }}
                 disabled={!cutOrCopyKey}
+              >
+                {item.name}
+              </Item>
+            )
+          }
+          if (item.key.startsWith("UNZIP") && menuState.test(item.key)) {
+            return (
+              <Item
+                key={item.key}
+                onClick={item.handler}
+                disabled={unzpiDisabled}
               >
                 {item.name}
               </Item>
@@ -329,8 +350,30 @@ const FileTree = (props, ref) => {
     setRelativePathData(str)
   }
 
+  const checkFileZipType = (node) => {
+    const fileSuffixTypes = ['zip', 'gzip', 'tar.gz', 'tgz'];
+    const fileSuffixName = node.name.split('.').pop();
+    let _unzpiDisabled = true;
+    if (node.fileType === 'FILE') {
+      if (fileSuffixName === 'gz') {
+        let gzFiles = node.name.split('.');
+        if (gzFiles.length > 2) {
+          const zgSuffix = gzFiles[gzFiles.length - 2];
+          if (zgSuffix === 'tar') {
+            _unzpiDisabled = false;
+          }
+        }
+      } else {
+        if (fileSuffixTypes.includes(fileSuffixName)) {
+          _unzpiDisabled = false;
+        }
+      }
+    }
+    updateUnzpiDisabled(_unzpiDisabled, node);
+  }
+
   const handleContextMenu = (event, node) => {
-    event.preventDefault()
+    event.preventDefault();
     // 如果fileType为数据源相关的类型 则不进行后面的逻辑
     if (node.fileType === "database" || node.fileType === "database-table") {
       return
@@ -338,6 +381,7 @@ const FileTree = (props, ref) => {
     if (node.fileType === "DIRECTORY" && node.name === "storage-service") {
       return
     }
+    node.key !== '/' && checkFileZipType(node);
     setFilePath(node.key)
     relativePath(node.key, selectedKeys[0])
     if (cloudChild(node.key)) {
@@ -351,16 +395,15 @@ const FileTree = (props, ref) => {
       } else {
         if (node.isLeaf) {
           setMenuState(
-            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|TENSORBOARD|COMPRESSED_TO_ZIP|PUBLISH_MODEL/
+            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|TENSORBOARD|COMPRESSED_TO_ZIP|PUBLISH_MODEL|UNZIP/
           )
         } else {
           setMenuState(
-            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|TENSORBOARD|COMPRESSED_TO_ZIP/
+            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|TENSORBOARD|COMPRESSED_TO_ZIP|UNZIP/
           )
         }
       }
     }
-
     //延迟到下次循环执行
     setTimeout(function () {
       show(event, {
@@ -370,6 +413,7 @@ const FileTree = (props, ref) => {
       })
     }, 0)
   }
+
   const handleRightClick = (e) => {
     const node = {
       key: "/",
@@ -419,9 +463,9 @@ const FileTree = (props, ref) => {
     return parentKey
   }
 
-  const onExpand = (expandedKeys,{expanded: bool,node}) => {
-    if(!bool){
-      expandedKeys = expandedKeys.filter(item=>item!==node.key)
+  const onExpand = (expandedKeys, { expanded: bool, node }) => {
+    if (!bool) {
+      expandedKeys = expandedKeys.filter(item => item !== node.key)
     }
     setExpandedKeys(expandedKeys)
     setAutoExpandParent(false)
@@ -434,71 +478,71 @@ const FileTree = (props, ref) => {
     expandedKeys.length ? setExpandedKeys([]) : setExpandedKeys(preExpandedKeys)
   }
 
-    const [overkeys, setOverKey] = useState(''); // 设置移入的值
+  const [overkeys, setOverKey] = useState(''); // 设置移入的值
 
-    // 树节点拖拽时出发
-    const onDragStart = () => {
-        setOverKey('');
-    };
+  // 树节点拖拽时出发
+  const onDragStart = () => {
+    setOverKey('');
+  };
 
-    const onDragOver = () => {
-        setOverKey('');
-    }
+  const onDragOver = () => {
+    setOverKey('');
+  }
 
-    const onVisibleChange = (key, visible) => {
-        visible ? setOverKey('') : setOverKey(key);
-    }
+  const onVisibleChange = (key, visible) => {
+    visible ? setOverKey('') : setOverKey(key);
+  }
 
   const loop = (data) => {
     return data.map((item) => {
       const isObject = typeof item.title == "object"
-      const index = isObject ? -1 : item.title.indexOf(searchValue)
-      const beforeStr = isObject ? null : item.title.substr(0, index)
+      const index = isObject ? -1 : item.title?.indexOf(searchValue)
+      const beforeStr = isObject ? null : item.title?.substr(0, index)
       const afterStr = isObject
         ? null
-        : item.title.substr(index + searchValue.length)
+        : item.title?.substr(index + searchValue.length)
       const showTitle = item.title
 
       let title =
         searchValue !== "" && index > -1 ? (
-          <span className={classNames("filename" + item.key, item.fileType)}>
+          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
             {beforeStr}
             <span className="file-tree-search-value">{searchValue}</span>
             {afterStr}
           </span>
         ) : isObject ? (
-          <span className={classNames("filename" + item.key, item.fileType)}>
+          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
             {showTitle}
           </span>
         ) : (
-            <div>
-                <Tooltip title={item.key} mouseEnterDelay={1.5} visible={ overkeys === item.key } onVisibleChange={()=>onVisibleChange(item.key, overkeys == item.key)} placement="topLeft" >
-                    <span className={"title-container"}>
-                    <span className={classNames("filename" + item.key, item.fileType)}>
-                        {showTitle}
-                    </span>
-                    {
-                        (cloudChild(item.key) && !item.active)?
-                        (
-                            <span className={"data-source-type-title"}>
-                              <span className="data-source-name">&nbsp;{objectStorageType(item.sourceType)}</span>
-                              <Tooltip placement="top" title={intl.get("RECONNECT")}>
-                              <Icons.BHDisconnectDatabase
-                                  onClick={(e) => {
-                                  e.stopPropagation()
-                                  reconnectionCloudDataBase(item)
-                                  }}
-                              />
-                              </Tooltip>
-                            </span>) : (
-                            <span className={"data-source-type-title"}>
-                                <span className="data-source-name" style={{paddingRight: '20px'}}>&nbsp;{objectStorageType(item.sourceType)}</span>
-                            </span>
-                            )
-                    }
-                    </span>
-                </Tooltip>
-            </div>
+          <div>
+            <Tooltip title={item.key} mouseEnterDelay={1.5} visible={overkeys === item.key} onVisibleChange={() => onVisibleChange(item.key, overkeys == item.key)} placement="topLeft" >
+              <span className={"title-container"}>
+                <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
+                  {showTitle}
+                </span>
+                {
+                  (cloudChild(item.key) && !item.active) ?
+                    (
+                      <span className={"data-source-type-title"}>
+                        <span className="data-source-name">&nbsp;{objectStorageType(item.sourceType)}</span>
+                        <Tooltip placement="top" title={intl.get("RECONNECT")}>
+                          <Icons.BHDisconnectDatabase
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              reconnectionCloudDataBase(item)
+                            }}
+                          />
+                        </Tooltip>
+                      </span>) : (
+                      <span className={"data-source-type-title"}>
+                        <span className="data-source-name" style={{ paddingRight: '20px' }}>&nbsp;{objectStorageType(item.sourceType)}</span>
+                      </span>
+                    )
+                }
+              </span>
+            </Tooltip>
+          </div>
 
         )
       let icon = null
@@ -515,30 +559,61 @@ const FileTree = (props, ref) => {
               />
             )
             break
+          case "mysql6":
+            dataSourceTypeTitle = "MySQL"
+            icon = (
+              <img
+                style={{ width: 15, height: 15 }}
+                src={MySqlIcon}
+                alt={"数据源图标"}
+              />
+            )
+            break
           case "postgresql":
             dataSourceTypeTitle = "PostgreSQL"
             icon = (
-                <img
-                  style={{ width: 15, height: 15 }}
-                  src={PostgreSqllIcon}
-                  alt={"数据源图标"}
-                />
+              <img
+                style={{ width: 15, height: 15 }}
+                src={PostgreSqllIcon}
+                alt={"数据源图标"}
+              />
             )
+            break
+          case "hive2":
+            dataSourceTypeTitle = "Hive"
+            icon = (
+              <img
+                style={{ width: 15, height: 15 }}
+                src={hiveIcon}
+                alt={"数据源图标"}
+              />
+            )
+            break
+          case 'sparksql':
+            dataSourceTypeTitle = "Spark"
+            icon = (
+              <img
+                style={{ width: 15, height: 15 }}
+                src={SparkIcon}
+                alt={"数据源图标"}
+              />
+            )
+            break
         }
 
         title = (
           <div className={"title-container"}>
             <span>{title}</span>
             <span className={"data-source-type-title"}>
-            <span className="data-source-name">{dataSourceTypeTitle}</span>
-              {item.status === '0'?
-                <span className="data-source-name" style={{paddingRight: '20px'}}></span> :
+              <span className="data-source-name">{dataSourceTypeTitle}</span>
+              {item.status === '0' ?
+                <span className="data-source-name" style={{ paddingRight: '20px' }}></span> :
                 (<Tooltip placement="top" title={intl.get('RECONNECT')}>
                   <Icons.BHDisconnectDatabase
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    reconnectionDataBase(item)
-                  }}/>
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      reconnectionDataBase(item)
+                    }} />
                 </Tooltip>)}
             </span>
           </div>
@@ -585,7 +660,7 @@ const FileTree = (props, ref) => {
           tableName: item.tableName,
           parentKey: item.parentKey,
           children: loop(item.children),
-          status:item.fileType==='database'?item.status:"",
+          status: item.fileType === 'database' ? item.status : "",
           // S3 图标逻辑 勿删
           // icon: item.fileType === 'DIRECTORY' && item.key === '/storage-service'?
           // (<Icons.BHStorageServiceIcon/>) : icon
@@ -619,7 +694,7 @@ const FileTree = (props, ref) => {
 
   /* 弹出重连Cloud框 */
   const reconnectionCloudDataBase = (item) => {
-    if(item.sourceType === 'ucloud nfs' || item.sourceType === 'aliyun nas'){
+    if (item.sourceType === 'ucloud nfs' || item.sourceType === 'aliyun nas') {
       const data = {
         cloudName: cloudNameMethods(item.sourceType),
         mountPath: item.title,
@@ -631,17 +706,17 @@ const FileTree = (props, ref) => {
       }
       dataSetApi.nfsMount(data)
         .then(res => {
-          if(res.code === 200){
+          if (res.code === 200) {
             message.success(intl.get('RELINK_SUCCESSFULLY'))
             getDataCloudListInfoMETHODS()
-          }else{
+          } else {
             message.error(res.message)
           }
         })
         .catch(err => {
           console.log(err)
         })
-    }else{
+    } else {
       setCloudDataBaseItem(item)
       setReconnectCloudModalVisible(true)
     }
@@ -696,6 +771,26 @@ const FileTree = (props, ref) => {
   )
   /*end  input搜索框相关逻辑 */
 
+  const [vscodeLoading, setVscodeLoading] = useState(false)
+  const handleOpenVscode = () => {
+    setVscodeLoading(true)
+    terminalApi.openVscode().then((res) => {
+      console.log(`start vscode in port ${res.data.port}`)
+      setVscodeLoading(false)
+      window.open(`/${region}/vscode/?folder=${userDir}`)
+    }).catch((error) => {
+      console.log(error)
+      setVscodeLoading(false)
+    })
+  }
+  const hasVscode = () => {
+    for (const conf of userExtensionConfig) {
+      if (conf.userId === userId && conf.extentions.indexOf('vscode') >= 0) {
+        return true
+      }
+    }
+    return false
+  }
 
   return (
     <div className="sider-box">
@@ -715,7 +810,7 @@ const FileTree = (props, ref) => {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          height: document.body.clientHeight - (isShowFooter ? 125 : 105),
+          height: terminal.clientHeight - (isShowFooter ? 125 : 108),
           overflow: "hidden",
         }}
       >
@@ -742,11 +837,23 @@ const FileTree = (props, ref) => {
             size="small"
             type="text"
             onClick={onRootClick}
-            style={{ width: "100%", textAlign: "left" }}
+            style={{ width: "90%", textAlign: "left" }}
             onContextMenu={handleRightClick}
           >
             /
           </Button>
+
+          {process.env.NODE_OPEN !== 'true' && hasVscode() ? <Tooltip placement="rightTop" title={'在vscode中打开项目'}>
+            <Button
+              icon={<Icons.BHVscodeIcon />}
+              size="small"
+              type="text"
+              style={{ width: "10%" }}
+              onClick={() => handleOpenVscode()}
+              loading={vscodeLoading}
+            >
+            </Button>
+          </Tooltip> : <></>}
 
           <div
             className="tree-box"
@@ -789,18 +896,18 @@ const FileTree = (props, ref) => {
       </div>
 
       <ReconnectionDataBase
-        visibleData = {reconnectModalVisible}
-        dataBaseItem = {dataBaseItem}
-        showReconnectionModal = {showReconnectionModal}
-        RefreshDataBase = {props.getDataBaseListInfoMETHODS}/>
+        visibleData={reconnectModalVisible}
+        dataBaseItem={dataBaseItem}
+        showReconnectionModal={showReconnectionModal}
+        RefreshDataBase={props.getDataBaseListInfoMETHODS} />
       <ReconnectionCloudDataBase
-        visibleData = {reconnectCloudModalVisible}
-        showReconnectionCloudModal = {showReconnectionCloudModal}
-        cloudItem = {cloudDataBaseItem}
-        RefreshDataBase = {props.getDataCloudListInfoMETHODS}
+        visibleData={reconnectCloudModalVisible}
+        showReconnectionCloudModal={showReconnectionCloudModal}
+        cloudItem={cloudDataBaseItem}
+        RefreshDataBase={props.getDataCloudListInfoMETHODS}
       />
     </div>
   )
 }
 
-export default React.forwardRef(FileTree)
+export default observer(React.forwardRef(FileTree))

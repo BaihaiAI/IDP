@@ -37,6 +37,16 @@ export const addFileAndContentAsync = createAsyncThunk(
     }
   }
 )
+export const updateFileAndContentAsync = createAsyncThunk('/updateFileAndContentAsync',async ({oldkey,newOpenFile})=>{
+  const response = await contentApi.cat({path:newOpenFile.path})
+  return {
+    oldkey,
+    response:response.data,
+    ...newOpenFile
+  }
+})
+
+
 
 export const filesTabSlice = createSlice({
   name: "filesTab",
@@ -112,6 +122,12 @@ export const filesTabSlice = createSlice({
       const index = findFileListIndex(state.fileList, path)
       if(index===-1) return
       state.fileList[index].deleteFlag = true
+    },
+
+    renameFile(state,action){
+      const { oldkey, openFile } = action.payload
+      const index = findFileListIndex(state.fileList, oldkey)
+      state.fileList[index] = {...openFile}
     },
 
     addNewFile(state, action) {
@@ -190,6 +206,30 @@ export const filesTabSlice = createSlice({
         }
       })
       .addCase(addFileAndContentAsync.rejected, () => {})
+      .addCase(updateFileAndContentAsync.fulfilled,(state, action)=>{
+        const {
+          path,
+          name,
+          suffix,
+          oldkey,
+          response
+        } = action.payload
+
+        const { content, contentType, lastModified, length, mime } = response
+
+        const index = findFileListIndex(state.fileList, oldkey)
+        state.fileList[index] = {
+          path,
+          name,
+          suffix,
+          content,
+          contentType,
+          lastModified,
+          length,
+          mime,
+          deleteFlag: false,
+        }
+      })
   }
 
 })
@@ -204,6 +244,7 @@ export const {
   clearLeftOrRightFileList,
   clearTabsFromList,
   updateFileDeleteFlag,
+  renameFile
 } = filesTabSlice.actions
 
 export default filesTabSlice.reducer

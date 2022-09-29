@@ -10,7 +10,7 @@ import {
 } from "./httpClient"
 import ExtraRequestConfig, { needRequestErrMsg } from "./extraRequestConfig"
 import extraRequestConfig from "./extraRequestConfig"
-import {getTeamId,userId} from "../store/cookie"
+import {getTeamId,userId,isTraveler} from "../store/cookie"
 import cookie from 'react-cookies';
 
 const JSONBig = require("json-bigint")
@@ -125,11 +125,13 @@ function interceptorsRequestUseResolve(config) {
   }
   config.url = url
 
-  if(!config.params.userId){
-    config.params.userId = userId
-  }
-  if(!config.params.teamId){
-    config.params.teamId = getTeamId()
+  if(!isTraveler()){
+    if(!config.params.userId){
+      config.params.userId = userId
+    }
+    if(!config.params.teamId){
+      config.params.teamId = getTeamId()
+    }
   }
 
   return config
@@ -192,7 +194,7 @@ function interceptorsResponseReject(error) {
     return Promise.reject({ message })
   }
 
-  if(notNeedErrorMessageBoxArr.find(item=>requestUrl.includes(requestUrl))){
+  if(notNeedErrorMessageBoxArr.find(item=>requestUrl.includes(item))){
     return Promise.reject({
       message,
     })

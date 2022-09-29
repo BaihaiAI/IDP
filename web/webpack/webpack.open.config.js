@@ -26,12 +26,12 @@ const proConfig = {
         new AddAssetHtmlWebpackPlugin({
             filepath: path.resolve(__dirname, '../dll/vendor.dll.js'),
             outputPath: '../dist/js',
-            publicPath: `/js`
+            publicPath: `./js`
         }),
         createHtmlWebpackPlugin({
             env: process.env.NODE_ENV,
             options: {
-                colorLinkUrl: `/static/color.less`,
+                colorLinkUrl: `./static/color.less`,
             }
         })
     ]

@@ -9,7 +9,7 @@ class Terminal {
     @observable openFilePath: String;
     @observable rightSideWidth: number = 0;
     @observable rightSidePanelWidth: number = 0;
-    @observable workspaceHeight: number = document.body.clientHeight - 102;
+    @observable workspaceHeight: number = 0;
     @observable workspaceWidth: number = 0;
     @observable terminalHeight: number = 0;
     @observable terminalWidth: number = 0;
@@ -19,6 +19,15 @@ class Terminal {
     @observable workspaceTabBarClickFile: string = '';
     @observable terminalVisabled: boolean = false;
     @observable rightBarOpenStatus: boolean = false;
+    @observable clientHeight: number = 0;
+
+    @action updateClientHeight(clientHeight) {
+        this.clientHeight = clientHeight;
+    }
+
+    @action updateWorkspaceHeight(workspaceHeight) {
+        this.workspaceHeight = workspaceHeight;
+    }
 
     @action setRightBarOpenStatus(rightBarOpenStatus = false) {
         this.rightBarOpenStatus = rightBarOpenStatus;
@@ -33,7 +42,7 @@ class Terminal {
     }
 
     @action getWorkspaceWidth() {
-        if ( this.workspaceWidth === 0 ) {
+        if (this.workspaceWidth === 0) {
             return this.workspaceWidth = this.documentBodyClientWidth + (this.leftSideWidth === -1 ? -this.leftFileManageWidth : this.leftSideWidth) - this.leftBarIconWidth - this.rightSideWidth + this.rightSidePanelWidth;
         } else {
             return this.workspaceWidth;
@@ -41,23 +50,23 @@ class Terminal {
     }
 
     @action setNext(next: number) {
+        this.isOpenRightBar(this.openFilePath);
         if (next === 1) {
             // 默认样式
-            this.workspaceHeight = document.body.clientHeight - 102;
+            this.workspaceHeight = document.body.clientHeight;
             this.terminalHeight = 0;
             this.terminalClientHeight = 0;
         } else if (next === 2) {
             // termina 半屏展开
             this.terminalHeight = 300;
             this.terminalWidth = this.documentBodyClientWidth + (this.leftSideWidth === -1 ? -this.leftFileManageWidth : this.leftSideWidth) - this.leftBarIconWidth - this.rightSideWidth + this.rightSidePanelWidth - 5; // 右边\
-            this.workspaceHeight = document.body.clientHeight - 300 - 36 - 20 - 46 - 32;
+            this.workspaceHeight = document.body.clientHeight - 200 - 36 - 20 - 46 - 25;
             this.setWorkspaceWidth(this.terminalWidth);
-            // this.terminalClientHeight = 300 - 46 - 32 - 20; // 计算规则：300px终端高度 - 按钮bar高度46px - antd tab高度32px - 终端内容边距20px
-            this.terminalClientHeight = document.body.clientHeight - this.workspaceHeight - 46 - 38 - 20 - 30; // 38: 最底部bar高度
+            this.terminalClientHeight = document.body.clientHeight - this.workspaceHeight + 100 - 46 - 38 - 20 - 36; // 38: 最底部bar高度
         } else if (next === 3) {
             // 全屏展示
             this.terminalHeight = document.body.clientHeight - 60;
-            this.workspaceHeight = 0;
+            this.workspaceHeight = 95;
             this.terminalWidth = this.documentBodyClientWidth + (this.leftSideWidth === -1 ? -this.leftFileManageWidth : this.leftSideWidth) - this.leftBarIconWidth - this.rightSideWidth + this.rightSidePanelWidth - 5;
             this.setWorkspaceWidth(this.terminalWidth);
             this.terminalClientHeight = document.body.clientHeight - 46 - 32 - 20 - 38; // 38: 最底部bar高度
@@ -106,8 +115,11 @@ class Terminal {
     isOpenRightBar(openFilePath) {
         let rightOpenFlg = false;
         const openFile = openFilePath || this.openFilePath;
-        if (openFile) {
-            rightOpenFlg = ['ipynb', 'idpnb'].includes(openFile.slice(openFile.lastIndexOf(".") + 1));
+        if (['ipynb', 'idpnb'].includes(openFile.slice(openFile.lastIndexOf(".") + 1))) {
+            rightOpenFlg = true;
+            this.rightSideWidth = 48;
+        } else {
+            this.rightSideWidth = 0;
         }
         return rightOpenFlg
     }

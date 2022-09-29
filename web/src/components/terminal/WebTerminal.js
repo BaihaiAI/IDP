@@ -4,12 +4,12 @@ import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddon } from 'xterm-addon-attach';
 import intl from "react-intl-universal";
 import './terminal.less';
-import { terminalWsUrl } from '@/store/config';
-import { getCurrentEnv } from '@/store/config';
+import { setCurrentEnv, getCurrentEnv, terminalWsUrl } from '@/store/config';
 import { message } from 'antd';
 import terminalApi from '@/services/terminalApi';
 import { observer } from 'mobx-react';
 import IdpTerminal from '@/idp/lib/terminal';
+import environmentAPI from '@/services/environment';
 
 // const socketURL = `ws://127.0.0.1:8089/terminal/v1/socket/`;
 function WebTerminal({ terminalId }) {
@@ -63,10 +63,21 @@ function WebTerminal({ terminalId }) {
             const pid = await initSysEnv(term);
             if (!pid) return;
             setPid(pid);
+            let currentEnv = getCurrentEnv();
+            if (!currentEnv) {
+              await environmentAPI.getEnvironmentName()
+                .then(res => {
+                  const data = res.data
+                  setCurrentEnv(data)
+                  currentEnv = data
+                })
+                .catch(err => {
+                  console.log(err)
+                })
+            }
             ws = new WebSocket(terminalWsUrl + pid);
             setWs(ws);
             ws.onopen = () => {
-                const currentEnv = getCurrentEnv();
                 if (ws.readyState === 1 && currentEnv) {
                     ws.send(`source /root/.bashrc\n`)
                     ws.send(`source /root/.bash_profile\n`)
@@ -115,6 +126,7 @@ function WebTerminal({ terminalId }) {
     }, [size])
 
     console.log('@terminalClientHeight:', IdpTerminal.terminalClientHeight);
+    console.log('@workspaceHeight:', IdpTerminal.workspaceHeight)
 
     return <div style={{ backgroundColor: 'black', width: IdpTerminal.terminalWidth, height: IdpTerminal.terminalHeight }} >
         <div id={terminalId} style={{ width: IdpTerminal.terminalWidth, height: IdpTerminal.terminalClientHeight }}></div>

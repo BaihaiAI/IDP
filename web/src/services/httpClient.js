@@ -11,6 +11,10 @@ export const commandManagerApiPath = '/1/api/v1';
 export const manageApiPath = '/0/api/v1';
 export const shopApiPath = '/2/api/v1/idp-shop';
 export const clusterPath = `/${region}/api/v2/cluster`;
+export const terminalPath = `/${region}/api/v1/terminal`;
+export const adminRsPath = "/0/api/v1/admin-rs"
+export const modelServicePath = "/0/api/v1/model-service"
+export const modelApiPath = '/0/api/v1/model-api'
 
 function redirect(url) {
   if (url) {

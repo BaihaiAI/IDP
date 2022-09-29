@@ -60,6 +60,7 @@ const ToolRunCell = (props) => {
         }
 
         const stateButton = () => {
+            console.log(cellState)
             switch (cellState) {
                 case "pending":
                     return (

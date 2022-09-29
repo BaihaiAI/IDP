@@ -25,6 +25,7 @@ function createHtmlWebpackPlugin({ template, filename, options = {}, minifyOptio
     const htmlOptions = Object.assign({
         inject: true,
         colorLinkUrl: '/child/idpStudio-idp/static/color.less',
+        loadingGifUrl: '/child/idpStudio-idp/static/loading.gif',
         loadPlugins: true,
         minify,
         chunks: ['index']
@@ -34,7 +35,7 @@ function createHtmlWebpackPlugin({ template, filename, options = {}, minifyOptio
         template: template || 'index.ejs',
         filename: filename || 'index.html',
         ...htmlOptions,
-        faviconUrl: (process.env.NODE === 'dev' || process.env.NODE_OPEN === 'true') ? '/static/favicon.ico' : '/child/idpStudio-idp/static/favicon.ico'
+        faviconUrl: (process.env.NODE === 'dev' || process.env.NODE_OPEN === 'true') ? './static/favicon.ico' : '/child/idpStudio-idp/static/favicon.ico',
     })
 }
 

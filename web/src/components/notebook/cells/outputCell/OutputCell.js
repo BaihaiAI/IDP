@@ -308,6 +308,7 @@ const OutputCell = (props) => {
                     <div style={{ color: "red", fontWeight: "bold" }}>Error:</div>
                     <span style={headerEnameErrors ? { marginRight: '15px' } : { display: 'none' }}>
                         <Ansi
+                            key="headerEnameErrors"
                             className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                             linkify={true}
                         >
@@ -316,6 +317,7 @@ const OutputCell = (props) => {
                     </span>
                     <span style={headerEvalueErrors ? {} : { display: 'none' }}>
                         <Ansi
+                            key="headerEvalueErrors"
                             className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                             linkify={true}
                         >
@@ -324,6 +326,7 @@ const OutputCell = (props) => {
                         <br />
                     </span>
                     <Ansi
+                        key="errors"
                         className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                         clickHandle={errorLineClick}
                         linkify={true}

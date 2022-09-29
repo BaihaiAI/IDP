@@ -39,7 +39,7 @@ function Content() {
   const showRightLine = () => {
     const pathname = location.pathname
     const suffix = activeTabPath.slice(activeTabPath.lastIndexOf(".") + 1)
-    return pathname === "/workspace" && (suffix === "ipynb" || suffix === "idpnb")
+    return pathname.endsWith("/workspace") && (suffix === "ipynb" || suffix === "idpnb")
   }
 
   const  renderWorkSpaceLeft = function() {

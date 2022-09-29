@@ -60,11 +60,9 @@ function list() {
 */
 
 function shutdown(options) {
-  const { name, identity, inode, path } = options;
+  const { inode, path } = options;
   const url = `${kernelApiPath}/kernel/shutdown`;
   const data = {
-    name: name,
-    identity: identity,
     inode: inode,
     path: path,
     restart: false,
@@ -75,11 +73,9 @@ function shutdown(options) {
 }
 
 function restart(options) {
-  const { name, identity, inode, path, numCpu, numGpu, memory, priority } = options;
+  const { inode, path, numCpu, numGpu, memory, priority } = options;
   const url = `${kernelApiPath}/kernel/shutdown`;
   const data = {
-    name: name,
-    identity: identity,
     inode: inode,
     path: path,
     restart: true,

@@ -27,8 +27,12 @@ function UpDatePlayIDP (props){
         })
       }
       
-    }).catch(err => {
-      console.log('--------', err)
+    }).catch((err) => {
+      let version = ""
+      contentApi.cat2_example({version}).then(res => {
+        message.success(res.message)
+        changeVisible()
+      })
     })
   }
   return (

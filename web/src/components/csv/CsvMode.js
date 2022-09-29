@@ -57,7 +57,23 @@ function CsvMode(props, ref){
             : (<Button key="edit" type="link" onClick={() => setPoe(true)}>{intl.get('EDIT')}</Button>)}
         </div>
       </div>
-      {previewOrEdit()}
+      {/* {previewOrEdit()} */}
+      <div style={{display: `${poe? 'block' : 'none'}`}}>
+        <EditCsv
+          ref={props.ref}
+          key={props.item.path}
+          content={content}
+          {...props.item}
+          onChange={onChange}
+          deleteflag={props.deleteflag}
+          workSpaceHeight={workSpaceHeight}
+        />
+      </div>
+      <div style={{display: `${poe? 'none' : 'block'}`}}>
+        <Preview
+          content={content}
+        />
+      </div>
     </div>
   )
 }

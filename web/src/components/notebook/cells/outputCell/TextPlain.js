@@ -23,6 +23,11 @@ function addScript(parentId, scripts) {
           const path = process.env.NODE == 'dev' ? `//${window.location.hostname}:${rescriptsrc.devServer().port}/` : '/child/idpStudio-idp/';
           text = text.replace('https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v2.2.1/js-package/distr/lets-plot.min.js', `${path}static/lib/lets-plot.min.js`);
         }
+        // 替换plotly.min.js
+        if (text.indexOf('https://cdn.plot.ly/plotly-2.14.0.min.js') > -1) {
+          const path = process.env.NODE == 'dev' ? `//${window.location.hostname}:${rescriptsrc.devServer().port}/` : '/child/idpStudio-idp/';
+          text = text.replace('https://cdn.plot.ly/plotly-2.14.0.min.js', `${path}static/lib/plotly-2.14.0.min.js`);
+        }
         if (text.trim().startsWith('<script')) {
           script = document.createElement('script');
           const t = text.trim();

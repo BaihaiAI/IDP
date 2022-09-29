@@ -12,6 +12,7 @@ import { message } from 'antd';
 import { selectFileList, addFile, removeFile, addFileOutput } from '../../../store/features/pythonSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import globalData from "idp/global"
+import terminalApi from '../../../services/terminalApi'
 
 interface Props {
   workSpaceHeight: number
@@ -88,12 +89,12 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
     setStatus('ready')
   }
   const initSysEnv = async () => {
-    return await axios.get(`/${region}/api/v1/terminal/pid?teamId=${teamId}&projectId=${projectId}`).then((res) => {
-      if (res.data.code === 20000000) {
-        return res.data.data.pid
+    return await terminalApi.getTerminal({ }).then((res: any) => {
+      if (res.code === 20000000) {
+        return res.data.pid
       } else {
-        console.log(res.data.message);
-        message.error(res.data.message);
+        console.log(res.message);
+        message.error(res.message);
         return null
       }
     }).catch(() => {
@@ -152,7 +153,7 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
       <div className='control'>
         <TopToolBar doRun={doRun} doStop={doStop} status={status} />
       </div>
-      <div style={{ height: workSpaceHeight ? (workSpaceHeight - 65) : (document.body.clientHeight - 121), overflow: 'scroll' }}>
+      <div style={{ height: document.body.clientHeight - 121, overflow: 'scroll' }}>
         <div className="python-code">
           <CodeMirror
             key={path}

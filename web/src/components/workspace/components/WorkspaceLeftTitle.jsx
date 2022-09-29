@@ -90,7 +90,7 @@ function WorkspaceLeftTitle(props) {
         ></Button>
         {intl.get("UPLOAD_FILE")}
       </Menu.Item>
-      <Menu.Divider />
+      {/* <Menu.Divider />
       <Menu.Item
         key="5"
         onClick={changeVisible}
@@ -104,7 +104,7 @@ function WorkspaceLeftTitle(props) {
           style={{ width: 28 }}
         ></Button>
         更新“玩转IDP”
-      </Menu.Item>
+      </Menu.Item> */}
     </Menu>
   )
 

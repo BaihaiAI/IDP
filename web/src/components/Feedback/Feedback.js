@@ -6,6 +6,7 @@ import {  Modal, Form, Input, Upload } from "antd"
 
 import { PlusOutlined } from "@ant-design/icons"
 import "./Feedback.css"
+import PropTypes from "prop-types"
 
 const { TextArea } = Input
 
@@ -18,7 +19,23 @@ function getBase64(file) {
   })
 }
 
+// 需要的props visible onOk onCancel category required
 class Feedback extends React.Component {
+
+  static propTypes = {
+    visible:PropTypes.bool,
+    onOk:PropTypes.func,
+    onCancel:PropTypes.func,
+    category:PropTypes.string,
+    required:PropTypes.bool,
+    labelObj:PropTypes.object,
+    width:PropTypes.number,
+  }
+
+  static defaultProps = {
+    labelObj:{}
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -31,6 +48,9 @@ class Feedback extends React.Component {
       fileList: [
         //上传文件列表
       ],
+      // 如果category为11 则是模型类的反馈
+      category:props.category,
+      required:props.required
     }
     this.formRef = React.createRef()
   }
@@ -141,13 +161,14 @@ class Feedback extends React.Component {
   }
   dataFormat = (values) => {
     let arr = {}
-    arr.category = "2"
+    arr.category = this.props.category || "2"
     arr.userId = userId
     arr.feedback = values.feedback
     arr.contact = values.contact
+    arr.userName = values.userName
     arr.fileIdList = []
-    values.upload &&
-      values.upload.fileList
+    this.state.fileList &&
+    this.state.fileList
         .filter((item) => item.status === "done")
         .forEach(function (item, i) {
           arr.fileIdList.push(item.response.data)
@@ -170,7 +191,14 @@ class Feedback extends React.Component {
   }
 
   render() {
+    const { labelObj,width,category } = this.props
+    const isShowLabel = JSON.stringify(labelObj) !== "{}"
+
     const { fileList, previewVisible, previewTitle, previewImage } = this.state
+    const requiredRules = this.props.required?[
+      {required:true,message:"该项是必填的"}
+    ]:[]
+
     const uploadButton = (
       <div>
         <PlusOutlined />
@@ -180,7 +208,8 @@ class Feedback extends React.Component {
     return (
       <>
         <Modal
-          title={intl.get("FEEDBACK")}
+          width={width}
+          title={isShowLabel?labelObj.title : intl.get("FEEDBACK")}
           visible={this.props.visible}
           onCancel={this.ModalhandleCancel}
           onOk={this.onOk}
@@ -188,14 +217,17 @@ class Feedback extends React.Component {
         >
           <div className="feedback-form">
             <Form ref={this.formRef}>
-              <h4>
-                <span>*</span>
-                {intl.get("SUGGESTION")}
-              </h4>
-              <Form.Item name="category" hidden="true">
-                <Input value={this.state.problemcategory} />
-              </Form.Item>
+              {
+                !isShowLabel && <h4>
+                  <span>*</span>
+                  { intl.get("SUGGESTION")}
+                </h4>
+              }
               <Form.Item
+                label={isShowLabel && labelObj.feedback}
+                labelCol={isShowLabel && {
+                  span:4
+                }}
                 name="feedback"
                 rules={[
                   {
@@ -207,17 +239,26 @@ class Feedback extends React.Component {
                 <TextArea
                   showCount
                   maxLength={200}
-                  placeholder={intl.get("SUGGESTION_TEXTAREA_PLACEHOLDER")}
+                  placeholder={isShowLabel?"请输入需求描述": intl.get("SUGGESTION_TEXTAREA_PLACEHOLDER")}
                 />
               </Form.Item>
-              <h4>
-                {intl.get("FEEDBACK_UPLOAD")} <span>{fileList.length}/4</span>
-              </h4>
-              <Form.Item name="upload">
+              {
+                !isShowLabel&& <h4>
+                  {intl.get("FEEDBACK_UPLOAD")}
+                  <span>{fileList.length}/4</span>
+                </h4>
+              }
+              <Form.Item
+                label={isShowLabel && labelObj.upload}
+                labelCol={isShowLabel && {
+                  span:4
+                }}
+                name="upload"
+              >
                 <Upload
-                  accept={'image/*'}
+                  accept={category!=="11" &&'image/*'}
+                  listType={"picture-card"}
                   action="/0/api/v1/feedback/uploadfile"
-                  listType="picture-card"
                   fileList={fileList}
                   onChange={this.handleChange}
                   data={{ userId }}
@@ -225,11 +266,36 @@ class Feedback extends React.Component {
                 >
                   {fileList.length >= 4 ? null : uploadButton}
                 </Upload>
+                <div style={{color:"#9B9B9B"}}>文件大小不超过20M</div>
               </Form.Item>
-              <h4>{intl.get("FEEDBACK_CONTACT")}</h4>
-              <Form.Item name="contact">
-                <Input placeholder={intl.get("FEEDBACK_CONTACT_PLACEHOLDER")} />
+
+              {
+                !isShowLabel && <h4>联系人</h4>
+              }
+              <Form.Item
+                label={isShowLabel && labelObj.userName}
+                labelCol={isShowLabel && {
+                  span:4
+                }}
+                name="userName"
+                rules={requiredRules}
+              >
+                <Input placeholder={"请输入联系人姓名"} />
               </Form.Item>
+
+              {
+                !isShowLabel &&  <h4>{intl.get("FEEDBACK_CONTACT")}</h4>
+              }
+              <Form.Item
+                label={isShowLabel && labelObj.contact}
+                labelCol={isShowLabel && {
+                  span:4
+                }}
+                name="contact"
+                rules={requiredRules}>
+                <Input placeholder={isShowLabel?"请输入手机号或固话":intl.get("FEEDBACK_CONTACT_PLACEHOLDER")} />
+              </Form.Item>
+
             </Form>
           </div>
 

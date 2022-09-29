@@ -28,7 +28,7 @@ function IDP_Header_Search_Plugs() {
                 {intl.get("SEARCH")}
             </div>
         </span>
-        <div style={{ display: "inline-block", color: "#fff", marginLeft: "16px", marginRight: "16px", fontSize: "20px", }} >
+        <div style={{ display: "inline-block", color: "#fff", marginLeft: "16px", marginRight: "16px", fontSize: "20px", position: 'relative', top: '-1px' }} >
             |
         </div>
         <GlobalSearchFileModal

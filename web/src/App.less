@@ -265,7 +265,7 @@
   border-top: 1px solid #DBE2E9;
   align-items: center;
   justify-content: space-between;
-  z-index: 30;
+  z-index: 999;
 
   .footbar {
     display: flex;
@@ -348,7 +348,15 @@
     padding-bottom: 0px;
 
     .CodeMirror-sizer {
-      margin-left: 40px !important;
+      // margin-left: 40px !important;
+    }
+
+    .CodeMirror-linenumber {
+      text-align: center;
+    }
+
+    .CodeMirror-gutters{
+      left: 0 !important;
     }
   }
 }
@@ -386,6 +394,11 @@
          padding-bottom: 21px;
          .sider-box-warrper{
            height: 32px;
+         }
+         .ant-collapse-header {
+           padding: 0px 16px;
+           height: 36px;
+           align-items: center;
          }
        }
      }

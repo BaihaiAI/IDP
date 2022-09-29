@@ -33,7 +33,7 @@ pages.keys().map((key, index, arr) => {
 
 function render(props) {
     const { container } = props;
-    ReactDOM.render(<ConfigProvider locale={cookie.load('locale') === 'zhCN' ? zhCN : enUS}>
+    ReactDOM.render(<ConfigProvider locale={cookie.load('locale') === 'enUS' ? enUS: zhCN }>
         <Provider store={store}>
             <BrowserRouter basename={window.__POWERED_BY_QIANKUN__ ? '/studio' : (process.env.NODE == 'dev' ? '/' : '/child/idpStudio-idp/')}>
                 <PrepareApp >
@@ -52,7 +52,11 @@ if (!window.__POWERED_BY_QIANKUN__) {
 export async function bootstrap() { }
 
 export async function mount(props) {
-    const userId = cookie.load('userId');
+
+    render(props)
+    // 因为产生了游客模式 不需要判断是否登录了
+
+/*    const userId = cookie.load('userId');
     const region = cookie.load('region');
     let projectId = new URLSearchParams(window.location.search).get('projectId');
     if (!projectId) {
@@ -67,7 +71,7 @@ export async function mount(props) {
     }
     if (userId && region && projectId) {
         render(props);
-    }
+    }*/
 }
 
 export async function unmount(props) {

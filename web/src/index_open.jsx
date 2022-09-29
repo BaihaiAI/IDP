@@ -27,7 +27,7 @@ function render(props) {
     const { container } = props;
     ReactDOM.render(<ConfigProvider locale={cookie.load('locale') === 'zhCN' ? zhCN : enUS}>
         <Provider store={store}>
-            <BrowserRouter basename={window.__POWERED_BY_QIANKUN__ ? '/studio' : (process.env.NODE == 'dev' ? '/' : '/child/idpStudio-idp/')}>
+            <BrowserRouter basename={window.__POWERED_BY_QIANKUN__ ? '/studio' : (process.env.NODE == 'dev' ? '/' : './')}>
                 <PrepareApp >
                     <App />
                 </PrepareApp>

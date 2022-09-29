@@ -10,7 +10,7 @@ import { NotificationOutlined } from "@ant-design/icons"
 import "./App.less"
 
 import { Provider } from "./context"
-import { projectId } from "./store/cookie"
+import {isTraveler, projectId} from "./store/cookie"
 import AppLoading from "./layout/appLoading"
 
 
@@ -31,7 +31,7 @@ import {
 } from "./utils/storage"
 
 import {
-  contentCatAsync,
+  contentCatAsync, resetNotebookState,
   updateNotebookListFromTabListAsync,
   updatePath,
   variableListAsync,
@@ -42,7 +42,7 @@ import {
   changeActivePath,
   clearTabsFromList,
   updateFileProp,
-  addFileAndContentAsync,
+  addFileAndContentAsync, updateFileAndContentAsync, renameFile,
 } from "./store/features/filesTabSlice"
 
 import {
@@ -52,6 +52,7 @@ import {
 
 import globalData from "@/idp/global"
 import {observer} from "mobx-react"
+import permissionApi from "@/services/permissionApi"
 
 
 const locales = {
@@ -73,6 +74,9 @@ const setDefaultLang = ()=>{
   }
 }
 
+function isIpynb(suffix) {
+  return suffix ==='ipynb' || suffix ==='idpnb'
+}
 
 // 大版本更新提示框
 @observer
@@ -95,9 +99,19 @@ class App extends React.Component {
     this.appComponentData = globalData.appComponentData
   }
 
+  getPermissionList = ()=>{
+    permissionApi.permissionList().then((res)=>{
+      const data = res.data
+      window.localStorage.setItem('permission_list',JSON.stringify(data))
+    })
+  }
+
   componentDidMount() {
     this.loadLocales()
-    this.checkHealth()
+    if(!isTraveler()){
+      this.checkHealth()
+      this.getPermissionList()
+    }
 
 
     window.onresize = () => {
@@ -216,7 +230,12 @@ class App extends React.Component {
         }
       })
     }else {
-      this.props.addFileAndContentAsync(openFile)
+      this.props.addFileAndContentAsync(openFile).then((res)=>{
+        if(!res.payload){
+          // 打开失败的话 改变local中的状态
+          handlerSaveHistoryOpenFile(openFile.path, openFile.name, "close")
+        }
+      })
     }
   }
 
@@ -229,15 +248,13 @@ class App extends React.Component {
     this.addFileAndHandleIpynb(openFile)
     handlerSaveHistoryOpenFile(key, name, "open")
     const { pathname, search } = this.props.location
-    if (pathname !== "/workspace") {
+    if (!pathname.endsWith("/workspace")) {
       this.props.history.replace("/workspace" + search)
     }
   }
   wsRename = (oldkey, newKey, name, isLeaf) => {
     const tabList = this.props.tabList
     let isNeedUpdateKernel = false
-
-
     if (isLeaf) {
       if (tabList.some((item) => item.path === oldkey)) {
         const openFile = {
@@ -245,23 +262,23 @@ class App extends React.Component {
           name,
           suffix: newKey.slice(newKey.lastIndexOf(".") + 1),
         }
-        this.appComponentData.notebookTabRef.current &&
-        this.appComponentData.notebookTabRef.current.updateDeleteFlag(oldkey).then(() => {
-          historyDelFile(oldkey)
-          handlerSaveHistoryOpenFile(newKey, name, "open")
+        const oldKeySuffix = oldkey.slice(oldkey.lastIndexOf(".")+1)
 
-          this.props.updateFileProp({ path: oldkey, newProps: openFile })
-          if (this.props.activeTabKey === oldkey) {
-            this.props.changeActivePath(newKey)
-          }
-          if (openFile.suffix === "ipynb" || openFile.suffix === "idpnb") {
+        this.appComponentData.notebookTabRef.current &&
+        this.appComponentData.notebookTabRef.current.updateDeleteFlag(oldkey).then(()=>{
+          if (isIpynb(openFile.suffix)) {
+            this.props.renameFile({oldkey,openFile})
+            if(isIpynb(oldKeySuffix)){
+              this.props.updatePath({ path: oldkey, newPath: newKey })
+            }
             if(!isNeedUpdateKernel){
               PubSub.publish("updateCollapseKernel")
               isNeedUpdateKernel = true
             }
             this.props.contentCatAsync(openFile).then((res) => {
               if (res.payload) {
-                //contentCatAsync
+                historyDelFile(oldkey)
+                handlerSaveHistoryOpenFile(newKey, name, "open")
                 const { inode } = res.payload.response.content.metadata
                 const path = res.payload.path
                 this.props.variableListAsync({ path, inode })
@@ -269,8 +286,24 @@ class App extends React.Component {
                 this.appComponentData.notebookTabRef.current.removeTab(openFile.path)
               }
             })
+          }else{
+            this.props.updateFileAndContentAsync({oldkey,newOpenFile:openFile}).then((res)=>{
+              if(isIpynb(oldKeySuffix)){
+                this.props.resetNotebookState(oldkey)
+              }
+
+              if(res.payload){
+                historyDelFile(oldkey)
+                handlerSaveHistoryOpenFile(newKey, name, "open")
+              }else{
+                this.appComponentData.notebookTabRef.current.removeTab(oldkey)
+              }
+            })
           }
-          this.props.updatePath({ path: oldkey, newPath: newKey })
+
+          if (this.props.activeTabKey === oldkey) {
+            this.props.changeActivePath(newKey)
+          }
         })
       }
     } else {
@@ -357,7 +390,8 @@ class App extends React.Component {
         clearTimeout(healthTimer)
         probeApi
           .health()
-          .then(function () {
+          .then(function (res) {
+            // 如果路由错误跳转到登录页
             _this.setState({ isHealth: true })
             _this.openLocalFile()
 
@@ -422,9 +456,12 @@ class App extends React.Component {
   }
 
   render() {
+    // 防止js没加载之前白屏
+    document.getElementById('loading-gif').style.display = 'none'
     const { projectInfo } = globalData.appComponentData
     // 查看projectInfo对象中 是否有后端返回的id属性
-    return this.state.isHealth && this.state.intlInit && projectInfo.id ? (
+    //
+    return  isTraveler() ||  (this.state.isHealth && this.state.intlInit && projectInfo.id) ? (
       <Provider
         value={{
           addFileAndHandleIpynb: this.addFileAndHandleIpynb,
@@ -474,6 +511,9 @@ export default connect(
     updateClientWidth,
     clearTabsFromList,
     updateNotebookListFromTabListAsync,
-    addFileAndContentAsync
+    addFileAndContentAsync,
+    resetNotebookState,
+    updateFileAndContentAsync,
+    renameFile
   }
 )(withRouter(App))

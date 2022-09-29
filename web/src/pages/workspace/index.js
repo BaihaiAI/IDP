@@ -18,30 +18,16 @@ function Workspace(props) {
 
     const { notebookTabRef } = globalData.appComponentData;
     const path = useSelector(selectActivePath);
-    const workspaceWidth = Terminal.getWorkspaceWidth();
-    console.log(workspaceWidth);
+    const openPathFile = Terminal.openFilePath;
 
     useEffect(() => {
         Terminal.setTerminalVisabled(true);
         Terminal.setOpenFilePath(path);
-    }, [path]);
+    }, [path, openPathFile]);
 
     const handleResize = () => {
         Terminal.updateDocumentBodyClientWidth(document.body.clientWidth)
     };
-
-    const isOpenRightBar = (openFile) => {
-        let flg = false;
-        const file = openFile.slice(openFile.lastIndexOf(".") + 1);
-        if (['ipynb', 'idpnb'].includes(file)) {
-            Terminal.setRightSideWidth(48, false);
-            flg = true;
-        } else if (['py'].includes(file)) {
-            Terminal.setRightSideWidth(0, false);
-            flg = true;
-        }
-        return flg;
-    }
 
     useEffect(() => {
         window.addEventListener('resize', handleResize);
@@ -70,25 +56,23 @@ function Workspace(props) {
     }
 
     return (
-        <div className="workspace_main">
-            <div className="workspace">
-                <div style={Terminal.terminalVisabled ? { height: Terminal.workspaceHeight, width: Terminal.workspaceWidth } : { height: '100%' }}>
-                    {
-                        Terminal.next != 3 && <NoteBookTabContainer ref={notebookTabRef} />
-                    }
-                </div>
+        <div className="workspace_main" style={{ height: '100%' }}>
+            <div style={Terminal.terminalVisabled ? { height: Terminal.workspaceHeight - 95, width: '100%' } : { height: '100%', width: '100%' }}>
+                {
+                    Terminal.next != 3 && <NoteBookTabContainer ref={notebookTabRef} />
+                }
             </div>
             {
                 Terminal.terminalVisabled ? <>
-                    <div className="bar-group-icons" style={{ height: '46px' }}>
+                    <div className="bar-group-icons" style={{ height: '36px' }}>
                         <div className="left-bottom-icon">
-                            <span onClick={() => next(1)} style={[1].includes(Terminal.next) ? { display: "none" } : {}}><CaretDownOutlined style={{ fontSize: '16px' }} /></span>
-                            <span onClick={() => next(2)} style={[2, 3].includes(Terminal.next) ? { display: 'none' } : {}}><CaretRightOutlined style={{ fontSize: '16px' }} /></span>
+                            <span onClick={() => next(1)} style={[1].includes(Terminal.next) ? { display: "none" } : {}}><CaretDownOutlined style={{ fontSize: '12px' }} /></span>
+                            <span onClick={() => next(2)} style={[2, 3].includes(Terminal.next) ? { display: 'none' } : {}}><CaretRightOutlined style={{ fontSize: '12px' }} /></span>
                             <span className="terminal-title" onClick={() => terminal()}>终端</span>
                         </div>
                         <div className="workspace_icon">
-                            {Terminal.next !== 3 && <span onClick={() => terminalTop()}><VerticalAlignTopOutlined style={{ fontSize: '16px' }} /></span>}
-                            {Terminal.next === 3 && <span onClick={() => terminalBottom()}><VerticalAlignBottomOutlined style={{ fontSize: '16px' }} /></span>}
+                            {Terminal.next !== 3 && <span onClick={() => terminalTop()}><VerticalAlignTopOutlined style={{ fontSize: '12px' }} /></span>}
+                            {Terminal.next === 3 && <span onClick={() => terminalBottom()}><VerticalAlignBottomOutlined style={{ fontSize: '12px' }} /></span>}
                         </div>
                     </div>
                     <div className="terminal" style={Terminal.terminalHeight === 0 ? { display: 'none' } : { height: Terminal.terminalHeight }}>
@@ -99,4 +83,4 @@ function Workspace(props) {
         </div>
     )
 }
-export default withErrorBoundary(observer(Workspace), { FallbackComponent: ErrorView })
+export default observer(Workspace)

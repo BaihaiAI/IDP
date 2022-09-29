@@ -293,7 +293,16 @@
   "SCATTER_PLOT": "scatter plot",
   "FIGURE_TITLE": "figure title",
   "DIMENSION": "dimension",
-  "COLOR": "color",
+  "DIM_X": "x",
+  "DIM_Y": "y",
+  "DIM_COLOR": "color",
+  "DIM_SIZE": "size",
+  "DIM_HOVER_DATA": "hover_data",
+  "DIM_FACET_COL": "facet_col",
+  "DIM_FACET_ROW": "facet_row",
+  "DIM_TEXT": "text",
+  "DIM_EMPTY": "(empty)",
+  "DIM_MORE": "more dimensions...",
   "NO_MATCHING_RESULTS_WERE_FOUND": "No matching results were found",
   "PLEASE_TRY_SEARCHING_FOR_OTHER_KEYWORDS": "Please try searching for other keywords",
   "CHOOSE": "choose",
@@ -455,5 +464,6 @@
   "WANDB": "Wandb",
   "NO_ENOUGH_RESOURCE": "Insufficient resources. Please reduce the resources or close the running kernel to release resources",
   "STARTUP_PARAMETERS": "startup parameters:",
-  "STARTUP_PARAMETERS_DESCRIPTION": "Enter the startup parameter. If it's null, it's unnecessary to fill in"
+  "STARTUP_PARAMETERS_DESCRIPTION": "Enter the startup parameter. If it's null, it's unnecessary to fill in",
+  "START_KERNEL": "kernel starting ..."
 }

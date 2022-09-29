@@ -5,9 +5,12 @@ import { useHistory, useLocation } from "react-router";
 import navConfig from "@/pages/common/navConfig";
 import globalData from "idp/global"
 import { toJS } from "mobx"
+import {isTraveler} from "@/store/cookie"
 
 const { Sider } = Layout
 
+
+export const travelRoutes = ["modelwarenhouse"]
 export default function LeftNavMenu() {
 
     const location = useLocation();
@@ -19,7 +22,12 @@ export default function LeftNavMenu() {
         history.push('/' + newPath + '?' + searchParams.toString());
     }
 
-    const currentRoutes = navConfig.concat(toJS(globalData.routerMenuControl.currentRoutes));
+    let currentRoutes = navConfig.concat(toJS(globalData.routerMenuControl.currentRoutes));
+    if(isTraveler()){
+      currentRoutes = currentRoutes.filter(item=>travelRoutes.includes(item.key))
+    }
+
+
 
     return (
         <Sider width={50} collapsed={true} collapsedWidth={50} trigger={null} style={{ paddingLeft: '4px' }}>

@@ -6,9 +6,10 @@ import { RegisterApi } from "idpStudio/idp/register";
 import RightIcons from "idpStudio/components/Icons/RigftIcons";
 const configJson = require("./config.json")
 
+
 const rightSide = {
     key: 'operatorList',
-    title: () => intl.get("VERSION"),
+    title: '公共代码片段',
     icon: <RightIcons.OperatorIcon style={{ fontSize: 30 }} />,
     menuItemStyle: {
         paddingLeft: "9.3px",

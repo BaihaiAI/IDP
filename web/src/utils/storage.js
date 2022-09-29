@@ -1,4 +1,5 @@
 import {projectId, userId} from "@/store/cookie"
+import cookie from "react-cookies"
 /*url相关的操作*/
 function checkImgExists(imgUrl) {
   return new Promise(function (resolve, reject) {
@@ -195,4 +196,43 @@ export function saveGlobalKeywordSearch(globalKeywordSearch = {}, projectId) {
 }
 
 
+export function hasOperationFromModule(moduleName,operationName) {
+  const operationList =  gerModulePermissionList(moduleName)
+  return operationList.includes(operationName)
+}
 
+export function gerModulePermissionList(moduleName) {
+  const permissionList = JSON.parse(
+    window.localStorage.getItem('permission_list')
+    || '[]'
+  )
+  const findResult = permissionList.find(item=>item.module === moduleName)
+
+  return findResult? findResult.operationList :[]
+}
+
+export function hasModulePermission(moduleName) {
+  const permissionList = JSON.parse(
+    window.localStorage.getItem('permission_list')
+    || '[]'
+  )
+  const findResult = permissionList.find(item=>item.module === moduleName)
+  return !!findResult
+}
+
+export function isOverPermissionFromRoleList(options={
+  onOk:()=>{},
+  onCancel:()=>{}
+}, roleId=5
+) {
+  const roleList = cookie.load("role")
+  const result = roleList.some(item=>item > roleId)
+  if(options && typeof options ==='object'){
+    if(result){
+      typeof options.onOk ==='function' && options.onOk()
+    }else{
+      typeof options.onCancel ==='function' && options.onCancel()
+    }
+  }
+  return result
+}

@@ -26,6 +26,8 @@ import 'codemirror/mode/shell/shell'
 import { useMemoizedFn } from 'ahooks';
 
 import './csvmode.less'
+import { observer } from 'mobx-react';
+import terminal from '@/idp/lib/terminal';
 
 function EditCsv(props) {
   const { path, content, suffix, onChange, deleteflag, posLine, workSpaceHeight } = props;
@@ -83,10 +85,10 @@ function EditCsv(props) {
   }
 
   return (
-    <div className="main-sql-wrapper editor-csv" style={{ height: workSpaceHeight ? (workSpaceHeight - 40) : (document.body.clientHeight - 125), overflow: 'scroll' }}>
+    <div className="main-sql-wrapper" style={{ height: terminal.workspaceHeight - 60, overflow: 'scroll' }}>
       <CodeMirror
         key={path}
-        height={workSpaceHeight ? (workSpaceHeight) : (document.body.clientHeight - 90)}
+        height={terminal.workspaceHeight - 130}
         className="text-editor"
         value={value}
         editorDidMount={(instance) => {
@@ -119,4 +121,4 @@ function EditCsv(props) {
   )
 }
 
-export default EditCsv;
+export default observer(EditCsv);

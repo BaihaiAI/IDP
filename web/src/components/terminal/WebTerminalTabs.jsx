@@ -1,4 +1,5 @@
 import { Tabs } from "antd";
+import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
 import WebTerminal from "./WebTerminal";
 
@@ -68,4 +69,4 @@ const WebTerminalTabs = () => {
     );
 }
 
-export default WebTerminalTabs;
+export default observer(WebTerminalTabs);

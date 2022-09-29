@@ -413,7 +413,6 @@ function FileTreeCollapse(props) {
         <CaretRightOutlined rotate={isActive ? 90 : 0} />
       )}
       className='workspace-run-list'
-      style={{height: '35px', display: 'flex', alignItems: 'center', width: '100%'}}
     >
       <Panel
         header={intl.get("ACTIVITY")}

@@ -6,13 +6,14 @@ const { createHtmlWebpackPlugin } = require('../config/htmlWebpackPlugin');
 
 const devConfig = {
     mode: 'development',
-    devtool: "source-map",
+    devtool: "eval",
     plugins: [
-        createHtmlWebpackPlugin({ 
+        createHtmlWebpackPlugin({
             options: {
                 colorLinkUrl: `//localhost:${rescriptsrc.devServer().port}/static/color.less`,
+                loadingGifUrl: `//localhost:${rescriptsrc.devServer().port}/static/loading.gif`,
             },
-            env: process.env.NODE_ENV 
+            env: process.env.NODE_ENV
         }),
         new webpack.HotModuleReplacementPlugin()
     ],

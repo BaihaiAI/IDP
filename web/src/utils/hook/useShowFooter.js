@@ -7,7 +7,7 @@ const useShowFooter = ()=>{
   const isShowFooter = useMemo(() => {
     const pathname = location.pathname
     let isShow = false
-    if (pathname === "/workspace" || pathname === "/terminal") {
+    if (pathname.endsWith("/workspace") || pathname.endsWith("/terminal")) {
       isShow = true
     }
     return isShow

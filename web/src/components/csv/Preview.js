@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Table } from 'antd';
 import './csvmode.less'
+import { observer } from 'mobx-react';
+import terminal from '@/idp/lib/terminal';
 function Preview(props) {
   const { content } = props
   const [tableHeader, setTableHeader] = useState([])
@@ -9,6 +11,7 @@ function Preview(props) {
   const [total, setTotal] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+
 
   const compare = (value1, value2) => {
     if (!isNaN(parseInt(value1)) && !isNaN(parseInt(value2))) {
@@ -19,15 +22,14 @@ function Preview(props) {
   }
 
   useEffect(() => {
-    if(tablecontent.length){
       setTotal(tablecontent.length)
 
       let { height } = document.getElementsByClassName("csv-preview")[0].getBoundingClientRect()
       height = height - (39 + 40)
       height = Math.floor(height / 39)
+      
       setPageSize(height)
-    }
-  }, [tablecontent])
+  }, [])
 
   useEffect(() => {
     let res = content.split("\n")
@@ -63,8 +65,8 @@ function Preview(props) {
       className='csv-preview'
       style={{
         width: '100%',
-        height: document.body.clientHeight - 159,
-        overflow: 'auto',
+        height: terminal.workspaceHeight - 70,
+        overflow: 'scroll',
       }}>
       <Table
         columns={tableHeader}
@@ -90,4 +92,4 @@ function Preview(props) {
     </div>
   )
 }
-export default (Preview)
+export default observer(Preview)

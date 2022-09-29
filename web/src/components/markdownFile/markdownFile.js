@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import './markdownFile.less'
 import { Col, Row } from "antd"
 import MarkdownEditor from '@uiw/react-markdown-editor';
+import { observer } from "mobx-react";
+import Terminal from "@/idp/lib/terminal";
 
 
 const MarkdownFile = (props,ref) => {
@@ -11,7 +13,7 @@ const MarkdownFile = (props,ref) => {
   return (
     <div className="mdfile"
         style={{
-          height: (document.body.clientHeight - 128),
+          height: Terminal.workspaceHeight - 60,
         }}>
       <Row>
         <Col span={24}>
@@ -28,4 +30,4 @@ const MarkdownFile = (props,ref) => {
 }
 
 
-export default React.forwardRef(MarkdownFile)
+export default observer(React.forwardRef(MarkdownFile))

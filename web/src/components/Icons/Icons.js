@@ -1754,6 +1754,107 @@ const warenhouse = () => (
 
 const BHWwarenhouse = (props) => <Icon component={warenhouse} {...props} />
 
+const BHVscode = () => (
+  <svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1">
+    <defs>
+      <linearGradient x1="47.4708285%" y1="3.61175964%" x2="52.3732933%" y2="86.8500638%" id="linearGradient-1">
+        <stop stop-color="#5EABE8" offset="0%"></stop>
+        <stop stop-color="#3A9FEF" offset="100%"></stop>
+      </linearGradient>
+      <linearGradient x1="13.3639964%" y1="9.10970441%" x2="91.0461511%" y2="85.5930721%" id="linearGradient-2">
+        <stop stop-color="#256DB0" offset="0%"></stop>
+        <stop stop-color="#2C7CBE" offset="100%"></stop>
+      </linearGradient>
+      <path d="M0.294760601,1.24399067 L1.29546587,0.24791599 C1.43792635,0.106114715 1.66349243,0.0920575182 1.82245627,0.215074138 L10.3319746,6.80029604 L10.3319746,6.80029604 L10.3319746,10.2210988 C10.3319746,10.4420127 10.1528885,10.6210988 9.93197463,10.6210988 C9.83095619,10.6210988 9.73367871,10.582877 9.65967987,10.51411 L0.30465187,1.82049973 C0.142826255,1.67011549 0.133551192,1.41701939 0.283935437,1.25519377 C0.287470756,1.25138948 0.291079828,1.24765441 0.294760601,1.24399067 Z" id="path-3"></path>
+      <path d="M9.39445795,4.32351299 L9.57601305,0.671748232 C9.58698269,0.451106853 9.77474053,0.28113433 9.99538191,0.292103976 C10.036609,0.294153668 10.0772705,0.302572442 10.1159221,0.317061298 L10.5487356,0.479304615 L10.5487356,0.479304615 L10.3135027,4.42066673 C10.300902,4.63179319 10.1195353,4.79273012 9.90840885,4.78012942 C9.88257711,4.7785877 9.85696817,4.77443167 9.83197463,4.76772506 L9.69029815,4.72970842 C9.5083287,4.68087981 9.38510247,4.51168735 9.39445795,4.32351299 Z" id="path-5"></path>
+      <filter x="-179.4%" y="-44.1%" width="458.9%" height="188.2%" filterUnits="objectBoundingBox" id="filter-6">
+        <feGaussianBlur stdDeviation="0.7" in="SourceGraphic"></feGaussianBlur>
+      </filter>
+      <filter x="-230.7%" y="-56.7%" width="561.4%" height="213.3%" filterUnits="objectBoundingBox" id="filter-7">
+        <feGaussianBlur stdDeviation="0.55" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+        <feOffset dx="-0.1" dy="0" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+        <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+        <feColorMatrix values="0 0 0 0 0.144467016   0 0 0 0 0.413002927   0 0 0 0 0.705951193  0 0 0 1 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+      </filter>
+      <linearGradient x1="13.8311758%" y1="6.03470089%" x2="95.5074151%" y2="85.4255001%" id="linearGradient-8">
+        <stop stop-color="#348FD6" offset="0%"></stop>
+        <stop stop-color="#2C7DCE" offset="100%"></stop>
+      </linearGradient>
+      <path d="M0.30639866,1.25886733 L1.35442795,0.239276363 C1.49592886,0.101615078 1.71670103,0.0877740233 1.87428741,0.206684376 L10.5,6.71541012 L10.5,6.71541012 L10.5,10.1080036 C10.5,10.3289175 10.3209139,10.5080036 10.1,10.5080036 C10.0011895,10.5080036 9.90587576,10.4714307 9.83242752,10.4053333 L0.317752264,1.84290293 C0.153541582,1.69512673 0.1402188,1.44221139 0.287994998,1.27800071 C0.293916159,1.27142105 0.300054093,1.26503974 0.30639866,1.25886733 Z" id="path-9"></path>
+      <path d="M8.94165542,9.80705664 L9.91102909,6.7767582 C9.96403248,6.61106761 10.1180486,6.49863178 10.2920105,6.49863178 L10.5,6.49863178 L10.5,6.49863178 L10.6866593,10.2714599 C10.6975755,10.4921039 10.5275576,10.6798207 10.3069136,10.6907369 C10.2522894,10.6934394 10.1976913,10.6849115 10.1464931,10.6656801 L9.18198199,10.3033848 C8.98240925,10.2284201 8.87670056,10.010108 8.94165542,9.80705664 Z" id="path-11"></path>
+      <filter x="-111.0%" y="-47.9%" width="322.1%" height="195.9%" filterUnits="objectBoundingBox" id="filter-12">
+        <feGaussianBlur stdDeviation="0.7" in="SourceGraphic"></feGaussianBlur>
+      </filter>
+      <filter x="-142.8%" y="-61.6%" width="385.6%" height="223.3%" filterUnits="objectBoundingBox" id="filter-13">
+        <feGaussianBlur stdDeviation="0.55" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+        <feOffset dx="-0.1" dy="0" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+        <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+        <feColorMatrix values="0 0 0 0 0.139196107   0 0 0 0 0.4156335   0 0 0 0 0.717201565  0 0 0 1 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+      </filter>
+    </defs>
+    <g id="数据源" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+      <g id="编组-30" transform="translate(0.000000, -0.422971)">
+        <g id="编组-29">
+          <path d="M9.69964879,0.86890916 L9.2479069,4.4270756 L9.2479069,4.4270756 L10.5,3.83505227 L10.5,11.1388723 L9.79411207,11.030082 L9.68762661,13.879864 C9.67731542,14.1558138 9.89265806,14.3878742 10.1686079,14.3981854 C10.2510365,14.4012654 10.3329468,14.3839046 10.4070385,14.3476502 L13.0160965,13.0709913 C13.2904996,12.9367209 13.4644795,12.6578979 13.4644795,12.3524055 L13.4644795,2.69493655 C13.4644795,2.40840855 13.3112425,2.14375961 13.0627441,2.00111716 L10.4445826,0.498246142 C10.2050914,0.360773981 9.89950225,0.443476722 9.76203009,0.682967883 C9.72916502,0.740222335 9.70796345,0.803418311 9.69964879,0.86890916 Z" id="路径-6备份-4" fill="url(#linearGradient-1)"></path>
+          <g id="路径-5备份-10" transform="translate(0.168025, 0.000000)">
+            <mask id="mask-4" fill="white">
+              <use xlinkHref="#path-3" transform="translate(5.165987, 5.569436) scale(1, -1) translate(-5.165987, -5.569436) "></use>
+            </mask>
+            <use id="蒙版" fill="url(#linearGradient-2)" transform="translate(5.165987, 5.569436) scale(1, -1) translate(-5.165987, -5.569436) " xlinkHref="#path-3"></use>
+            <g filter="url(#filter-6)" mask="url(#mask-4)" transform="translate(9.963580, 2.507146) scale(1, -1) translate(-9.963580, -2.507146) ">
+              <use fill-opacity="0.6" fill="#1B5CA7" fill-rule="evenodd" xlinkHref="#path-5"></use>
+              <use fill="black" fill-opacity="1" filter="url(#filter-7)" xlinkHref="#path-5"></use>
+            </g>
+          </g>
+          <g id="路径-5备份-9" transform="translate(0.000000, 3.835052)">
+            <mask id="mask-10" fill="white">
+              <use xlinkHref="#path-9"></use>
+            </mask>
+            <use id="蒙版" fill="url(#linearGradient-8)" xlinkHref="#path-9"></use>
+            <g filter="url(#filter-12)" mask="url(#mask-10)">
+              <use fill-opacity="0.4" fill="#1A64AD" fill-rule="evenodd" xlinkHref="#path-11"></use>
+              <use fill="black" fill-opacity="1" filter="url(#filter-13)" xlinkHref="#path-11"></use>
+            </g>
+          </g>
+        </g>
+        <rect id="矩形" fill-opacity="0" fill="#FFFFFF" x="0" y="0.42297132" width="14" height="14"></rect>
+      </g>
+    </g>
+  </svg>
+)
+const BHVscodeIcon = (props) => <Icon component={BHVscode} {...props} />
+
+const BHVscodeMid = () => (
+  <svg width="24" height="24">
+    <defs>
+      <linearGradient y2="0.41792" x2="0.88416" y1="0.82375" x1="0.19716" id="SVGID_00000067944738462130272590000005177448678554964873_">
+        <stop stop-color="#266EB3" offset="0" />
+        <stop stop-color="#2656AB" offset="1" />
+      </linearGradient>
+      <linearGradient y2="0.49565" x2="1.04744" y1="0.4984" x1="0.73117" id="SVGID_00000028310536657479075990000017678704169882046900_">
+        <stop stop-color="#478ED9" offset="0" />
+        <stop stop-color="#2656AB" offset="1" />
+      </linearGradient>
+      <linearGradient y2="0.912" x2="0.22384" y1="0.2962" x1="0.73167" id="SVGID_00000055689009838355005230000009947931080352620198_">
+        <stop stop-color="#266EB3" stop-opacity="0" offset="0" />
+        <stop stop-color="#2656AB" offset="1" />
+      </linearGradient>
+    </defs>
+    <g>
+      <title>background</title>
+      <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1" />
+    </g>
+    <g>
+      <path id="svg_1" fill="currentColor" d="m17.95,23.86l4.9,-2.42c0.59,-0.29 0.96,-0.89 0.96,-1.54l0,-7.9l0,-7.9c0,-0.65 -0.37,-1.25 -0.96,-1.54l-4.9,-2.42c-0.28,-0.15 -0.62,-0.12 -0.86,0.08l-0.55,0.45l1.41,0.48l0,10.85l0,10.86l-1.41,0.48l0.55,0.45c0.24,0.19 0.58,0.22 0.86,0.07z" class="st0" />
+      <path id="svg_2" fill="currentColor" d="m17.95,6.59l-15.02,11.42c-0.34,0.26 -0.81,0.23 -1.12,-0.07l-1.35,-1.31c-0.36,-0.34 -0.35,-0.92 0.02,-1.25l16.11,-14.77c0.35,-0.32 0.88,-0.3 1.21,0.04l0,0c0.1,0.1 0.15,0.24 0.15,0.38l0,5.56z" class="st1" />
+      <polygon id="svg_3" fill="currentColor" points="7.19,14.77 4.5,16.81 2.57,13.46   7.19,9.23 " />
+      <path id="svg_4" fill="currentColor" d="m17.95,17.4l-15.02,-11.42c-0.34,-0.26 -0.82,-0.23 -1.12,0.07l-1.35,1.31c-0.36,0.34 -0.35,0.91 0.01,1.25l16.12,14.77c0.35,0.32 0.88,0.3 1.21,-0.04l0,0c0.1,-0.1 0.15,-0.24 0.15,-0.38l0,-5.56z" />
+      <polygon id="svg_5" fill="currentColor" points="10.84,12 14.69,9.07 11.52,5.26   7.19,9.23 " />
+    </g>
+  </svg>
+)
+const BHVscodeMidIcon = (props) => <Icon component={BHVscodeMid} {...props} />
+
 const Icons = {
   BHEditIcon,
   BHSaveIcon,
@@ -1801,6 +1902,8 @@ const Icons = {
   BHTFBoardIcon,
   BHmonitorIcon,
   BHWandbIcon,
-  BHWwarenhouse
+  BHWwarenhouse,
+  BHVscodeIcon,
+  BHVscodeMidIcon
 }
 export default Icons

@@ -1,6 +1,18 @@
 {
   "version":[
     {
+      "time": "2022-09-01",
+      "versionnum": "V 1.16.0",
+      "characteristic": [
+        "[系统架构]: 前端调整成微应用架构，功能模块通过插件方式集成",
+        "[工作区]: 新增idpnb格式文件，为notebook默认文件格式",
+        "[数据集成]: 新增spark和hive数据源"
+      ],
+      "repair": [],
+      "functionadjustment": [
+      ]
+    },
+    {
       "time": "2022-07-23",
       "versionnum": "V 1.15.0",
       "characteristic": [

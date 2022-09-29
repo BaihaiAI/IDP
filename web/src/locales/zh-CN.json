@@ -293,7 +293,16 @@
   "SCATTER_PLOT": "散点图",
   "FIGURE_TITLE": "图标题",
   "DIMENSION": "维度",
-  "COLOR": "颜色",
+  "DIM_X": "X轴",
+  "DIM_Y": "Y轴",
+  "DIM_COLOR": "颜色",
+  "DIM_SIZE": "大小",
+  "DIM_HOVER_DATA": "悬停显示",
+  "DIM_FACET_COL": "列切分",
+  "DIM_FACET_ROW": "行切分",
+  "DIM_TEXT": "标记",
+  "DIM_EMPTY": "(空)",
+  "DIM_MORE": "更多维度...",
   "NO_MATCHING_RESULTS_WERE_FOUND": "没有找到匹配的结果",
   "PLEASE_TRY_SEARCHING_FOR_OTHER_KEYWORDS": "请尝试搜索其他关键词",
   "CHOOSE": "选择",
@@ -455,5 +464,6 @@
   "WANDB": "Wandb",
   "NO_ENOUGH_RESOURCE": "资源不够，请调小资源或者关闭运行中的kernel释放资源",
   "STARTUP_PARAMETERS": "启动参数：",
-  "STARTUP_PARAMETERS_DESCRIPTION": "输入启动参数，如果为空不需要填"
+  "STARTUP_PARAMETERS_DESCRIPTION": "输入启动参数，如果为空不需要填",
+  "START_KERNEL": "kernel启动中..."
 }

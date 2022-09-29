@@ -25,8 +25,6 @@ function RightSideLine(props) {
     const dispatch = useDispatch()
     const vis = useSelector(selectOperatorDecision)
 
-    console.log('@rightLineSelectKey:', rightLineSelectKey);
-
     useEffect(() => {
         IdpTerminal.setRightBarOpenStatus(rightLineSelectKey.length == 0 || rightLineSelectKey === 'historyVersion' ? false : true);
     }, [rightLineSelectKey]);

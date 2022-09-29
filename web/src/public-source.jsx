@@ -34,12 +34,12 @@ import PipeLineHome from '@/components/pipeLine/PipeLineHome';
 import PublishModel from '@/components/publishmodel/PublishModel';
 import UsageFooterBar from '@/idp/component/usageFooterBar'
 
-import { teamId, userId, projectId } from '@/store/cookie';
+import { teamId, userId, projectId, region, userDir } from '@/store/cookie';
 import globalData from "idp/global";
 import { setCurrentEnv } from '@/store/config';
 import { locationToProjectListPage, refreshPage } from "@/utils";
 
-// 强制使用中文
+import userExtensionConfig from '../config/user-extension-config';
 
 export default {
     StudioStore: store,
@@ -51,6 +51,9 @@ export default {
     getUserById: () => userId,
     getProjectId: () => projectId,
     getGlobalData: () => globalData,
+    getRegion: () => region,
+    getUserDir: () => userDir,
+    getUserExtensionConfig: () => userExtensionConfig,
     CodeMirror,
     PublishModel,
     LspWebsocket,

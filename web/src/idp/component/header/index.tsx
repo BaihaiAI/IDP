@@ -26,7 +26,7 @@ const IdpHeader: React.FC<Props> = () => {
         const r = data?.map((item, index) => {
             return <div key={`tool_${index}`} style={{ display: 'flex', cursor: "pointer", alignItems: 'center' }}>
                 {item.content}
-                <div style={{ display: "inline-block", color: "#fff", marginLeft: "16px", marginRight: "16px", fontSize: "20px" }} >
+                <div style={{ display: "inline-block", color: "#fff", marginLeft: "16px", marginRight: "16px", fontSize: "20px", position: 'relative', top: '-1px' }} >
                     |
                 </div>
             </div>

@@ -57,8 +57,7 @@ const baseConfig = {
     output: {
         publicPath: getPublicPath(),
         path: path.join(__dirname, "../dist"),
-        filename: `js/[name].[hash].js`,
-        chunkFilename: 'js/[name].[id].js',
+        filename: `js/[name].js`,
         ...loadRescriptsrc()
     },
     resolve: {

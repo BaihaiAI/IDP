@@ -21,7 +21,7 @@ class AddFolderNoPopInput extends React.Component {
                 displayWarning: 'none',
                 fileNameValidator: '',
                 confirmLoading: false,
-
+                time: 0,
             }
 
         }
@@ -37,14 +37,14 @@ class AddFolderNoPopInput extends React.Component {
     };
     findChildren = (key, tree) => {
         for (const node of tree) {
-        if (!node.isLeaf) {
-            if (key === node.key) {
-            return node.children ? node.children : [];
-            } else if (node.children) {
-            const keys = this.findChildren(key, node.children);
-            if (keys.length > 0) return keys;
+            if (!node.isLeaf) {
+                if (key === node.key) {
+                    return node.children ? node.children : [];
+                } else if (node.children) {
+                    const keys = this.findChildren(key, node.children);
+                    if (keys.length > 0) return keys;
+                }
             }
-        }
         }
         return [];
     }
@@ -60,12 +60,12 @@ class AddFolderNoPopInput extends React.Component {
             visible.fileNameValidator = intl.get('FILE_NAME_INVALID_1');
             this.setState({ visible });
             return false;
-        } else if(value.length>50){
+        } else if (value.length > 50) {
             visible.displayWarning = ""
             visible.fileNameValidator = "文件或文件夹名长度不能超过50"
             this.setState({
-            visible
-        })
+                visible
+            })
             return false
         } else {
             const arr = this.props.treeData;
@@ -88,29 +88,30 @@ class AddFolderNoPopInput extends React.Component {
         }
         return true;
     }
+
     onPress = (e) => {
-        if(this.checkFileName(this.state.visible, e.currentTarget.value, this.props.selectedKey,this.props.isLeaf,false)){
-            this.props.onPressEnter(e)
+        if (this.checkFileName(this.state.visible, e.currentTarget.value, this.props.selectedKey, this.props.isLeaf, false)) {
+            this.props.onPressEnter(e);
         }
     };
 
     render() {
         return (
-        <>
-            <Input
-                placeholder={this.props.placeholder}
-                defaultValue={this.props.defaultValue}
-                onChange={(event) => this.props.onChange(event)}
-                onPressEnter={this.onPress}
-                disabled={this.props.folderInputDisabled}
-                ref={this.addFolderInputRef}
-                onBlur={this.props.onBlur}
-                onFocus={() => this.addFolderInputRef.current.focus({cursor: 'all'})}
-                style={this.props.style}
-                onClick={this.onClick}
-            />
-            <div className="addfile-tips" style={{ display: this.state.visible.displayWarning }}>{this.state.visible.fileNameValidator}</div>
-        </>
+            <>
+                <Input
+                    placeholder={this.props.placeholder}
+                    defaultValue={this.props.defaultValue}
+                    onChange={(event) => this.props.onChange(event)}
+                    onPressEnter={this.onPress}
+                    disabled={this.props.folderInputDisabled}
+                    ref={this.addFolderInputRef}
+                    onBlur={this.props.onBlur}
+                    onFocus={() => this.addFolderInputRef.current.focus({ cursor: 'all' })}
+                    style={this.props.style}
+                    onClick={this.onClick}
+                />
+                <div className="addfile-tips" style={{ display: this.state.visible.displayWarning }}>{this.state.visible.fileNameValidator}</div>
+            </>
         );
     }
 }

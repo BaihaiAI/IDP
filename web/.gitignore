@@ -1,7 +1,7 @@
 #code
 node_modules
 dist
-
+dist_source
 
 /dll
 /login_test
@@ -16,8 +16,8 @@ yarn-error.log
 yarn.lock
 package-lock.json
 
-.DS_Store
+*.DS_Store
 
 dll_plugins
 
-#/config/global.js
+source

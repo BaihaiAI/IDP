@@ -256,7 +256,14 @@ const Notebook = (props, ref) => {
 
           let cell = { ...cells[i] }
           let cellState = "ready"
-          if ("execute_input" === msgJson["msgType"]) {
+          if ("start_kernel" == msgJson["msgType"]) {
+            cell["outputs"] = [{
+              "name": "stdout",
+              "outputType": "stream",
+              "text": [intl.get("START_KERNEL")]
+            }]
+            cellState = "pending"
+          } else if ("execute_input" === msgJson["msgType"]) {
             cell["outputs"] = []
             cellState = "executing"
           } else if ("reply_on_stop" === msgJson["msgType"] || ('status' === msgJson['msgType'] && 'idle' === msgJson['content']['execution_state'])) {
@@ -291,9 +298,9 @@ const Notebook = (props, ref) => {
               dispatch(variableListAsync({path, inode}))
             } else {
               cellState = "executing"
-              document.getElementById(`cellbox-${cellId}`).scrollIntoView({
-                behavior: "smooth",
-              });
+              // document.getElementById(`cellbox-${cellId}`).scrollIntoView({
+              //   behavior: "smooth",
+              // });
             }
           }
           // console.log(msgJson["msgType"],'=====',cellState)
@@ -446,6 +453,22 @@ const Notebook = (props, ref) => {
     if ("" === cellId) {
       message.warning(intl.get("EDITOR_ERROR_1"))
       return
+    }
+
+    // 可视化cell判断是否选择了变量和X/Y维度
+    if (cell["cell_type"] === 'visualization') {
+      let warnMsg = ''
+      if (!cell.metadata || !cell.metadata.chart || !cell.metadata.df_name) {
+        warnMsg = '请选择变量和维度'
+      } else {
+        if (!cell.metadata.chart['x'] || !cell.metadata.chart['y']) {
+          warnMsg = '请选择维度(X轴)和维度(Y轴)'
+        }
+      }
+      if ('' !== warnMsg) {
+        Modal.warning({ title: warnMsg })
+        return
+      }
     }
 
     let code = ""
@@ -693,8 +716,6 @@ const Notebook = (props, ref) => {
   const stopAllCell = () => {
     const params = {
       session: "bbb5b78a-6001-415b-a1f9-45037d6a3045",
-      kernel: metadata.kernelspec.name,
-      identity: metadata.kernelspec.identity,
       inode: metadata.inode,
       batchId: new Date().getTime(),
       path: path,
@@ -719,8 +740,6 @@ const Notebook = (props, ref) => {
     const resource = resourceRef.current.getResource()
     kernelApi
       .restart({
-        name: metadata.kernelspec.name,
-        identity: metadata.kernelspec.identity,
         inode: metadata.inode,
         path: path,
         numCpu: resource.numCpu,

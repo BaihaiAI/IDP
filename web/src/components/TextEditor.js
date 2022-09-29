@@ -35,6 +35,7 @@ import * as codemirror from 'codemirror';
 import appContext from "../context"
 import {observer} from "mobx-react"
 import globalData from "idp/global"
+import terminal from '@/idp/lib/terminal';
 
 class TextEditor extends React.Component {
   constructor(props) {
@@ -194,12 +195,12 @@ class TextEditor extends React.Component {
   render() {
 
     return (
-      <div className="main-sql-wrapper" style={{ height: this.props.workSpaceHeight ? (this.props.workSpaceHeight - 40) : (document.body.clientHeight - 93), overflow: 'scroll' }}>
+      <div className="main-sql-wrapper" style={{ height: document.clientHeight - 30, overflow: 'scroll' }}>
         {
           this.state.mime.startsWith('image') ? <img src={`data:${this.state.mime};base64,${this.state.value}`} /> :
             <CodeMirror
               key={this.props.path}
-              height={this.props.workSpaceHeight ? (this.props.workSpaceHeight) : (document.body.clientHeight - 93)}
+              height={this.props.workSpaceHeight ? (this.props.workSpaceHeight) : (terminal.workspaceHeight - 93)}
               className="text-editor"
               value={this.state.value}
               editorDidMount={(editor) => {
@@ -246,6 +247,4 @@ function TextEditorWithAppContext(props){
   const { notebookTabRef } = globalData.appComponentData
   return <TextEditor {...props} notebookTabRef={notebookTabRef} />
 }
-export default connect((state) => ({
-  clientHeight: state.config.clientHeight,
-}))(observer(TextEditorWithAppContext));
+export default observer(TextEditorWithAppContext);

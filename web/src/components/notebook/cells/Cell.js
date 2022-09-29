@@ -93,8 +93,6 @@ const Cell = (props) => {
   const stopCell = (cellId) => {
     const params = {
       session: "bbb5b78a-6001-415b-a1f9-45037d6a3045",
-      kernel: metadata.kernelspec.name,
-      identity: metadata.kernelspec.identity,
       path,
       batchId: new Date().getTime(),
       inode: metadata.inode,

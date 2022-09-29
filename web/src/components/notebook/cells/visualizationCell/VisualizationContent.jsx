@@ -71,26 +71,30 @@ const  VisualizationContent = (props) => {
     }
   }, [
     metadata.df_name,
-    metadata.x_col,
-    metadata.y_col,
-    metadata.color_col,
-    metadata.pic_type,
-    metadata.title,
+    metadata.chart,
     metadata.show_table
   ])
 
+  const getDimValue = (chart, dim) => {
+    return chart ? chart[dim] || '' : ''
+  }
+
   useEffect(() => {
-    const { df_name, x_col, y_col, color_col, pic_type, title } = metadata
-    // console.log(df_name, x_col, y_col, color_col, pic_type, title ,'----------')
+    const {df_name, chart} = metadata
     setMetaDataInfo({
-      df_name: df_name || "",
+      df_name: df_name || '',
     })
     dataFrameRef.current.setFormValue({
-      x_col: x_col || "",
-      y_col: y_col || "",
-      color_col: color_col || "",
-      pic_type: pic_type || "",
-      title: title || "",
+      pic_type: getDimValue(chart, 'pic_type'),
+      title: getDimValue(chart, 'title'),
+      x: getDimValue(chart, 'x'),
+      y: getDimValue(chart, 'y'),
+      color: getDimValue(chart, 'color'),
+      size: getDimValue(chart, 'size'),
+      hover_data: getDimValue(chart, 'hover_data'),
+      facet_col: getDimValue(chart, 'facet_col'),
+      facet_row: getDimValue(chart, 'facet_row'),
+      text: getDimValue(chart, 'text'),
     })
 
     const findResult = dataFrameVariableList.find(
@@ -142,18 +146,29 @@ const  VisualizationContent = (props) => {
                   break*/
         default:
         {
-          defaultFormObj.x_col = newArr[0]
-          defaultFormObj.y_col = newArr[0]
-          defaultFormObj.color_col = newArr[0]
+          defaultFormObj.x = newArr[0]
+          defaultFormObj.y = newArr[0]
+          defaultFormObj.color = ""
+          defaultFormObj.size = ""
+          defaultFormObj.hover_data = ""
+          defaultFormObj.facet_col = ""
+          defaultFormObj.facet_row = ""
+          defaultFormObj.text = ""
         }
       }
 
       defaultFormObj.pic_type = "line"
     } else {
-      defaultFormObj.x_col = ""
-      defaultFormObj.y_col = ""
-      defaultFormObj.color_col = ""
       defaultFormObj.pic_type = ""
+      defaultFormObj.x = ""
+      defaultFormObj.y = ""
+      defaultFormObj.color = ""
+      defaultFormObj.size = ""
+      defaultFormObj.hover_data = ""
+      defaultFormObj.facet_col = ""
+      defaultFormObj.facet_row = ""
+      defaultFormObj.text = ""
+      
     }
 
     dataFrameRef.current.setFormValue({
@@ -162,7 +177,7 @@ const  VisualizationContent = (props) => {
 
     const newMetaData = {
       ...metadata,
-      ...defaultFormObj,
+      chart: defaultFormObj,
       df_name: value || "",
     }
 
@@ -227,7 +242,7 @@ const  VisualizationContent = (props) => {
             <Select
               getPopupContainer={()=>selectParentRef.current}
               value={metaDataInfo.df_name}
-              onChange={dataFrameNameChange}
+              onSelect={dataFrameNameChange}
               allowClear
               style={{ minWidth: "100px" }}
               bordered={false}

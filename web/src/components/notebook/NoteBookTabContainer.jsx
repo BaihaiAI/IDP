@@ -81,7 +81,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
       case "csv":
         return (
           <CsvMode
-            ref={ref}
+            // ref={ref}
             key={item.path}
             item={item}
             deleteflag={item.deleteFlag}
@@ -92,7 +92,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
       case "svg":
         return (
           <SvgEditor
-            ref={ref}
+            // ref={ref}
             key={item.path}
             item={item}
             deleteflag={item.deleteFlag}
@@ -103,7 +103,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
       case "md":
         return (
           <MarkdownFile
-            ref={ref}
+            // ref={ref}
             key={item.path}
             item={item}
             deleteflag={item.deleteFlag}
@@ -114,7 +114,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
       default:
         return (
           <TextEditor
-            ref={ref}
+            // ref={ref}
             key={item.path}
             {...item}
             deleteflag={item.deleteFlag}
@@ -226,7 +226,6 @@ function NoteBookTabContainer(props, ref) {
 
   const panes = useMemo(() => {
     return tabList.map((item) => {
-      console.log(item.path)
       if (item.path.startsWith('file:///')) return libFile(item)
       const isIpynb = item.suffix === "ipynb" || item.suffix === "idpnb"
       let iconStatus
@@ -269,19 +268,18 @@ function NoteBookTabContainer(props, ref) {
   const onChange = (activeKey) => {
     const theFileType = activeKey.slice(activeKey.lastIndexOf(".") + 1);
     const rightBarOpenStatus = IdpTerminal.rightBarOpenStatus;
+    let next = IdpTerminal.next;
+    if ( next === 3 ) next = 2; 
     if (theFileType === 'ipynb' || theFileType === 'idpnb') {
-      IdpTerminal.setTerminalVisabled(true);
       IdpTerminal.setRightSidePanelWidth(rightBarOpenStatus ? -300 : 0, false);
-      IdpTerminal.setNext(IdpTerminal.next);
+      IdpTerminal.setNext(next);
       IdpTerminal.updateWorkspaceTabBarClickFile(activeKey);
-    } else if(theFileType === 'py') {
-      IdpTerminal.setTerminalVisabled(true);
+    } else {
       IdpTerminal.setRightSidePanelWidth(0, false);
-      IdpTerminal.setNext(IdpTerminal.next);
+      IdpTerminal.setNext(next);
       IdpTerminal.updateWorkspaceTabBarClickFile(activeKey);
-    }  else {
-      IdpTerminal.setTerminalVisabled(false);
     }
+    IdpTerminal.setTerminalVisabled(true);
     dispatch(changeActivePath(activeKey))
     // 切换时清空 回撤数组
     dispatch(clearPopupList())
@@ -332,12 +330,12 @@ function NoteBookTabContainer(props, ref) {
     }
     const theFileType = newActiveKey.slice(newActiveKey.lastIndexOf(".") + 1);
     if (theFileType === 'ipynb' || theFileType === 'idpnb' ||  theFileType === 'py' ) {
-      IdpTerminal.setTerminalVisabled(true);
-      IdpTerminal.setNext(IdpTerminal.next);
+      let next = IdpTerminal.next;
+      if ( next === 3 ) next = 2;
+      IdpTerminal.setNext(next);
       IdpTerminal.updateWorkspaceTabBarClickFile(newActiveKey);
-    } else {
-      IdpTerminal.setTerminalVisabled(false);
     }
+    IdpTerminal.setTerminalVisabled(true);
     return newActiveKey
   }
 

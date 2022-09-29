@@ -48,6 +48,8 @@ let lastLoadTime = null
 
 const { Sider } = Layout
 
+let last = 0;
+
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />
 
 function flattenDirFileChildren(list) {
@@ -113,7 +115,11 @@ class WorkspaceLeft extends React.Component {
 
       PublishModelVisible: false,
       // 存储 右键 key
-      rightKey: ""
+      rightKey: "",
+
+      apiLock: false,
+      unzpiDisabled: true,
+      checkedNode: "",
     }
     this.fileTreeRef = React.createRef()
 
@@ -168,7 +174,6 @@ class WorkspaceLeft extends React.Component {
 
     const sourceFileArray = sourceFile.split('/').filter(it => it != '');
     const sourceFileName = sourceFileArray[sourceFileArray.length - 1];
-    let targetPath = "";
 
     const crecursionSourceFile = (treelist) => {
       for (let i = 0; i < treelist.length; i++) {
@@ -181,6 +186,7 @@ class WorkspaceLeft extends React.Component {
         }
       }
     };
+
     const fileArr = targetFile.split('/').filter(it => it != '');
     let filelocation = '';
     if (fileType === "FILE") {
@@ -189,8 +195,8 @@ class WorkspaceLeft extends React.Component {
     if (fileType === "DIRECTORY") {
       filelocation = targetFile; // 获取文件夹结构，不包含文件
     }
-    sourceData.key = filelocation + "/" + sourceFileName; // 拼接文件路径
-    targetPath = JSON.parse(JSON.stringify(sourceData.key)); // 重新拷贝，避免数据污染
+    sourceData.key = (filelocation === '/' ? '' : filelocation) + "/" + sourceFileName; // 拼接文件路径
+    let targetPath = (filelocation === '/' ? '' : filelocation) + "/" + sourceFileName; // 重新拷贝，避免数据污染
 
     const crecursionTargetFile = (treelist) => {
       for (let i = 0; i < treelist.length; i++) {
@@ -203,6 +209,11 @@ class WorkspaceLeft extends React.Component {
       }
     };
 
+    const crecursionTargetFileRoot = (treelist) => {
+      Object.assign(sourceData, { key: targetPath });
+      treelist.push(sourceData);
+    }
+
     let fileFlg = false; // 是否执行生成新的tree逻辑
     const findFile = (treelist) => {
       for (let i = 0; i < treelist.length; i++) {
@@ -214,12 +225,14 @@ class WorkspaceLeft extends React.Component {
         }
       };
     }
-    findFile(treeData);
     if (!fileFlg) {
       crecursionSourceFile(treeData);
-      crecursionTargetFile(treeData);
+      if (filelocation === '/') {
+        crecursionTargetFileRoot(treeData);
+      } else {
+        crecursionTargetFile(treeData);
+      }
     }
-
     return { newTreeData: treeData, sourceData, targetPath, isfile: fileFlg }
   };
 
@@ -426,6 +439,11 @@ class WorkspaceLeft extends React.Component {
           treeData: allTreeData,
         })
       })
+      .catch((err) => {
+        this.setState({
+          spinning: false,
+        })
+      })
   }
 
   loadTree = async ({ forceLoad = false, loadDataSource = false } = {}) => {
@@ -494,14 +512,16 @@ class WorkspaceLeft extends React.Component {
       if (promiseList.length !== 0) {
         Promise.all(promiseList).then((results) => {
           results.forEach((result, index) => {
-            const dataList = result.data.record
+            const { record: dataList, db } = result.data
             const activeDataBaseAlias = dataBaseAliasList[index]
-            // console.log(activeDataBaseAlias)
+
+            const field = this.getKeyFields(db)
+
             if (dataList.length > 0) {
               newDataSetList[indexList[index]].children = dataList
                 // .slice(1)
                 .map((item) => {
-                  const value = Object.values(item)[0]
+                  const value = item[field]
                   return {
                     title: value,
                     key: activeDataBaseAlias + "/" + value,
@@ -526,6 +546,29 @@ class WorkspaceLeft extends React.Component {
         })
       }
     })
+  }
+
+  getKeyFields = (key) => {
+    let field;
+    switch (key) {
+      case "hive2":
+        field = 'tab_name'
+        break
+      case 'sparksql':
+        field = 'tablename'
+        break
+      case "postgresql":
+        field = "tablename"
+        break
+      case "mysql6":
+        field = "table_name"
+        break
+      case "mysql":
+        field = "table_name"
+        break
+    }
+
+    return field
   }
 
   componentDidMount() {
@@ -563,6 +606,14 @@ class WorkspaceLeft extends React.Component {
 
   getDataSetShowList = ({ aliasDB, tableName }) => {
     const data = { aliasDB, tableName }
+    if (!aliasDB) {
+      message.info('数据库数据库名为空');
+      return;
+    }
+    if (!tableName) {
+      message.info('数据库数据库表名为空');
+      return;
+    }
     Promise.all([
       dataSetApi.getSelectList(data),
       dataSetApi.getSchemaList(data),
@@ -571,27 +622,18 @@ class WorkspaceLeft extends React.Component {
       const selectListHeader = results[0].data.schema
       const schemaList = results[1].data.record
       const schemaListHeader = results[1].data.schema
-
-
-
       const search = this.props.location.search
       this.props.history.push('/dataset' + search)
-
-      setTimeout(() => {
-        PubSub.publish("getDataSetShowData", {
-          aliasDB,
-          tableName,
-          selectList,
-          selectListHeader,
-          schemaList,
-          schemaListHeader,
-        })
-      }, 100)
-
-
+      PubSub.publish("getDataSetShowData", {
+        aliasDB,
+        tableName,
+        selectList,
+        selectListHeader,
+        schemaList,
+        schemaListHeader,
+      })
     })
   }
-
 
   onSelect = (keys, info) => {
     // console.log("onSelect()", info)
@@ -601,27 +643,24 @@ class WorkspaceLeft extends React.Component {
     const isLeaf = info.node.isLeaf // leaf
     const fileType = info.node.fileType || (isLeaf ? "FILE" : "DIRECTORY") // 文件类型
     const children = info.node.children;
-
     // 只对文件处理
     if ("FILE" === fileType) {
+      IdpTerminal.setOpenFilePath(selectedKey);
       let _next = 1;
       const next = IdpTerminal.next;
-      if ( next == 1) _next = next;
-      if ( next == 2) _next = next;
-      if ( next == 3) _next = 2;
+      if (next == 1) _next = next;
+      if (next == 2) _next = next;
+      if (next == 3) _next = 2;
       const theFileType = keys[0].slice(keys[0].lastIndexOf(".") + 1);
       if (theFileType === 'ipynb' || theFileType === 'idpnb') {
-        IdpTerminal.setTerminalVisabled(true);
-        IdpTerminal.setRightSideWidth(48);
-        IdpTerminal.setNext(_next);
-      } else if ( theFileType === 'py') {
-        IdpTerminal.setTerminalVisabled(true);
         IdpTerminal.setRightSideWidth(0);
         IdpTerminal.setNext(_next);
       } else {
-        IdpTerminal.setTerminalVisabled(false);
+        IdpTerminal.setRightSideWidth(48);
+        IdpTerminal.setNext(_next);
       }
     }
+    IdpTerminal.setTerminalVisabled(true);
     const visible = this.state.visible
     visible.renameValue = selectedName
     this.setState({ visible })
@@ -981,8 +1020,7 @@ class WorkspaceLeft extends React.Component {
     const _this = this //先存一下this，以防使用箭头函数this会指向我们不希望它所指向的对象。
     let visible = _this.state.visible
     const value = visible.folderValue
-    if (
-      "" === value ||
+    if ("" === value ||
       !this.checkFileName(
         visible,
         value,
@@ -997,7 +1035,6 @@ class WorkspaceLeft extends React.Component {
     visible.folderInputDisabled = true
     visible.confirmLoading = true
     _this.setState({ visible })
-
     let path = "/"
     if ("/" !== _this.state.selectedKey) {
       if (_this.state.isLeaf) {
@@ -1010,21 +1047,28 @@ class WorkspaceLeft extends React.Component {
     const params = {
       path: `${path}${value}`,
     }
-    workspaceApi
-      .dirNew(params)
-      .then(function (response) {
+    this.throttle(function () {
+      workspaceApi.dirNew(params).then(function (response) {
         _this.setDragAble(true)
-        _this.setState({ inputVisible: false })
         _this.resetVisible()
+        _this.setState({ inputVisible: false })
         _this.loadTree({ forceLoad: true })
-      })
-      .catch(function (error) {
+      }).catch(function (error) {
         _this.setDragAble(true)
-        console.log(error)
         _this.resetVisible()
         _this.setState({ inputVisible: false })
         message.error(intl.get("ADD_FAILED"))
       })
+    })
+  }
+
+  // 利用时间差进行防抖
+  throttle = (callback) => {
+    let now = new Date().getTime();;
+    if (now - last > 1000) {
+      last = new Date().getTime();
+      callback()
+    }
   }
 
   submitAddFile = () => {
@@ -1058,12 +1102,9 @@ class WorkspaceLeft extends React.Component {
     }
 
     const filePath = `${path}${value}`
-    workspaceApi
-      .fileNew({
-        path: filePath,
-      })
-      .then(function (response) {
-        _this.resetVisible()
+    workspaceApi.fileNew({ path: filePath }).then(function (response) {
+      _this.resetVisible()
+      setTimeout(() => {
         _this.onSelect([filePath], {
           node: {
             key: filePath,
@@ -1071,17 +1112,16 @@ class WorkspaceLeft extends React.Component {
             isLeaf: true,
           },
         })
-        _this.setDragAble(true)
-        _this.setState({ inputVisible: false })
-        _this.loadTree({ forceLoad: true })
-      })
-      .catch(function (error) {
-        console.log(error)
-        _this.setDragAble(true)
-        _this.resetVisible()
-        _this.setState({ inputVisible: false })
-        message.error(intl.get("ADD_FAILED"))
-      })
+      });
+      _this.setDragAble(true)
+      _this.setState({ inputVisible: false })
+      _this.loadTree({ forceLoad: true })
+    }).catch(function (error) {
+      _this.setDragAble(true)
+      _this.resetVisible()
+      _this.setState({ inputVisible: false })
+      message.error(intl.get("ADD_FAILED"))
+    })
   }
 
   getParentPath = (selectPath) => {
@@ -1133,17 +1173,15 @@ class WorkspaceLeft extends React.Component {
     if ("/" !== _this.state.selectedKey) {
       path = `${_this.state.selectedKey}`
     }
-    // if ('/' !== key) {
-    //   path = key;
-    // }
 
     let parentPath = _this.getParentPath(path)
 
-    const input_suffix = value.match(/\.\w+$/)
-    const cur_suffix = _this.state.selectedName.match(/\.\w+$/)
-
     const dest = _this.setSuffix(value)
     unNeedRequestErrMsg()
+
+    const realPath = _this.state.selectedKey
+    const isFile = _this.state.isLeaf
+
     workspaceApi
       .fileRename({
         source: _this.state.selectedName,
@@ -1151,6 +1189,10 @@ class WorkspaceLeft extends React.Component {
         dest,
       })
       .then(function (response) {
+        if (!isFile) {
+          _this.loadNodeList = _this.loadNodeList.filter(item => item !== realPath)
+        }
+
         _this.resetVisible()
         _this.loadTree({ forceLoad: true })
         _this.setState({ inputVisible: false })
@@ -1896,25 +1938,46 @@ class WorkspaceLeft extends React.Component {
     }
   }
 
+  updateUnzpiDisabled = (unzpiDisabled, node) => {
+    this.setState({ unzpiDisabled, checkedNode: node });
+  }
+
+  unZipFolder = async (e) => {
+    const { key } = e.props.info;
+    const unzpiDisabled = this.state.unzpiDisabled;
+    const checkedNode = this.state.checkedNode;
+    // 只对压缩文件处理，其他不做任何处理
+    if (!unzpiDisabled && checkedNode.fileType == 'FILE' && !checkedNode.expanded) {
+      const node = checkedNode.key.replace(/\s*/g, "");
+      const nodeFileName = checkedNode.name.replace(/\s*/g, "");
+      const nodes = node.split(nodeFileName).filter(it => it != '').join('');
+      const nodePath = nodes.substring(0, nodes.length - 1);
+      const nodeIds = key.replace(/\s*/g, "").replace(new RegExp("/", "g"), '_');
+      const nodeClass = document.getElementById(nodeIds);
+      nodeClass.style.opacity = 1;
+      try {
+        const reuslt = await warenhouseApi.decompressFile(key, nodePath);
+        if (reuslt.code == '21000000') {
+          nodeClass.style.opacity = 0;
+          this.onLoadData({ key: nodePath });
+        }
+      } catch (error) {
+        nodeClass.style.opacity = 0;
+      }
+    }
+  }
+
   getContextMenu = () => {
     return {
       menuId: "fileTree",
       items: [
-        {
-          key: "ADD_FOLDER",
-          name: intl.get("ADD_FOLDER"),
-          handler: this.addNewFolder,
-        },
-        {
-          key: "ADD_FILE",
-          name: intl.get("ADD_FILE"),
-          handler: this.addNewFile,
-        },
-        { key: "SEPARATOR_0" },
+        { key: "ADD_FOLDER", name: intl.get("ADD_FOLDER"), handler: this.addNewFolder },
+        { key: "ADD_FILE", name: intl.get("ADD_FILE"), handler: this.addNewFile },
+        { key: "SEPARATOR_1" },
         { key: "CUT_FILE", name: intl.get('CUT'), handler: this.handlerCutFile },
         { key: "CUT_COPY_FILE", name: intl.get('COPY'), handler: this.handlerCopyFile },
         { key: "STICK", name: intl.get('PASTE'), handler: this.handlerStickFile },
-        { key: "SEPARATOR_1" },
+        { key: "SEPARATOR_2" },
         { key: "RENAME", name: intl.get("RENAME"), handler: this.rename },
         { key: "DELETE", name: intl.get("DELETE"), handler: this.delete },
         {
@@ -1923,15 +1986,20 @@ class WorkspaceLeft extends React.Component {
           handler: this.onExportClick,
           children: [
             {
+              key: "EXPORT_IDPNB",
+              name: ".idpnb",
+              handler: this.onExportClick,
+            },
+            {
               key: "EXPORT_IPYNB",
               name: ".ipynb",
               handler: this.onExportClick,
             },
-            {
-              key: "EXPORT_HTML",
-              name: this.state.exportFileLoading ? <Spin indicator={loadingIcon} /> : "HTML",
-              handler: this.exportTypeClick("html"),
-            },
+            // {
+            //   key: "EXPORT_HTML",
+            //   name: this.state.exportFileLoading ? <Spin indicator={loadingIcon} /> : "HTML",
+            //   handler: this.exportTypeClick("html"),
+            // },
             /*            {
               key: "EXPORT_PDF",
               name: "PDF",
@@ -1939,7 +2007,7 @@ class WorkspaceLeft extends React.Component {
             },*/
             {
               key: "EXPORT_PYTHON",
-              name: "PYTHON",
+              name: ".py",
               handler: this.exportTypeClick("python"),
             },
           ],
@@ -1949,7 +2017,7 @@ class WorkspaceLeft extends React.Component {
           name: intl.get("EXPORTFOLDER"),
           handler: this.exportFolderClick,
         },
-        { key: "SEPARATOR_2" },
+        { key: "SEPARATOR_3" },
         {
           key: "COPY_RELATIVE_PATH",
           name: intl.get("COPY_RELATIVE_PATH"),
@@ -1958,7 +2026,7 @@ class WorkspaceLeft extends React.Component {
           key: "COPY_ABSOLUTE_PATH",
           name: intl.get("COPY_ABSOLUTE_PATH"),
         },
-        { key: "SEPARATOR_3" },
+        { key: "SEPARATOR_4" },
         {
           key: "TENSORBOARD",
           name: intl.get("TENSORBOARD"),
@@ -1967,6 +2035,8 @@ class WorkspaceLeft extends React.Component {
             this.props.history.push(`/tensorboard?projectId=${projectId}&tensor=${tensor}`)
           },
         },
+        { key: "SEPARATOR_5" },
+        { key: "UNZIP", name: '解压ZIP', handler: this.unZipFolder },
         {
           key: "COMPRESSED_TO_ZIP",
           name: "压缩为ZIP",
@@ -1979,6 +2049,7 @@ class WorkspaceLeft extends React.Component {
               })
           }
         },
+        { key: "SEPARATOR_6" },
         {
           key: "PUBLISH_MODEL",
           name: "发布模型",
@@ -2050,9 +2121,11 @@ class WorkspaceLeft extends React.Component {
               getDataBaseListInfoMETHODS={this.getDataBaseListInfo}
               getDataCloudListInfoMETHODS={this.loadFileList}
               fileInfo={this.state.fileInfo}
+              unzpiDisabled={this.state.unzpiDisabled}
               handlerCutFileKey={this.handlerCutFileKey}
               handlerCopyFileKey={this.handlerCopyFileKey}
               handlerStickFileKey={this.handlerStickFileKey}
+              updateUnzpiDisabled={this.updateUnzpiDisabled}
             >
               <FileTreeChildren
                 uploadFileList={this.state.uploadFileList}

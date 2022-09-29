@@ -28,6 +28,7 @@ export function logout() {
   window.localStorage.removeItem("historyOpenFile")
   window.localStorage.removeItem("historyOpenProject")
   window.localStorage.removeItem("avatar")
-
+  window.localStorage.removeItem("permission_list")
+  
   window.location.href = redirectUrl
 }

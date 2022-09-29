@@ -1,11 +1,11 @@
 import React,{Fragment} from 'react'
 import {CaretDownOutlined} from "@ant-design/icons"
-import {Tooltip, Tree} from "antd"
+import {Tooltip, Tree, Spin } from "antd"
 import classNames from "classnames"
 import intl from "react-intl-universal"
 import Icons from "../../Icons/Icons"
 import MySqlIcon from "../../../assets/logo/sql.svg"
-import PostgreSqllIcon from "../postgerSQL.svg"
+import PostgreSqllIcon from "../svgicons/postgerSQL.svg"
 import {cloudChild, objectStorageType} from "../FileTree"
 import {useHotkeys} from "react-hotkeys-hook"
 
@@ -46,24 +46,24 @@ function FileTreeList(props) {
         ? null
         : item.title.substr(index + searchValue.length)
       const showTitle = item.title
-
       let title =
         searchValue !== "" && index > -1 ? (
-          <span className={classNames("filename" + item.key, item.fileType)}>
+          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
             {beforeStr}
             <span className="file-tree-search-value">{searchValue}</span>
             {afterStr}
           </span>
         ) : isObject ? (
-          <span className={classNames("filename" + item.key, item.fileType)}>
+          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
             {showTitle}
           </span>
         ) : (
-          <div>
+          <div style={{position: 'relative'}}>
             <Tooltip title={item.key} mouseEnterDelay={1.5} visible={ overkeys === item.key } onVisibleChange={()=>onVisibleChange(item.key, overkeys == item.key)} placement="topLeft" >
                     <span className={"title-container"}>
                     <span className={classNames("filename" + item.key, item.fileType)}>
                         {showTitle}
+                        <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} style={{ position: 'absolute', zIndex: 3, right: 0, opacity: 0 }}><Spin size="small" /></span>
                     </span>
                       {
                         (cloudChild(item.key) && !item.active)?

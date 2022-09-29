@@ -1,0 +1,3 @@
+[submodule "extension"]
+	path = extension
+	url = git@code.baihai.co:baihai/idp-studio-extension.git

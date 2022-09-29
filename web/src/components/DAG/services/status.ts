@@ -55,12 +55,16 @@ let state = {
 
 const transformStatus = (status) => {
   switch (status) {
+    case 'Init':
+      return 'waiting'
     case 'Pending':
       return 'waiting'
     case 'Running':
       return 'running'
     case 'Success':
       return 'success'
+    case 'Kill':
+      return 'fail'
     case 'Fail':
       return 'fail'
     default:

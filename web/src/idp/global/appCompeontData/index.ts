@@ -46,13 +46,16 @@ class AppComponentData{
         })
       }
     } else {
-      const search = window.location.search
+      let search = window.location.search
       projectId = window.localStorage.getItem("historyOpenProject");
-      const url = window.location.origin + (window.__POWERED_BY_QIANKUN__ ? `/studio/workspace` : "/workspace");
-      console.log(url);
-      
+      const url = (window.__POWERED_BY_QIANKUN__ ? window.location.pathname : "./workspace");
       if (projectId) {
-        window.location.href = `${url}?projectId=${projectId}`;
+        if(search){
+          search += `&projectId=${projectId}`
+        }else{
+          search = `?projectId=${projectId}`
+        }
+        window.location.href = `${url}${search}`;
       } else {
         const qs = new URLSearchParams(search)
         const shareId = qs.get("shareId")
@@ -61,7 +64,12 @@ class AppComponentData{
           projectApi.getProjectPage({ current: 1, size: 5 ,name:''}).then((result) => {
             const { records: projectList } = result.data
             projectId = projectList[0].id
-            window.location.href = `${url}?projectId=${projectId}`
+            if(search){
+              search += `&projectId=${projectId}`
+            }else{
+              search = `?projectId=${projectId}`
+            }
+            window.location.href = `${url}${search}`
           })
         } else {
           locationToProjectListPage()

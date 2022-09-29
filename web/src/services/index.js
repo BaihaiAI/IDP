@@ -9,7 +9,10 @@ import tensorboardApi from './tensorboardApi';
 import warenhouseApi from './warenhouseApi';
 import { manageApiPath } from './httpClient';
 import environmentApi from './environment';
-import projectApi from './projectApi'
+import projectApi from './projectApi';
+import terminalApi from './terminalApi';
+import auditApi from './auditApi';
+
 export {
     userInfoApi,
     resetPassword,
@@ -22,5 +25,7 @@ export {
     warenhouseApi,
     manageApiPath,
     environmentApi,
-    projectApi
+    projectApi,
+    terminalApi,
+    auditApi
 }

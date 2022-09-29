@@ -4,6 +4,23 @@ import { commandApiPath, commandApiPath2, commandManagerApiPath } from "./httpCl
 
 const project = projectId
 
+
+const judgmentDBType = (key) => {
+  let db;
+  switch(key){
+    case 'spark':
+      db = "sparksql"
+      break
+    case 'hive':
+      db = 'hive2'
+      break
+    default:
+      db = key
+  }
+  return db
+}
+
+
 const connectDataBase = ({
   db,
   host,
@@ -14,7 +31,7 @@ const connectDataBase = ({
   aliasDB,
 }) => {
   return request.post(`${commandApiPath}/database/conn`, {
-    db,
+    db: judgmentDBType(db),
     host,
     port,
     username,
@@ -49,7 +66,7 @@ const addDataBase = ({
     }
   */
   return request.post(`${commandManagerApiPath}/command/datasource/add`, {
-    db,
+    db: judgmentDBType(db),
     host,
     port,
     username,
@@ -138,7 +155,7 @@ const reconnectDataBase = (data) => {
     aliasDB,
     username,
     password,
-    db,
+    db: judgmentDBType(db),
     dbUrl,
     dbName,
     project,

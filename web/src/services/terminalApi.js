@@ -1,16 +1,20 @@
 import { projectId, region, teamId } from '../store/cookie';
 import request from "./request";
+import { terminalPath } from './httpClient'
 
-/**
- * workspace/pipeline
- */
 function getTerminal(options) {
-    let url = `${window.__POWERED_BY_QIANKUN__ ? window.location.origin : ''}/${region}/api/v1/terminal/pid?rows=${options.rows}&cols=${options.cols}&teamId=${teamId}&projectId=${projectId}`;
-    return request.get(url);
+  let url = `${terminalPath}/pid?rows=${options.rows}&cols=${options.cols}&teamId=${teamId}&projectId=${projectId}`;
+  return request.get(url);
+}
+
+function openVscode() {
+  let url = `${terminalPath}/vscode`;
+  return request.get(url);
 }
 
 const terminalApi = {
-    getTerminal,
+  getTerminal,
+  openVscode,
 };
 
 export default terminalApi;
