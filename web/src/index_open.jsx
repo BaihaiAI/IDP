@@ -14,10 +14,6 @@ import IdpIdle from './components/IdleDetector';
 import { store } from '@/store';
 import { ConfigProvider } from "antd";
 
-// @ts-ignore
-let pages = require.context("../extension", true, /\/.*config\.json$/);
-pages.keys().map((key, index, arr) => {});
-
 (function(){
     const token = new URLSearchParams(window.location.search).get('token');
     cookie.save('token', token);
