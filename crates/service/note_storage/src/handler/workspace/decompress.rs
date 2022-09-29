@@ -49,8 +49,8 @@ pub async fn unzip(
             let extract_to =
                 business::path_tool::get_store_full_path(team_id, project_id, &extract_to);
             let meta = extract_to.metadata()?;
-            if meta.is_dir() {
-                return Err(ErrorTrace::new("extractTo not a dir "));
+            if !meta.is_dir() {
+                return Err(ErrorTrace::new("extractTo not a dir"));
             }
             extract_to
         }
