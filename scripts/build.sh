@@ -24,3 +24,9 @@ popd
 #tar xf /tmp/pyright.tgz --directory target/release/lsp/
 
 cargo b --release --bin idp --bin idp_kernel
+
+pushd target/release
+curl -O -L http://baihai.cn-bj.ufileos.com/docker-build/python_packages.tgz
+tar zxf python_packages.tgz
+rm python_packages.tgz
+popd
