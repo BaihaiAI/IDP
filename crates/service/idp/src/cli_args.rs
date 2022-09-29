@@ -53,10 +53,10 @@ impl CliArgs {
 impl Default for CliArgs {
     fn default() -> Self {
         Self {
+            listen_addr: None,
             gateway_port: 3000,
             terminal_port: 8089,
             lsp_port: 7777,
-            // submitter_port: 9240,
             redis_port: 16379,
             note_storage_port: 8082,
             kernel_manage_port: 9007,
