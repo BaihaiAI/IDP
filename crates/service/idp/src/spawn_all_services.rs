@@ -78,10 +78,28 @@ pub fn spawn_all_services(args: &CliArgs) {
         );
     }
     std::env::set_var("NODE_BIN", &nodejs_path);
-    if exe_parent_dir.join("lsp").is_dir() {
+    if exe_parent_dir
+        .join("lsp")
+        .join("pyright")
+        .join("server.js")
+        .is_file()
+    {
         std::env::set_var(
             "PY_RIGHT_SERVER_JS",
             exe_parent_dir.join("lsp").join("pyright").join("server.js"),
+        );
+    } else if Path::new(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../../typescript-lsp/packages/vscode-pyright/pyright/server.js"
+    ))
+    .exists()
+    {
+        std::env::set_var(
+            "PY_RIGHT_SERVER_JS",
+            concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../../typescript-lsp/packages/vscode-pyright/pyright/server.js"
+            ),
         );
     }
 
@@ -122,19 +140,6 @@ pub fn spawn_all_services(args: &CliArgs) {
         })
         .unwrap();
 
-    /*
-    let submitter_port = args.submitter_port;
-    let terminal_shutdown_tx_clone = terminal_shutdown_tx.clone();
-    std::thread::Builder::new()
-        .name("submitter".to_string())
-        .spawn(move || {
-            let _panic_guard = PanicGuard {
-                terminal_shutdown_tx: terminal_shutdown_tx_clone,
-            };
-            submitter::main_(submitter_port);
-        })
-        .unwrap();
-    */
     let terminal_shutdown_tx_clone = terminal_shutdown_tx.clone();
     std::thread::Builder::new()
         .name("kernel_manage".to_string())
