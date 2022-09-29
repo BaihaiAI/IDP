@@ -16,6 +16,8 @@
 #[cfg_attr(test, derive(Eq, PartialEq))]
 #[clap(version = env!("VERSION"))]
 pub struct CliArgs {
+    #[clap(long, value_parser, value_name = "IP")]
+    pub listen_addr: Option<std::net::Ipv4Addr>,
     #[clap(long, value_parser, value_name = "PORT", default_value = "3000")]
     pub gateway_port: u16,
     #[clap(long, value_parser, value_name = "PORT", default_value = "8089")]

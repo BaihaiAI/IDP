@@ -55,7 +55,11 @@ async fn main() {
 
     spawn_all_services::spawn_all_services(&args);
 
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], gateway_port));
+    let listen_addr = match args.listen_addr {
+        Some(addr) => addr,
+        None => std::net::Ipv4Addr::LOCALHOST,
+    };
+    let addr = std::net::SocketAddr::from((listen_addr, gateway_port));
     let static_ = hyper_staticfile::Static::new(web_dir);
     let make_svc = make_service_fn(|conn: &AddrStream| {
         let static_ = static_.clone();
