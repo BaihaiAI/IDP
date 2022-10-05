@@ -20,6 +20,7 @@ serde_helper = { path = "../../common/serde_helper" }
 
 chrono = { version = "0.4", features = ["serde"] }
 futures-util = "0.3"
+walkdir = "2.3.2"
 hyper = { version = "0.14", features = ["server", "tcp", "http1"] }
 hyper-tungstenite = "0.8"
 reqwest = { version = "0.11", default-features = false, features = [
