@@ -84,7 +84,7 @@ fn ensure_pth_file_exist(py_path: &String, install_dir: &String) -> Result<Strin
         }
         // traval all file, not found python
         tracing::error!("not found python lib/pythonxxx dir");
-        Err("not found pyton lib/pythonxxxx dir".to_string())
+        Err("not found python lib/pythonxxxx dir".to_string())
     } else {
         tracing::error!("not found python lib dir");
         Err("not found python lib dir".to_string())
