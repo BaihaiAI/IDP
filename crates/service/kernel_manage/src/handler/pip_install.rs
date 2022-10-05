@@ -44,10 +44,9 @@ fn ensure_pth_file_exist(py_path: &String, install_dir: &String) -> Result<Strin
         .map_or(Err(format!("get {} parent failed", path.display())), |x| {
             Ok(x)
         })?;
-    let p2 = p1.parent().map_or(
-        Err(format!("get {} parent 2 failed", path.display())),
-        |x| Ok(x),
-    )?;
+    let p2 = p1
+        .parent()
+        .map_or(Err(format!("get {} parent 2 failed", path.display())), Ok)?;
     let aim_dir = p2.join("lib");
 
     if aim_dir.is_dir() {
@@ -85,18 +84,18 @@ fn ensure_pth_file_exist(py_path: &String, install_dir: &String) -> Result<Strin
         }
         // traval all file, not found python
         tracing::error!("not found python lib/pythonxxx dir");
-        return Err(format!("not found pyton lib/pythonxxxx dir"));
+        Err("not found pyton lib/pythonxxxx dir".to_string())
     } else {
         tracing::error!("not found python lib dir");
-        return Err(format!("not found python lib dir"));
+        Err("not found python lib dir".to_string())
     }
 }
 
 fn write_idp_pth_file(aim: std::path::PathBuf, install_dir: &String) -> Result<String, String> {
-    return std::fs::write(&aim, install_dir)
+    std::fs::write(&aim, install_dir)
         .map_or(Err(format!("write to {} failed", aim.display())), |_| {
             Ok(format!("{}", aim.display()))
-        });
+        })
 }
 
 fn ensure_python2user_install_dir_exist(py_path: &String) -> Result<String, String> {
@@ -106,21 +105,17 @@ fn ensure_python2user_install_dir_exist(py_path: &String) -> Result<String, Stri
         .map_or(Err(format!("get {} parent failed", path.display())), |x| {
             Ok(x)
         })?;
-    let p2 = p1.parent().map_or(
-        Err(format!("get {} parent 2 failed", path.display())),
-        |x| Ok(x),
-    )?;
+    let p2 = p1
+        .parent()
+        .map_or(Err(format!("get {} parent 2 failed", path.display())), Ok)?;
     let aim = p2.join("pm_installed");
     std::fs::create_dir_all(&aim)
         .map_or(Err(format!("create dir {} failed", aim.display())), |_| {
             Ok("")
         })?;
-    return aim
-        .into_os_string()
+    aim.into_os_string()
         .into_string()
-        .map_or(Err(format!("trans path XXX to string failed")), |ret| {
-            Ok(ret)
-        });
+        .map_or(Err("trans path XXX to string failed".to_string()), Ok)
 }
 
 pub async fn pip_install(req: Request<Body>) -> Result<Resp<()>, Error> {
@@ -128,7 +123,7 @@ pub async fn pip_install(req: Request<Body>) -> Result<Resp<()>, Error> {
     let package_name = req.package_name;
     let version = req.version;
 
-    return real_install(py_path, package_name, version).await;
+    real_install(py_path, package_name, version).await
 }
 
 pub async fn real_install(
@@ -140,9 +135,9 @@ pub async fn real_install(
     // let linux_username = business::team_id_tool::team_id_to_user_name(team_id);
 
     let install_dir = ensure_python2user_install_dir_exist(&py_path)
-        .map_or(Err(Error::new("make dir failed")), |ret| Ok(ret))?;
+        .map_or(Err(Error::new("make dir failed")), Ok)?;
     ensure_pth_file_exist(&py_path, &install_dir)
-        .map_or(Err(Error::new("check pth file failed")), |ret| Ok(ret))?;
+        .map_or(Err(Error::new("check pth file failed")), Ok)?;
 
     let mut cmd = tokio::process::Command::new(py_path);
     cmd
