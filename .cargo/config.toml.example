@@ -1,0 +1,9 @@
+# for homebrew install python
+[target.x86_64-apple-darwin]
+rustflags = ["-L", "/opt/homebrew/lib/", "-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+#[env]
+#PYO3_PYTHON="/opt/homebrew/bin/python3"
+
+# for conda install python
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]

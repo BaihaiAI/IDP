@@ -1,0 +1,8 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "serde_helper"
+version.workspace = true
+
+[dependencies]
+serde = "1.0"

@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "sources": [
+    "../src/index.tsx"
+  ],
+  "names": [
+    "React",
+    "forwardRef",
+    "MarkdownEditor",
+    "props",
+    "ref",
+    "prefixCls",
+    "className",
+    "onChange",
+    "toolbars",
+    "toolbarsMode",
+    "visible",
+    "visibleEditor",
+    "previewProps",
+    "codemirrorProps",
+    "value",
+    "setValue",
+    "codeMirror",
+    "previewContainer",
+    "editor",
+    "setEditor",
+    "container",
+    "containerEditor",
+    "preview",
+    "current",
+    "toolBarProps",
+    "editorProps",
+    "codeEditor",
+    "data",
+    "getValue",
+    "instance",
+    "mdp"
+  ],
+  "mappings": "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",
+  "sourcesContent": [
+    "import React, { useState, createRef, useRef, useEffect, useImperativeHandle, useMemo } from 'react';\nimport CodeMirror, { ICodeMirror } from './components/CodeMirror';\nimport MarkdownPreview, { MarkdownPreviewProps } from '@uiw/react-markdown-preview';\nimport ToolBar, { IToolBarProps } from './components/ToolBar';\nimport { getCommands, getModeCommands } from './commands';\nimport './index.less';\n\nexport * from './commands';\n\nexport interface IMarkdownEditor extends ICodeMirror {\n  className?: string;\n  prefixCls?: string,\n  value?: string,\n  height?: number,\n  visible?: boolean,\n  visibleEditor?: boolean,\n  toolbars?: IToolBarProps['toolbars'],\n  toolbarsMode?: IToolBarProps['toolbars'],\n  previewProps?: MarkdownPreviewProps;\n  options?: CodeMirror.EditorConfiguration,\n}\n\nexport interface MarkdownEditorRef {\n  editor?: CodeMirror.Editor;\n  preview?: HTMLDivElement | null;\n}\n\nexport default React.forwardRef<MarkdownEditorRef, IMarkdownEditor>(MarkdownEditor);\n\nfunction MarkdownEditor(\n  props: IMarkdownEditor,\n  ref?:\n    | ((instance: MarkdownEditorRef) => void)\n    | React.RefObject<MarkdownEditorRef>\n    | null\n) {\n  const {\n    prefixCls = 'md-editor', className,\n    onChange,\n    toolbars = getCommands(),\n    toolbarsMode = getModeCommands(),\n    visible = true,\n    visibleEditor = true,\n    previewProps = {}, ...codemirrorProps } = props;\n  const [value, setValue] = useState(props.value || '');\n  const codeMirror = createRef<CodeMirror>();\n  const previewContainer = useRef<HTMLDivElement | null>()\n  const [editor, setEditor] = useState<CodeMirror.Editor>();\n\tconst container = useRef<HTMLDivElement>(null);\n\tconst containerEditor = useRef<HTMLDivElement>(null);\n\n  useImperativeHandle(ref, () => ({\n    editor: editor,\n    preview: previewContainer.current,\n  }));\n\n  useEffect(() => {\n    if (codeMirror.current) {\n      setEditor(codeMirror.current.editor);\n    }\n  }, [codeMirror.current]);\n\n  const toolBarProps = {\n    editor,\n    preview: previewContainer.current,\n    container: container.current,\n    containerEditor: containerEditor.current,\n    editorProps: props\n  }\n  const codeEditor = useMemo(() => (\n    <CodeMirror\n      visibleEditor={visibleEditor}\n      {...codemirrorProps}\n      ref={codeMirror}\n      onChange={(editor, data) => {\n        setValue(editor.getValue());\n        onChange && onChange(editor, data, editor.getValue())\n      }}\n    />\n  ), [visibleEditor, codemirrorProps])\n  return (\n    <div ref={container}>\n      <div className={`${prefixCls || ''} ${className || ''}`}>\n        <ToolBar {...toolBarProps} toolbars={toolbarsMode} mode />\n        <ToolBar {...toolBarProps} toolbars={toolbars} />\n        <div className={`${prefixCls}-content`}>\n          <div className={`${prefixCls}-content-editor`} ref={containerEditor}>\n            {visibleEditor && codeEditor}\n          </div>\n          <MarkdownPreview\n            {...previewProps}\n            data-visible={!!visible}\n            className={`${prefixCls}-preview`}\n            ref={(instance) => {\n              if(instance && instance.mdp) {\n                previewContainer.current = instance.mdp.current\n              }\n            }}\n            source={value}\n          />\n        </div>\n      </div>\n    </div>\n  );\n}\n"
+  ]
+}

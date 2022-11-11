@@ -1,0 +1,56 @@
+@startuml diagram
+autonumber
+
+actor User
+participant KernelManage_handle_ws
+participant KernelManage_req_consumer_coroutinue [
+    =KernelManage
+    ----
+    ""req_consumer coroutinue""
+]
+participant Submitter
+participant KernelManage_AppContext_coroutinue [
+    =KernelManage
+    ----
+    ""AppContext coroutinue""
+]
+participant KernelManage_kernel_ws_conn [
+    =KernelManage
+    ----
+    ""KernelEntry""
+]
+participant IdpKernel_WsThread [
+    =IdpKernel
+    ----
+    ""WsThread""
+]
+participant IdpKernel_OutputSenderThread
+entity IdpKernel_PyMainThread
+
+User -> KernelManage_handle_ws: execute
+KernelManage_handle_ws -> KernelManage_AppContext_coroutinue: subscribe broadcast_output_to_all_ws_write
+KernelManage_handle_ws -> KernelManage_req_consumer_coroutinue: req_producer
+KernelManage_req_consumer_coroutinue -> KernelManage_AppContext_coroutinue: whether kernel start
+
+hnote over KernelManage_AppContext_coroutinue: if kernel not start
+KernelManage_req_consumer_coroutinue -> Submitter: req_submitter_spawn_kernel
+Submitter -> IdpKernel_WsThread: os.Popen
+Submitter -> IdpKernel_OutputSenderThread: os.Popen
+Submitter -> IdpKernel_PyMainThread: os.Popen
+IdpKernel_WsThread --> KernelManage_AppContext_coroutinue: kernel_manage_ws_connect\nkernel_ws_conn_insert_rx
+loop retry 50 times sleep 300ms
+    KernelManage_req_consumer_coroutinue <-- KernelManage_AppContext_coroutinue: kernel_ws_conn_take_tx
+end
+KernelManage_req_consumer_coroutinue -> KernelManage_kernel_ws_conn: generate
+
+hnote over KernelManage_AppContext_coroutinue: if kernel started
+KernelManage_req_consumer_coroutinue -> KernelManage_kernel_ws_conn: add_req_to_pending
+KernelManage_kernel_ws_conn -> IdpKernel_WsThread: if kernel idle\nsend one req\nfrom pending queue
+IdpKernel_WsThread -> IdpKernel_PyMainThread: execute_tx.send
+IdpKernel_OutputSenderThread <-- IdpKernel_PyMainThread: output
+IdpKernel_WsThread <-- IdpKernel_OutputSenderThread: output_rx
+KernelManage_kernel_ws_conn <-- IdpKernel_WsThread: handle_kernel_execute_resp
+KernelManage_AppContext_coroutinue <-- KernelManage_kernel_ws_conn: broadcast_output_to_all_ws_write
+KernelManage_handle_ws <-- KernelManage_AppContext_coroutinue: if match broadcast
+User <-- KernelManage_handle_ws: ws_write.send 
+@enduml

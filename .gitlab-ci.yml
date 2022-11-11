@@ -1,0 +1,8 @@
+stages:
+  - check
+
+check:
+  stage: check
+  #retry: 1
+  script:
+  - ./scripts/ci.sh

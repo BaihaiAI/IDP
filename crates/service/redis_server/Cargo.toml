@@ -1,0 +1,11 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "redis_server"
+version.workspace = true
+
+[dependencies]
+business = { path = "../../common/business" }
+err = { path = "../../common/err" }
+
+resp = "1.0.3"

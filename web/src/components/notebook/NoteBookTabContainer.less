@@ -1,0 +1,131 @@
+#notebook-tab-container {
+  height: 100% !important;
+  .cm-s-xq-light span.cm-meta {
+      color: #DBAA1A;
+    }
+  .ant-tabs{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .ant-tabs-content-holder{
+      height: 100%;
+      .ant-tabs-content{
+          height: 100%;
+        .ant-tabs-tabpane{
+          height: 100%;
+          > div:first-child{
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+          }
+        }
+      }
+    }
+  }
+  .circle-icon {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 100%;
+    transform: translateY(-2px) translateX(-2px);
+    &.idle{
+      background-color: #44B84D
+    }
+    &.busy{
+      background-color: #F2C635
+    }
+    &.pause{
+      background-color: #8C58EB
+    }
+  }
+  .ant-tabs-nav-operations {
+    background-color: #f4f6f8;
+    &:hover {
+      .ant-tabs-nav-more {
+        > span {
+          background-color: #dfe5eb;
+        }
+      }
+    }
+    .ant-tabs-nav-more {
+      > span {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+      }
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+  }
+  .ant-tabs-nav {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+    .ant-tabs-nav-wrap {
+      background-color: #f4f6f8;
+      //border-bottom: 1px solid #e2e8f0;
+    }
+  }
+  .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab,
+  .ant-tabs-card > div > .ant-tabs-nav .ant-tabs-tab {
+    border-radius: 0;
+    border: 0;
+    background-color: transparent;
+    font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+    font-size: 12px;
+    padding: 9px 16px;
+    height: 32px;
+    &:hover {
+      background-color: #dfe5eb;
+      .ant-tabs-tab-remove {
+        opacity: 1;
+      }
+    }
+    &:first-of-type {
+      margin-left: 31px;
+    }
+    &.ant-tabs-tab-active {
+      .ant-tabs-tab-btn {
+        color: #333333;
+      }
+      background-color: #fff;
+      border-radius: 10px 10px 0 0;
+      &:first-of-type {
+      }
+      &:not(:first-of-type) {
+        /*        background: url("./矩形备份 11.svg");
+        background-position-x: 0;
+        background-position-y: 0;
+        background-size: cover;*/
+      }
+    }
+    .ant-tabs-tab-btn {
+      color: #333333;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .ant-tabs-tab-remove {
+      opacity: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      transform: translateX(4px) translateY(2px);
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      span {
+        svg {
+          width: 10px;
+          height: 10px;
+        }
+      }
+      &:hover {
+        background-color: #dfe5eb;
+      }
+    }
+    .ant-tabs-tab-btn {
+      color: #666666;
+      height: 14px;
+    }
+  }
+}

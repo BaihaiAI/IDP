@@ -1,0 +1,26 @@
+[
+    {
+        "fileName": "menus",
+        "entry": "files.tsx"
+    },
+    {
+        "fileName": "menus",
+        "entry": "view.tsx"
+    },
+    {
+        "fileName": "menus",
+        "entry": "run.tsx"
+    },
+    {
+        "fileName": "menus",
+        "entry": "kernel.tsx"
+    },
+    {
+        "fileName": "menus",
+        "entry": "tool.tsx"
+    },
+    {
+        "fileName": "menus",
+        "entry": "help.tsx"
+    }
+]

@@ -1,0 +1,41 @@
+.md-editor {
+  color: #24292e;
+  text-align: left;
+  border-radius: 3px;
+  position: relative;
+  background-color: #fff;
+}
+.md-editor-content {
+  position: relative;
+}
+.md-editor-fullscreen .md-editor {
+  border-radius: 0;
+}
+.md-editor-fullscreen {
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.md-editor-fullscreen .md-editor-toolbar {
+  border-radius: 0;
+}
+.md-editor-preview {
+  background-color: #fff;
+  padding: 20px;
+  width: 0%;
+  overflow: hidden;
+  border-left: 0;
+  box-sizing: border-box;
+  word-break: break-all;
+}
+.md-editor h1 a,
+.md-editor h2 a,
+.md-editor h3 a,
+.md-editor h4 a,
+.md-editor h5 a,
+.md-editor h6 a {
+  display: none;
+}

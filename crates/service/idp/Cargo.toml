@@ -1,0 +1,35 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "idp"
+version.workspace = true
+
+[features]
+default = []
+license = ["dep:license_generator", "dep:rand"]
+
+[dependencies]
+business = { path = "../../common/business" }
+hyper_reverse_proxy = { path = "../../vendor/hyper_reverse_proxy" }
+kernel_manage = { path = "../kernel_manage" }
+license_generator = { path = "../../license_generator", optional = true }
+logger = { path = "../../common/logger" }
+lsp = { path = "../lsp" }
+note_storage = { path = "../note_storage" }
+redis_server = { path = "../redis_server" }
+
+clap = { version = "3.2", default-features = false, features = [
+    "std",
+    "derive",
+] }
+hyper = { version = "0.14", features = ["server", "client", "http1", "tcp"] }
+rand = { version = "0.8", optional = true }
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+#hyper-reverse-proxy = "0.5.1", 0.5 not support websocket, so we use git rev=a4deffe
+#we vendor this crate instead of git dep because github is very slow in china
+hyper-staticfile = "0.9.1"
+once_cell = "1.12.0"
+tracing = "0.1"
+
+[build-dependencies]
+git_version = { path = "../../common/git_version" }

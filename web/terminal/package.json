@@ -1,0 +1,11 @@
+{
+  "name": "terminal",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "express": "^4.17.1",
+    "express-ws": "^4.0.0",
+    "node-pty": "^0.9.0"
+  }
+}

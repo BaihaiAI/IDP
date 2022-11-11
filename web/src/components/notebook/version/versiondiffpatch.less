@@ -1,0 +1,276 @@
+.VersionDiffPatch{
+  .ant-drawer-content-wrapper{
+          width: 100% !important;
+  }
+  .ant-drawer-wrapper-body{
+    .ant-drawer-header{
+      border-bottom: 1px solid #d6dee6;
+      .ant-drawer-title{
+        cursor: pointer;
+        font-weight: 800;
+      }
+    }
+    .ant-drawer-body{
+      display: flex;
+      padding: 0;
+      .diff-patch{
+        flex: 1;
+        padding: 10px 24px 32px 24px;
+        display: flex;
+        flex-direction: column;
+        min-width: 500px;
+        .hideUn{
+          padding: 10px 0 8px 0;
+          span{
+            user-select: none;
+            white-space: nowrap;
+          }
+          .ant-radio-inner{
+            border-radius: 12%;
+            border-color: #1890ff;
+          }
+          .ant-radio-inner::after{
+            background-color: #1890ff;
+            border-radius: 12%;
+          }
+        }
+        .diff-cells{
+          flex: 1 1;
+          min-width: 400px;
+          position: relative;
+          overflow-y: auto;
+          box-shadow: inset 0px 4px 20px 0px rgb(0 0 0 / 10%);
+          border-radius: 4px;
+          .deff-cell-left{
+            width: 50%;
+            padding: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .puppet{
+              width: 100%;
+              display: flex;
+              justify-content: space-around;
+            }
+          }
+          .deff-cell-right{
+            width: 50%;
+            padding: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            margin: 0;
+            border-left: 1px solid rgb(0 0 0 / 10%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100%;
+            .puppet{
+              width: 100%;
+              display: flex;
+              justify-content: space-around;
+            }
+          }
+        }
+      }
+      .no-diff{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        div{
+          width: 190px;
+          img{
+            width: 190px;
+            height: 120px;
+          }
+          p{
+            line-height: 50px;
+            font-weight: 600;
+            text-align: center;
+            color: #999999;
+            font-size: 18px;
+          }
+        }
+      }
+      .right-sider{
+        padding-left: 8px;
+        padding-bottom: 24px;
+        width: 350px;
+        border-left: 1px solid #d6dee6;
+        .snapshot-list{
+          max-height: 100%;
+          overflow: auto;
+          display: flex;
+          .snapshot-list-select{
+            width: 80px;
+            display: flex;
+            justify-content: space-around;
+            .left{
+              .ant-radio-wrapper{
+                height: 84px;
+                display: flex;
+                align-items: center;
+              }
+              .ant-radio-inner::after{
+                background-color: #1890ff;
+              }
+              .ant-radio-checked .ant-radio-inner {
+                border-color: #1890ff;
+              }
+            }
+            .right{
+              .ant-radio-wrapper{
+                height: 84px;
+                display: flex;
+                align-items: center;
+              }
+              .ant-radio-inner::after{
+                background-color: #1890ff;
+              }
+              .ant-radio-checked .ant-radio-inner {
+                border-color: #1890ff;
+              }
+            }
+          }
+          .snapshot-list-warper{
+            flex: 1;
+            .snapshot-puppet{
+              .version-list-body{
+                // flex: 1;
+                padding: 15px 15px 15px 0;
+                .version-list-item{
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  cursor: pointer;
+                }
+                .version-list-item > span{
+                  font-size: 15px;
+                  color: #333;
+                  font-weight: bold;
+                  display: inline-block;
+                  width: 200px;
+                  overflow: hidden;
+                  text-overflow:ellipsis;
+                  white-space: nowrap;
+                }
+                .revert-timestamp{
+                  white-space: nowrap;
+                  text-overflow: ellipsis;
+                  overflow: hidden;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+.cells-block{
+width: 90%;
+border: 1px solid #d6dee6;
+border-radius: 9px;
+margin: 15px 15px;
+background-color: #f4f6f8;
+overflow-x: auto;
+padding-top: 35px;
+padding-bottom: 14px;
+// overflow: hidden;
+.cells-black-warp{
+  position: relative;
+  .cell-title{
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    font-weight: 500;
+    top: -30px;
+    left: 0;
+    line-height: 30px;
+    font-size: 16px;
+    padding-left: 35px;
+    color: #999999;
+    user-select: none;
+  }
+  .cell-sql{
+    height: 34px;
+    min-width: 100%;
+    padding-left: 35px;
+    border-top: 1px solid #DBE2E9;
+    border-bottom: 1px solid #DBE2E9;
+    background: #fff;
+    .p1, .p2{
+      float: left;
+      width: 165px;
+      line-height: 32px;
+      height: 32px;
+      margin: 0;
+      padding-left: 15px;
+    }
+    .p2{
+      border-left: 1px solid #DBE2E9;
+    }
+  }
+  .cell-vis{
+    height: 34px;
+    min-width: 100%;
+    padding-left: 35px;
+    border-top: 1px solid #DBE2E9;
+    border-bottom: 1px solid #DBE2E9;
+    background: #fff;
+    .p1, .p2{
+      float: left;
+      width: 165px;
+      line-height: 32px;
+      height: 32px;
+      margin: 0;
+      padding-left: 15px;
+    }
+    .p2{
+      border-left: 1px solid #DBE2E9;
+    }
+  }
+}
+}
+.cell-row{
+height: 22px;
+font-size: 14px;
+font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+white-space: nowrap;
+padding: 2px 0;
+p{
+  display: inline-block;
+  line-height: 22px;
+  height: 22px;
+  margin: 0;
+  min-width: 100%;
+  position: relative;
+  padding-left: 35px;
+  span{
+    position: absolute;
+    display: inline-block;
+    width: 35px;
+    line-height: 22px;
+    color: #a5a5a5;
+    text-align: center;
+    left: 0;
+    user-select: none;
+  }
+}
+}
+
+.hide{
+visibility: hidden;
+}
+.new-cell{
+background: #ffe1e1 !important;
+}
+.cell-ashes{
+display: none;
+}

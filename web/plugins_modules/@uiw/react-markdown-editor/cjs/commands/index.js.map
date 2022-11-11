@@ -1,0 +1,33 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/index.tsx"
+  ],
+  "names": [
+    "defaultCommands",
+    "bold",
+    "italic",
+    "header",
+    "strike",
+    "underline",
+    "olist",
+    "ulist",
+    "link",
+    "todo",
+    "image",
+    "fullscreen",
+    "preview",
+    "getCommands",
+    "Object",
+    "keys",
+    "filter",
+    "key",
+    "test",
+    "map",
+    "getModeCommands"
+  ],
+  "mappings": ";;;;;;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AACA;;AAqBO,IAAMA,eAAe,GAAG;AAAEC,EAAAA,IAAI,EAAJA,UAAF;AAAQC,EAAAA,MAAM,EAANA,cAAR;AAAgBC,EAAAA,MAAM,EAANA,cAAhB;AAAwBC,EAAAA,MAAM,EAANA,cAAxB;AAAgCC,EAAAA,SAAS,EAATA,oBAAhC;AAA2CC,EAAAA,KAAK,EAALA,YAA3C;AAAkDC,EAAAA,KAAK,EAALA,YAAlD;AAAyDC,EAAAA,IAAI,EAAJA,UAAzD;AAA+DC,EAAAA,IAAI,EAAJA,UAA/D;AAAqEC,EAAAA,KAAK,EAALA,YAArE;AAA4EC,EAAAA,UAAU,EAAVA,sBAA5E;AAAwFC,EAAAA,OAAO,EAAPA;AAAxF,CAAxB;;;AAEA,IAAMC,WAA6B,GAAG,SAAhCA,WAAgC;AAAA,SAC3CC,MAAM,CAACC,IAAP,CAAYf,eAAZ,EAA6BgB,MAA7B,CAAoC,UAAAC,GAAG;AAAA,WAAI,CAAC,wBAAwBC,IAAxB,CAA6BD,GAA7B,CAAL;AAAA,GAAvC,EACGE,GADH,CACO,UAACF,GAAD;AAAA,WAASjB,eAAe,CAACiB,GAAD,CAAxB;AAAA,GADP,CAD2C;AAAA,CAAtC;;;;AAIA,IAAMG,eAAiC,GAAG,SAApCA,eAAoC;AAAA,SAAM,CAACR,gBAAD,EAAUD,sBAAV,CAAN;AAAA,CAA1C",
+  "sourcesContent": [
+    "import { Editor, Position } from 'codemirror';\nimport { bold } from './bold';\nimport { italic } from './italic';\nimport { header } from './header';\nimport { strike } from './strike';\nimport { underline } from './underline';\nimport { olist } from './olist';\nimport { ulist } from './ulist';\nimport { link } from './link';\nimport { todo } from './todo';\nimport { image } from './image';\nimport { fullscreen } from './fullscreen';\nimport { preview } from './preview';\nimport { IMarkdownEditor } from '../';\n\nexport type ButtonHandle = (command: ICommand, props: IMarkdownEditor, options: {\n  preview?: HTMLDivElement | null,\n  container?: HTMLDivElement | null,\n  containerEditor?: HTMLDivElement | null;\n  editor?: Editor;\n}) => JSX.Element\n\nexport type ICommand = {\n  icon?: React.ReactElement;\n  name?: string;\n  keyCommand?: string;\n  button?: ButtonHandle | React.ButtonHTMLAttributes<HTMLButtonElement>;\n  execute?: (editor: Editor, selection: string, position: Position, opts: {\n    preview?: HTMLDivElement | null,\n    container?: HTMLDivElement | null,\n  }) => void;\n}\n\nexport const defaultCommands = { bold, italic, header, strike, underline, olist, ulist, link, todo, image, fullscreen, preview }\n\nexport const getCommands: () => ICommand[] = () => \n  Object.keys(defaultCommands).filter(key => !/^(fullscreen|preview)/.test(key))\n    .map((key) => defaultCommands[key as (keyof (typeof defaultCommands))]);\n\nexport const getModeCommands: () => ICommand[] = () => [preview, fullscreen];"
+  ]
+}

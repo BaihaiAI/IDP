@@ -1,0 +1,52 @@
+.zipview {
+    // 
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+
+    .zipview-header {
+        border-bottom: 1px solid #ddd;
+        position: fixed;
+        height: 31px;
+        background-color: #f7f7f7;
+        padding: 0 20px 0 30px;
+        width: 100%;
+        z-index: 2;
+
+        .zh-span {
+            line-height: 30px;
+            font-size: 14px;
+        }
+    }
+
+    .zipview-content {
+        flex: 1;
+        padding: 0 20px 0 30px;
+        display: flex;
+        position: relative;
+        top: 30px;
+
+        .ant-tree,
+        .ant-tree-icon-hide,
+        .ant-tree-block-node,
+        .ant-tree-directory {
+            width: 100%;
+        }
+
+        .zipview-spin {
+            width: 100%;
+            align-items: center;
+            display: flex;
+            justify-content: space-around;
+        }
+    }
+
+    .zh-zip {
+        position: absolute;
+        top: 0px;
+        font-size: 13px;
+        cursor: pointer;
+        color: #3793EF;
+        top: 5px;
+    }
+}

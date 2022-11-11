@@ -1,0 +1,122 @@
+.setting {
+  display: flex;
+  flex-direction: column;
+  .account {
+    flex: 1;
+    box-sizing: border-box;
+    // padding: 40px 32px 0 32px;
+    .account-title {
+      font-size: 16px;
+      font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+      font-weight: normal;
+      color: #333333;
+      line-height: 18px;
+      user-select: none;
+      padding-bottom: 32px;
+    }
+    .change-avatar {
+      height: 175px;
+      width: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      .portrait {
+        width: 140px;
+        height: 140px;
+        background-color: #e3f0ffff;
+        border-radius: 50%;
+        margin-bottom: 11px;
+        overflow: hidden;
+        img {
+          width: 100%;
+          height: auto;
+        }
+      }
+    }
+    .information {
+      background: #ffffff;
+      box-shadow: 0px 0px 4px 1px #ebebeb;
+      border-radius: 8px;
+      margin-top: 40px;
+      padding: 23px 26px;
+      .info-ul {
+        padding: 0;
+        margin-bottom: 0;
+        .info-png {
+          background-size: 15px !important;
+        }
+        li {
+          padding: 15px 0;
+          font-size: 16px;
+          font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+          font-weight: normal;
+          color: #333333;
+          line-height: 18px;
+          padding-left: 20px;
+          background-size: 15px 15px;
+          background-repeat: no-repeat;
+          background-position: 0 50%;
+          width: 350px;
+          list-style: none;
+          span {
+            position: relative;
+            >p.edit-name {
+              width: 15px;
+              height: 15px;
+              position: absolute;
+              right: -20px;
+              top: 50%;
+              margin-top: -7px;
+              background-size: 100% 100%;
+              cursor: pointer;
+              // background-size: 100% 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.change-password-modal {
+  .ant-modal-header,
+  .ant-modal-body,
+  .ant-modal-footer {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+}
+
+.add-or-update-project-modal,
+.git-clone-project-modal {
+  .ant-modal-header,
+  .ant-modal-body,
+  .ant-modal-footer {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+}
+
+.ant-modal-content{
+  // width: 440px !important;
+  margin: 0 auto;
+}
+
+.stopClick{
+  background-color: #999 !important;
+  border: 1px solid #999 !important;
+  cursor: not-allowed
+}
+.sendvic{
+  width: 120px;
+  height: 40px !important;
+  margin-top: 1px;
+  border-radius: 0 2px 2px 0 !important;
+}
+.sendinput{
+  //width: 248px;
+  height: 40px !important;
+  border-radius: 2px 0 0 2px !important;
+  border-right: 0 !important;
+}

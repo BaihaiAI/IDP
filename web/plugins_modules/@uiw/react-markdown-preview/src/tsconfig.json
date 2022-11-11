@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "jsx": "react",
+    "baseUrl": "./",
+    "emitDeclarationOnly": true,
+    "noEmit": false
+  }
+}

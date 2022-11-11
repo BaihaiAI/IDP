@@ -1,0 +1,21 @@
+# IDE
+.idea
+.vscode
+*.swp
+
+.DS_Store
+
+# rust
+.cargo/config.toml
+/target
+Cargo.lock
+
+__pycache__
+
+dist
+*.tar.gz
+
+kernel_manage.db
+crates/service/kernel_manage/kernel_manage.db
+*.whl
+cursors

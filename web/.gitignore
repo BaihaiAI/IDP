@@ -1,0 +1,23 @@
+#code
+node_modules
+dist
+dist_source
+
+/dll
+/login_test
+/logins
+
+#IDE
+.vscode
+.idea
+
+#npm yarn
+yarn-error.log
+yarn.lock
+package-lock.json
+
+*.DS_Store
+
+dll_plugins
+
+source

@@ -1,0 +1,212 @@
+{
+  "version":[
+    {
+      "time": "2022-09-01",
+      "versionnum": "V 1.16.0",
+      "characteristic": [
+        "[系统架构]: 前端调整成微应用架构，功能模块通过插件方式集成",
+        "[工作区]: 新增idpnb格式文件，为notebook默认文件格式",
+        "[数据集成]: 新增spark和hive数据源"
+      ],
+      "repair": [],
+      "functionadjustment": [
+      ]
+    },
+    {
+      "time": "2022-07-23",
+      "versionnum": "V 1.15.0",
+      "characteristic": [
+        "[计算引擎]: 增加资源调度，任务优先级队列，团队内资源共享，根据任务优先级进行调度",
+        "[工作区]: 运行notebook时增加资源设置，可自定义CPU、CPU、内存资源",
+        "[工作区]: 运行notebook时增加优先级(1-100)设置，优先级越高，资源越先分配",
+        "[工作流]: 工作流增加优先级(1-100)设置，优先级越高，资源越先分配",
+        "[工作流]: 工作流增加运行环境设置，可选择运行环境，默认为当前环境"
+      ],
+      "repair": [],
+      "functionadjustment": [
+        "[计算单元]: 训练时是否使用GPU从底部工具栏计算单元中的切换CPU/GPU调整为设置GPU个数来指定，GPU设置大于0时，训练时使用GPU，否则使用CPU"
+      ]
+    },
+    {
+      "time": "2022-07-12",
+      "versionnum": "V 1.14.1",
+      "characteristic": [
+      ],
+      "repair": [
+
+      ],
+      "functionadjustment": [
+        "[模型管理]: 模型发布时增加进度条"
+      ]
+    },
+    {
+      "time": "2022-07-02",
+      "versionnum": "V 1.14.0",
+      "characteristic": [
+        "[工作区]: 增加模型发布功能",
+        "[工作区]: 支持文件和文件夹压缩",
+        "[侧边栏]: 增加模型管理功能"
+      ],
+      "repair": [
+        "[工作区]: 修复进度条被拆成多行显示"
+      ],
+      "functionadjustment": [
+
+      ]
+    },
+    {
+      "time": "2022-06-22",
+      "versionnum": "V 1.13.1",
+      "characteristic": [
+
+      ],
+      "repair": [
+        "[工作区]: 修复公共代码片段搜索功能不生效的bug"
+      ],
+      "functionadjustment": [
+
+      ]
+    },
+    {
+      "time": "2022-06-20",
+      "versionnum": "V 1.13.0",
+      "characteristic": [
+        "[工作区]: 右边侧边栏增加公共代码片段管理功能"
+      ],
+      "repair": [
+      ],
+      "functionadjustment": [
+        "[作业和资源监控]: 工作流任务增加日志查看功能"
+      ]
+    },
+    {
+      "time": "2022-06-14",
+      "versionnum": "V 1.12.3",
+      "characteristic": [
+      ],
+      "repair": [
+        "[工作流]: 修复编辑时不展示DAG图的bug",
+        "[历史快照]: 修复第一次diff时无法显示的bug"
+      ],
+      "functionadjustment": [
+      ]
+    },
+    {
+      "time": "2022-06-08",
+      "versionnum": "V 1.12.2",
+      "characteristic": [
+        "[侧边栏]: 增加任务监控"
+      ],
+      "repair": [],
+      "functionadjustment": [
+        "[工作区]: 调整终端显示位置"
+      ]
+    },
+    {
+      "time": "2022-05-25",
+      "versionnum": "V 1.12.1",
+      "characteristic": [
+        "[工作区]: 快照增加diff功能",
+        "[工作区]: 删除cell可以通过ctrl+z撤销"
+      ],
+      "repair": [],
+      "functionadjustment": [
+        "[项目页]: 刷新页面时保持当前页面"
+      ]
+    },
+    {
+      "time": "2022-05-22",
+      "versionnum": "V 1.11.3",
+      "characteristic": [
+        "[计算引擎]: 编码与运行资源分离，团队内部资源共享，动态使用",
+        "[工作区]: 新增常用快捷键",
+        "[环境]: 新增CPU/GPU切换"
+      ],
+      "repair": [],
+      "functionadjustment": [
+
+      ]
+    },
+    {
+      "time": "2022-04-11",
+      "versionnum": "V 1.10.3",
+      "characteristic": [
+        "[数据源]: 新增Aliyun NAS、UCloud NFS",
+        "[工作区/环境管理]: 预置常用的运行环境，新增CUDA 11.3 和 CUDA 10.2 两个版本可选择，在工作区底部的环境列表中可切换环境"
+      ],
+      "repair": [
+        "[工作区/目录树]: 修复已打开的文件无法删除的问题",
+        "[工作区/代码单元格]: 修复运行单元格按钮错位和消失问题",
+        "[工作区/Python单元格]: 修复单元格输出中“加载”和“进度条”显示异常的问题"
+      ],
+      "functionadjustment": [
+        "[工作区/目录树]: 外部数据源增加重新连接功能",
+        "[工作区/Python单元格]: import 的包未安装，通过「快速修复」功能便捷安装时可选择包版本号"
+      ]
+    },
+    {
+      "time": "2022-04-02",
+      "versionnum": "V 1.10.2",
+      "characteristic": [
+        "[团队管理]: 新增成员管理和资源管理",
+        "[工作区/代码单元格]: 新增运行当前单元格及以上所有单元格、运行当前单元格及以下所有单元格"
+      ],
+      "repair": [
+      ],
+      "functionadjustment": [
+        "[kernel]: 替换jupyter kernel为idp kernel"
+      ]
+    },
+    {
+      "time": "2022-03-07",
+      "versionnum": "V 1.7.66.beta",
+      "characteristic": [
+        "[工作区]: 增加运行当前cell及以上所有cell, 运行当前cell及以下所有cell"
+      ],
+      "repair": [
+        "[工作区]: 修复运行cell按钮随动",
+        "[目录树]: 修复无法删除打开文件问题"
+      ],
+      "functionadjustment": [
+        "[工作区]: Tab键转换成4个空格",
+        "[目录树]: 外部数据源增加重新连接功能"
+      ]
+    },
+    {
+      "time": "2022-03-05",
+      "versionnum": "V 1.7.65.beta",
+      "characteristic": [
+        "[菜单]: 关于中增加版本更新日志"
+      ],
+      "repair": [
+        "[工作区]: 修正js处理长整型数据类型精度丢失",
+        "[工作区]: 修正自动安装依赖包时包名错误",
+        "[终端]: 修正终端环境与kernel环境不一致的问题"
+      ],
+      "functionadjustment": [
+        "[工作区]: Tab键转换成4个空格",
+        "[目录树]: 外部数据源增加重新连接功能"
+      ]
+    },
+    {
+      "time": "2022-03-02",
+      "versionnum": "V 1.7.63",
+      "characteristic": [
+        "[代码辅助]: 支持不同项目用对应的环境分析",
+        "[数据源]: 支持 aliyun, aws s3 挂载",
+        "[工作区]: 支持全文搜索",
+        "[目录树]:  同名文件复制支持自动改名"
+      ],
+      "repair": [
+        "[代码辅助]: 浏览器切屏很长时间后, 切回来没有补全提示",
+        "[工作区]: CSV文件预览修正分页和排序错误",
+        "[工作区]: 分享链接没有正确打开",
+        "[工作流]: 偶发资源不回收",
+        "[数据源]: 偶发数据删除失败"
+      ],
+      "functionadjustment":[
+        "[目录树]: Lazyload 增加S3 Mount目录的断线标记"
+      ]
+    }
+  ]
+}

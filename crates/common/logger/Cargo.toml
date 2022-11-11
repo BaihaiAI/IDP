@@ -1,0 +1,17 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "logger"
+version.workspace = true
+
+[features]
+default = []
+#tokio_console = ["dep:console-subscriber"]
+
+[dependencies]
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+    "env-filter",
+    "registry",
+    "fmt",
+    "ansi",
+] }

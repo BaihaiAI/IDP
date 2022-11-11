@@ -1,0 +1,60 @@
+.bh-notebook-version-list{
+        .ant-drawer-body{
+                padding: 0
+        }
+        .version-list{
+                position: relative;
+        }
+        .version-list-title{
+                position:fixed;
+                top:0;
+                right: 0;
+                width:256px;
+                background:#fff;
+                z-index:1;
+                padding: 10px 15px;
+                font-weight: bold;
+                font-size: 16px;
+                color: #000;
+                line-height: 35px;
+                border-bottom: 1px solid #ccc;
+
+        }
+        .version-list-body{
+                padding: 15px;
+        }
+        .version-list-body:hover{
+                background-color: #f0f0f0;
+        }
+        .version-list-item{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+        }
+        .version-list-item > span{
+                font-size: 15px;
+                color: #333;
+                font-weight: bold;
+                display: inline-block;
+                width: 300px;
+        }
+        .revert-timestamp{
+                white-space: nowrap;
+                text-overflow:ellipsis;
+                overflow: hidden;
+        }
+}
+// 快照列表 右上角 close 按钮
+.ant-drawer-header{
+        display: flex;
+        align-items: center;
+        .middle-keybord{
+                display: inline-block;
+                height: 10px;
+                width: 150px
+        }
+}
+.ant-drawer-close{
+        top: auto;
+}

@@ -1,0 +1,10 @@
+[
+    {
+        "fileName": "header",
+        "entry": "idp.tsx"
+    },
+    {
+        "fileName": "header",
+        "entry": "search.tsx"
+    }
+]

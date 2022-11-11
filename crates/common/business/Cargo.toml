@@ -1,0 +1,18 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "business"
+version.workspace = true
+
+[features]
+default = []
+pip_install = ["dep:walkdir"]
+
+[dependencies]
+once_cell = "1.0"
+os_utils = { path = "../os_utils", default-features = false }
+tracing = "0.1.29"
+walkdir = { version = "2.3.2", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+fs_extra = "1.2.0"

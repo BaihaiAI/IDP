@@ -1,0 +1,24 @@
+[workspace]
+members = [
+    "crates/test_runner",
+    "crates/cache_io",
+    # "crates/notebook_cache",
+    "crates/license_generator",
+
+    "crates/service/*",
+    "crates/vendor/*",
+    "crates/common/*",
+    # "crates/ci/*",
+]
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/BaihaiAI/IDP"
+rust-version = "1.64.0"
+version = "0.1.0"
+
+[profile.release]
+lto = true
+# keep debug info for gdb
+debug = true

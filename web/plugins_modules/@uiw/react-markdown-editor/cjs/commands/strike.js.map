@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "sources": [
+    "../../src/commands/strike.tsx"
+  ],
+  "names": [
+    "strike",
+    "name",
+    "keyCommand",
+    "button",
+    "icon",
+    "execute",
+    "editor",
+    "selection",
+    "position",
+    "value",
+    "replaceSelection",
+    "ch",
+    "setCursor",
+    "line",
+    "focus"
+  ],
+  "mappings": ";;;;;;;;;AAAA;;;;AAGO,IAAMA,MAAgB,GAAG;AAC9BC,EAAAA,IAAI,EAAE,QADwB;AAE9BC,EAAAA,UAAU,EAAE,QAFkB;AAG9BC,EAAAA,MAAM,EAAE;AAAE,kBAAc;AAAhB,GAHsB;AAI9BC,EAAAA,IAAI,eACF;AAAK,IAAA,KAAK,EAAC,IAAX;AAAgB,IAAA,MAAM,EAAC,IAAvB;AAA4B,IAAA,OAAO,EAAC,aAApC;AAAA,2BACE;AAAM,MAAA,IAAI,EAAC,cAAX;AAA0B,MAAA,CAAC,EAAC;AAA5B;AADF,IAL4B;AAS9BC,EAAAA,OAAO,EAAE,iBAACC,MAAD,EAASC,SAAT,EAAoBC,QAApB,EAAiC;AACxC,QAAMC,KAAK,GAAGF,SAAS,eAAQA,SAAR,UAAwB,MAA/C;AACAD,IAAAA,MAAM,CAACI,gBAAP,CAAwBD,KAAxB;AACAD,IAAAA,QAAQ,CAACG,EAAT,GAAc,CAAC,CAACJ,SAAF,GAAcC,QAAQ,CAACG,EAAvB,GAA4BH,QAAQ,CAACG,EAAT,GAAc,CAAxD;AACAL,IAAAA,MAAM,CAACM,SAAP,CAAiBJ,QAAQ,CAACK,IAA1B,EAAgCL,QAAQ,CAACG,EAAzC;AACAL,IAAAA,MAAM,CAACQ,KAAP;AACD;AAf6B,CAAzB",
+  "sourcesContent": [
+    "import React from 'react';\nimport { ICommand} from './'\n\nexport const strike: ICommand = {\n  name: 'strike',\n  keyCommand: 'strike',\n  button: { 'aria-label': 'Add strike text' },\n  icon: (\n    <svg width=\"12\" height=\"12\" viewBox=\"0 0 512 512\">\n      <path fill=\"currentColor\" d=\"M496 288H16c-8.837 0-16-7.163-16-16v-32c0-8.837 7.163-16 16-16h480c8.837 0 16 7.163 16 16v32c0 8.837-7.163 16-16 16zm-214.666 16c27.258 12.937 46.524 28.683 46.524 56.243 0 33.108-28.977 53.676-75.621 53.676-32.325 0-76.874-12.08-76.874-44.271V368c0-8.837-7.164-16-16-16H113.75c-8.836 0-16 7.163-16 16v19.204c0 66.845 77.717 101.82 154.487 101.82 88.578 0 162.013-45.438 162.013-134.424 0-19.815-3.618-36.417-10.143-50.6H281.334zm-30.952-96c-32.422-13.505-56.836-28.946-56.836-59.683 0-33.92 30.901-47.406 64.962-47.406 42.647 0 64.962 16.593 64.962 32.985V136c0 8.837 7.164 16 16 16h45.613c8.836 0 16-7.163 16-16v-30.318c0-52.438-71.725-79.875-142.575-79.875-85.203 0-150.726 40.972-150.726 125.646 0 22.71 4.665 41.176 12.777 56.547h129.823z\" />\n    </svg>\n  ),\n  execute: (editor, selection, position) => {\n    const value = selection ? `~~${selection}~~` : '~~~~';\n    editor.replaceSelection(value);\n    position.ch = !!selection ? position.ch : position.ch + 1;\n    editor.setCursor(position.line, position.ch);\n    editor.focus();\n  },\n};"
+  ]
+}

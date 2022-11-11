@@ -1,0 +1,5 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "git_version"
+version.workspace = true

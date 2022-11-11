@@ -1,0 +1,37 @@
+.md-editor-toolbar {
+  border-bottom: 1px solid #dfdfe0;
+  background-color: #fbfbfb;
+  padding: 4px 2px 4px 5px;
+  border-radius: 3px 3px 0 0;
+}
+.md-editor-toolbar button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: 0;
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+  padding: 3px 2px;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.md-editor-toolbar button:hover {
+  color: #06c;
+  background-color: #e8e8e8;
+}
+.md-editor-toolbar button.active {
+  color: #06c;
+}
+.md-editor-toolbar button:active {
+  color: #6a57ff;
+  background-color: #dadada;
+}
+.md-editor-toolbar button svg {
+  vertical-align: middle;
+}
+.md-editor-toolbar-mode {
+  float: right;
+  padding-right: 5px;
+  border-bottom: 0!important;
+}

@@ -1,0 +1,11 @@
+await-holding-invalid-types = [
+    # https://onesignal.com/blog/solving-memory-leaks-in-rust/
+    "tracing::trace::Entered",
+    "tracing::trace::EnteredSpan",
+    # https://github.com/seanmonstar/reqwest/issues/1017
+    "reqwest::blocking::Client",
+]
+disallowed-methods = [
+    { path = "std::iter::Iterator::zip", reason = "if a.len() > b.len(), a.zip(b) would lost some elements in a" },
+]
+too-many-arguments-threshold = 12
