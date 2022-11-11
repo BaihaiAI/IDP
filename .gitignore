@@ -17,5 +17,4 @@ dist
 
 kernel_manage.db
 crates/service/kernel_manage/kernel_manage.db
-*.whl
 cursors
