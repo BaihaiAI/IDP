@@ -16,7 +16,7 @@ edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/BaihaiAI/IDP"
 rust-version = "1.64.0"
-version = "0.1.0"
+version = "1.0.0"
 
 [profile.release]
 lto = true
