@@ -40,9 +40,9 @@ pushd lsp
 set NODEJS_VERSION=v16.17.0
 rmdir node /s /q
 curl -O -L https://registry.npmmirror.com/-/binary/node/latest-v16.x/node-%NODEJS_VERSION%-win-%arch%.zip
-tar zxf node-%NODEJS_VERSION%-windows-x86_64-%arch%.zip
-del node-%NODEJS_VERSION%-windows-x86_64-%arch%.zip
-ren node-%NODEJS_VERSION%-windows-x86_64-%arch% node
+tar zxf node-%NODEJS_VERSION%-win-x64-%arch%.zip
+del node-%NODEJS_VERSION%-win-x64-%arch%.zip
+ren node-%NODEJS_VERSION%-win-x64-%arch% node
 popd
 popd
 

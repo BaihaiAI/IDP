@@ -36,6 +36,12 @@ The core features of IDP are as follows:
 ```
 Then open http://localhost:3000 with your browser.
 
+### Start IDP with pre-built binary
+
+- [Windows x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-win-x64.tar.gz)
+- [macOS macOS](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-arm64.tar.gz)
+- [Linux x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
+
 ### Start with IDP on Cloud:
 Quickly check out IDP SaaS with <https://www.baihai.co/invitation.html>
 
