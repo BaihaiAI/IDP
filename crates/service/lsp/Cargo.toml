@@ -9,7 +9,7 @@ business = { path = "../../common/business" }
 err = { path = "../../common/err" }
 logger = { path = "../../common/logger" }
 
-chrono = "0.4"
+chrono = "0.4.23"
 futures-util = "0.3.19"
 lsp-types = "0.93.0"
 regex = "1.5.4"

@@ -45,6 +45,8 @@ pub struct ExecuteCodeReq {
     /// region only used in baihai_aid
     pub region: String,
     // - executeType field frontend has filter to code, no markdown
+    #[serde(default)]
+    pub enable_save_session: Option<bool>,
 }
 
 /// meta from ipynb json cell struct meta field

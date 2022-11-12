@@ -23,7 +23,7 @@ test_runner = { path = "../../test_runner" }
 axum = { version = "0.5", features = ["multipart", "headers"] }
 axum-macros = "0.2"
 base64 = { version = "0.13.0" }
-chrono = "0.4"
+chrono = "0.4.23"
 encoding_rs = "0.8"
 flate2 = "1.0"
 futures = "0.3"

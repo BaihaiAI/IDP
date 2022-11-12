@@ -73,7 +73,8 @@ impl super::KernelCtx {
                 code: code.clone(),
                 data_source_list,
                 duration_ms: duration,
-                run_at: chrono::NaiveDateTime::from_timestamp(run_at as _, 0),
+                run_at: chrono::NaiveDateTime::from_timestamp_opt(run_at as _, 0)
+                    .expect("chrono from_timestamp_opt"),
                 header: resp.header.clone(),
             };
             if let Err(err) = self.execute_record_db.insert(

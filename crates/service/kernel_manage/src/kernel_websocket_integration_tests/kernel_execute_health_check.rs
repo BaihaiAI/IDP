@@ -56,6 +56,7 @@ impl Config {
             cell_type: crate::handler::execute_code::execute_req_model::CellTypeMeta::Code {},
             code: self.code.clone(),
             region: self.region.clone(),
+            enable_save_session: None,
         }
     }
 }

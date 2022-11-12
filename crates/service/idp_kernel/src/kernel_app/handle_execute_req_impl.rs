@@ -56,7 +56,11 @@ impl super::KernelApp {
             &self.ctx.header.path,
         );
 
-        let enable_checkpoint = "false";
+        let enable_checkpoint = if req.enable_save_session {
+            "true"
+        } else {
+            "false"
+        };
         if !is_pipeline {
             if let Err(err) = self.python_defines.load_or_skip.call1(
                 py,

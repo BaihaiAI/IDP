@@ -87,22 +87,19 @@ class Ipy:
 def load_or_skip(path: str, enable_checkpoint: str):
     if enable_checkpoint == "false":
         return
-    try:
-        import dill
-        dill.load_session(path)
-    except ModuleNotFoundError:
-        pass
+    # try:
+    import dill
+    dill.load_session(path)
+    # except ModuleNotFoundError:
+    #     pass
 
 
 def after_run(session_path: str, var_path: str, enable_checkpoint: str):
-    try:
-        import baihai_aid
-        baihai_aid.save_vars(var_path)
-        if enable_checkpoint == "true":
-            import dill
-            dill.dump_session(session_path)
-    except ModuleNotFoundError:
-        pass
+    import baihai_aid
+    baihai_aid.save_vars(var_path)
+    if enable_checkpoint == "true":
+        import dill
+        dill.dump_session(session_path)
 
 
 class GraphicObj:

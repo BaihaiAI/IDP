@@ -18,7 +18,7 @@ logger = { path = "../../common/logger" }
 serde_helper = { path = "../../common/serde_helper" }
 
 
-chrono = { version = "0.4", features = ["serde"] }
+chrono = { version = "0.4.23", features = ["serde"] }
 futures-util = "0.3"
 hyper = { version = "0.14", features = ["server", "tcp", "http1"] }
 hyper-tungstenite = "0.8"

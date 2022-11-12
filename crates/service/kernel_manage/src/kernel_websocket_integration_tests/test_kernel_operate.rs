@@ -109,6 +109,7 @@ fn ws_code_req(code: &str, cell_id: &str) -> ExecuteCodeReq {
         cell_type: CellTypeMeta::Code {},
         code: code.to_string(),
         region: REGION.to_string(),
+        enable_save_session: None,
     }
 }
 

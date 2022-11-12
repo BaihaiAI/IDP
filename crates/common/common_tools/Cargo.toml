@@ -16,7 +16,7 @@ common_model = { path = "../model" }
 
 axum = { version = "0.5", features = ["headers"], optional = true }
 base64 = { version = "0.13.0" }
-chrono = { version = "0.4.19", optional = true }
+chrono = { version = "0.4.23", optional = true }
 encoding_rs = "0.8"
 err = { path = "../err" }
 serde_json = "1.0.68"
