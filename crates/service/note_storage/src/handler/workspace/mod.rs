@@ -1416,7 +1416,7 @@ pub fn put_result_to_vec(
         line_count += 1;
         if line_text
             .to_ascii_lowercase()
-            .contains(&keyword.clone().to_ascii_lowercase())
+            .contains(&keyword.to_ascii_lowercase())
         {
             let gsr = GlobalSearchResult {
                 absolute_path: path.display().to_string(), /* x.clone().path.display().
