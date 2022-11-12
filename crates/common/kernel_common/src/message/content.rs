@@ -207,7 +207,7 @@ pub struct ExecuteRequest {
     pub allow_stdin: bool,
     pub stop_on_error: bool,
     // IDP custom field
-    pub enable_save_session: bool,
+    pub enable_save_session: Option<bool>,
 }
 
 impl Default for ExecuteRequest {
@@ -219,7 +219,7 @@ impl Default for ExecuteRequest {
             user_expressions: serde_json::Value::Object(serde_json::Map::new()),
             allow_stdin: false,
             stop_on_error: true,
-            enable_save_session: false,
+            enable_save_session: None,
         }
     }
 }

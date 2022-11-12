@@ -90,7 +90,7 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
             content: kernel_common::Content::ExecuteRequest(
                 kernel_common::content::ExecuteRequest {
                     code,
-                    enable_save_session: req.enable_save_session.unwrap_or_default(),
+                    enable_save_session: req.enable_save_session,
                     ..Default::default()
                 },
             ),

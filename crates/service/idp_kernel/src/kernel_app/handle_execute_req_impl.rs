@@ -56,7 +56,7 @@ impl super::KernelApp {
             &self.ctx.header.path,
         );
 
-        let enable_checkpoint = if req.enable_save_session {
+        let enable_checkpoint = if req.enable_save_session.unwrap_or_default() {
             "true"
         } else {
             "false"
