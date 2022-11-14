@@ -28,14 +28,18 @@ pub fn vars(req: Request<Body>) -> Result<Resp<String>, Error> {
     let req = serde_urlencoded::from_str::<Req>(req.uri().query().unwrap_or_default())?;
     let vars_path =
         business::path_tool::vars_file_path(req.team_id, req.project_id, &req.file_path);
-    let data = match std::fs::read_to_string(&vars_path) {
-        Ok(json_str) => json_str,
+    let meta = match std::fs::metadata(&vars_path) {
+        Ok(meta) => meta,
         Err(err) => {
             if !matches!(err.kind(), std::io::ErrorKind::NotFound) {
                 tracing::error!("{vars_path} {err}");
             }
-            "[]".to_string()
+            return Ok(Resp::success("[]".to_string()));
         }
     };
-    Ok(Resp::success(data))
+    if meta.len() > 5 * 1024 * 1024 {
+        return Err(Error::new("vars file too large skip loading").code(Error::CODE_WARNING));
+    }
+
+    Ok(Resp::success(std::fs::read_to_string(vars_path)?))
 }
