@@ -51,7 +51,7 @@ impl Default for Resource {
     }
 }
 
-pub fn spawn_kernel_process(header: Header) -> Result<std::process::Child, ErrorTrace> {
+fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
     tracing::info!("--> spawn_kernel_process");
     let ipynb_abs_path = header.ipynb_abs_path();
 
@@ -188,12 +188,14 @@ pub fn spawn_kernel_process(header: Header) -> Result<std::process::Child, Error
             )));
         }
     }
+    let pod_id = header.inode();
     let mut command = std::process::Command::new(idp_kernel_path);
     command
         // bash fork+exec new process to start kernel, prevent defunct after ptrace by criu
         // .arg(format!("(sleep 0; {idp_kernel_path} $0) &"))
         // .stdout(unsafe { std::process::Stdio::from_raw_fd(log_fd) })
         .arg(base64::encode(serde_json::to_string(&header).unwrap()))
+        .arg(pod_id.to_string())
         .current_dir(working_directory);
     #[cfg(unix)]
     command
@@ -230,13 +232,39 @@ pub fn spawn_kernel_process(header: Header) -> Result<std::process::Child, Error
     }
 
     tracing::info!("{command:?}");
-    let child = command.spawn()?;
-    tracing::debug!("<-- spawn_kernel_process pid = {}", child.id());
+    let mut child = command.spawn()?;
+    std::thread::Builder::new().name("wait_kernel".to_string()).spawn(move || {
+        /*
+        let Ok(exit_status) = child.wait() else {
+            panic!("");
+        };
+        */
+        let exit_status = child.wait().expect("wait kernel child process");
+        #[cfg(unix)]
+        if let Some(signal) = std::os::unix::process::ExitStatusExt::signal(&exit_status) {
+            let err_msg = format!("kernel was kill by signal {signal}");
+            #[cfg(not)]
+            if signal == 9 {
+                // /sys/fs/cgroup/user.slice/user-1000.slice/memory.current
+                dbg!(std::fs::read_to_string("/sys/fs/cgroup/memory/memory.limit_in_bytes").unwrap());
+            }
+            tracing::error!("{err_msg}");
+            let rsp = reqwest::blocking::Client::builder().build().unwrap().post(format!("http://127.0.0.1:9007/api/v1/execute/kernel/core_dumped_report?pod_id={pod_id}&reason={err_msg}")).send().unwrap();
+            dbg!(rsp.status());
+            return;
+        }
+        #[cfg(unix)]
+        if std::os::unix::process::ExitStatusExt::core_dumped(&exit_status) {
+            panic!("kernel core dumped! please check log in coredumpctl");
+        }
+        if !exit_status.success() {
+            panic!("kernel exit code {:?}", exit_status.code());
+        }
+    }).unwrap();
 
-    Ok(child)
+    Ok(())
 }
 
-#[cfg(feature = "tcp")]
 pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
     tracing::info!("--> spawn_kernel_process_tcp");
     if !business::kubernetes::is_k8s() {
