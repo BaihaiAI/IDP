@@ -1,9 +1,44 @@
 use business::business_term::ProjectId;
 use business::business_term::TeamId;
 use common_model::Rsp;
-use tokio::time;
 
 use crate::common::error::IdpGlobalError;
+
+pub async fn stop_hpopt_backend(db_url: String) -> Result<(), IdpGlobalError> {
+    let backend_pid = get_pid_by_name(&db_url).await?;
+    println!("backend_pid: {}", backend_pid);
+    if backend_pid > 0 {
+        println!("kill backend_pid: {}", backend_pid);
+        let _ = tokio::process::Command::new("kill")
+            .arg("-9")
+            .arg(backend_pid.to_string())
+            .output()
+            .await?;
+    }
+    Ok(())
+}
+
+async fn get_pid_by_name(db_url: &str) -> Result<u32, IdpGlobalError> {
+    let output = tokio::process::Command::new("ps")
+        .arg("-ef")
+        .output()
+        .await
+        .map_err(|e| IdpGlobalError::ErrorCodeMsg(500, format!("get_pid_by_name error: {}", e)))?;
+
+    let output_str = String::from_utf8(output.stdout).unwrap();
+    let lines = output_str.lines();
+    for line in lines {
+        if line.contains(db_url) {
+            let pid = line.split_whitespace().nth(1).unwrap();
+            return Ok(pid.parse::<u32>().unwrap());
+        }
+    }
+
+    Err(IdpGlobalError::ErrorCodeMsg(
+        500,
+        "get_pid_by_name error: not found".to_string(),
+    ))
+}
 
 pub async fn start_hpopt_backend(
     db_url: String,
@@ -30,6 +65,10 @@ pub async fn start_hpopt_backend(
         //     "--- start_hpopt_backend after optuna-dashboard command, time cost = {:?}",
         //     start.elapsed()
         // );
+        println!(
+            "--- start_hpopt_backend after optuna-dashboard command, time cost = {:?}",
+            start.elapsed()
+        );
 
         if child_opt.is_err() {
             //print log on console
@@ -58,20 +97,48 @@ pub fn get_dburl_by_db_file_name(
 
     db_url
 }
+
+#[inline]
+pub fn get_db_full_file_name_by_dburl(db_url: &str) -> String {
+    //substring by prefix "sqlite:///"
+    let db_file_fullpath = &db_url[10..];
+    db_file_fullpath.to_string()
+}
+
 #[inline]
 fn db_rul(db_file_name: String) -> String {
     format!("sqlite:///{}", db_file_name)
 }
 
-#[tokio::test]
-async fn test_start_hpopt_backend() {
-    let db_file_name = "111.db";
-    let team_id = 19980923;
-    let project_id = 1001;
-    let db_url = get_dburl_by_db_file_name(team_id, project_id, db_file_name);
-    println!("db_url: {}", db_url);
-    let rsp = start_hpopt_backend(db_url, team_id, project_id).await;
-    println!("{:?}", rsp);
-    time::sleep(time::Duration::from_secs(10)).await;
-    assert!(rsp.is_ok());
+#[cfg(test)]
+mod control_tests {
+    use crate::handler::hpopt::control::{get_dburl_by_db_file_name, start_hpopt_backend, stop_hpopt_backend};
+    #[tokio::test]
+    // #[cfg(not)]
+    async fn test_start_hpopt_backend() {
+        let db_file_name = "111.db";
+        let team_id = 19980923;
+        let project_id = 1001;
+        let db_url = get_dburl_by_db_file_name(team_id, project_id, db_file_name);
+        println!("db_url: {}", db_url);
+        let rsp = start_hpopt_backend(db_url, team_id, project_id).await;
+        println!("{:?}", rsp);
+        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+        assert!(rsp.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_get_file_name_by_dburl() {
+        let db_url = "sqlite:////store/19980923/projects/1001/hpopt_datasource/111.db";
+        let file_name = crate::handler::hpopt::control::get_db_full_file_name_by_dburl(db_url);
+        println!("file_name: {}", file_name);
+        // assert_eq!(file_name, "111.db");
+    }
+    #[tokio::test]
+    async fn test_stop_hpopt_backend() {
+        let db_url = "sqlite:////store/19980923/projects/1001/hpopt_datasource/111.db";
+        let rsp = stop_hpopt_backend(db_url.to_string()).await;
+        println!("{:?}", rsp);
+        assert!(rsp.is_ok());
+    }
 }

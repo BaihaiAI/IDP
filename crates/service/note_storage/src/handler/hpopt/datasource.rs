@@ -1,8 +1,41 @@
-use business::business_term::{TeamId, ProjectId};
+use business::business_term::ProjectId;
+use business::business_term::TeamId;
+use err::ErrorTrace;
+
+use crate::common::error::IdpGlobalError;
+
+use super::control;
+
+// 拼接db_file_name,通过dashboard启动,指定这个文件,会自动创建sqlite对应数据库
+// English: Splicing db_file_name, start through dashboard, specify this file, will automatically create the corresponding sqlite database
+pub async fn datasource_new(
+    team_id: TeamId,
+    project_id: ProjectId,
+    datasource_name: String,
+) -> Result<String, IdpGlobalError> {
+    let db_file_name = format!("idp_{}.db", datasource_name);
+    let datasource_list = get_datasource_list(team_id, project_id).await?;
+    // if exsits the same name, return error
+    if datasource_list.contains(&db_file_name) {
+        //TODO change status code
+        return Err(IdpGlobalError::ErrorCodeMsg(
+            131500,
+            "db file name already exist".to_string(),
+        ));
+    }
+    let db_url = control::get_dburl_by_db_file_name(team_id, project_id, &db_file_name);
+    match control::start_hpopt_backend(db_url,team_id,project_id).await{
+        Ok(_) => Ok(db_file_name),
+        Err(e) => Err(e),
+    }
+}
 
 ///
 /// /store/{team_id}/projects/project_id/hp[opt_datasource]
-pub async fn datasource_list(team_id:TeamId,project_id:ProjectId) -> Vec<String> {
+pub async fn get_datasource_list(
+    team_id: TeamId,
+    project_id: ProjectId,
+) -> Result<Vec<String>, std::io::Error> {
     // get datasource dir path
     let datasource_path = business::path_tool::get_hpopt_datasource_path(team_id, project_id);
     // create file struct by path and get all file name.
@@ -19,14 +52,17 @@ pub async fn datasource_list(team_id:TeamId,project_id:ProjectId) -> Vec<String>
                 }
             }
         });
-    }else{
+    } else {
         // this dir not exist, create it.
         // print log on console. todo:need change to log crate.
-        println!("datasource dir not exist, create it. path: {}",datasource_path);
+        println!(
+            "datasource dir not exist, create it. path: {}",
+            datasource_path
+        );
         // log::info!("datasource dir not exist, create it. path: {}",datasource_path);
-        std::fs::create_dir_all(datasource_path).unwrap();
+        std::fs::create_dir_all(datasource_path)?;
     }
-    datasource_list
+    Ok(datasource_list)
 }
 
 #[cfg(not)]
@@ -34,6 +70,6 @@ pub async fn datasource_list(team_id:TeamId,project_id:ProjectId) -> Vec<String>
 async fn test_datasource_list() {
     let team_id = 19980923;
     let project_id = 1001;
-    let datasource_list = datasource_list(team_id, project_id).await;
+    let datasource_list = get_datasource_list(team_id, project_id).await;
     println!("{:?}", datasource_list);
 }

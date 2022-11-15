@@ -23,6 +23,7 @@ use sqlx::Pool;
 use sqlx::Postgres;
 use tokio::sync::Mutex;
 
+use crate::api::http::v2::hpopt;
 use crate::api::http::v2::pipeline;
 use crate::api::http::v2::project;
 use crate::api::http::v2::workspace;
@@ -147,6 +148,25 @@ pub async fn init_router(
                             on(MethodFilter::POST, workspace::global_keyword_search),
                         ),
                 )
+                .nest("/hpopt", {
+                    Router::new()
+                        .route(
+                            "/datasource/list",
+                            on(MethodFilter::GET, hpopt::datasource_list),
+                        )
+                        .route(
+                            "/datasource/new",
+                            on(MethodFilter::POST, hpopt::datasource_new),
+                        )
+                        .route(
+                            "/backend/start",
+                            on(MethodFilter::GET, hpopt::start_hpopt_backend),
+                        )
+                        .route(
+                            "/backend/stop",
+                            on(MethodFilter::GET, hpopt::stop_hpopt_backend),
+                        )
+                })
                 .nest("/project", {
                     Router::new()
                         .route("/new", on(MethodFilter::POST, project::new))
