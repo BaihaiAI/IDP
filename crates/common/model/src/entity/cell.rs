@@ -25,6 +25,7 @@ use crate::entity::cell::CellType::Markdown;
 pub struct Cell {
     pub cell_type: CellType,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub outputs: Vec<serde_json::Map<String, serde_json::Value>>,
     pub source: Vec<String>, // List<String> source;
     #[serde(skip_serializing_if = "Option::is_none")]
