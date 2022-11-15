@@ -22,11 +22,9 @@ pub fn init_python(
     iopub_sender: std::sync::mpsc::Sender<Message>,
     input_reply_receiver: std::sync::mpsc::Receiver<String>,
     header: &kernel_common::Header,
+    py: pyo3::Python,
 ) -> PythonDefines {
     let start = std::time::Instant::now();
-    pyo3::prepare_freethreaded_python();
-    let gil = pyo3::Python::acquire_gil();
-    let py = gil.python();
     #[cfg(unix)]
     super::init_signal_handler::init_signal_handler(py);
     debug!("after init signal, time cost = {:?}", start.elapsed());

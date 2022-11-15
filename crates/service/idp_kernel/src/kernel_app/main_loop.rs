@@ -31,7 +31,9 @@ impl super::KernelApp {
         self.publish_content(Content::UpdateLastReq {});
 
         tracing::info!("kernel recv execute_request req");
-        self.handle_execute_req(req, is_pipeline);
+        pyo3::Python::with_gil(|py| {
+            self.handle_execute_req(req, is_pipeline, py);
+        });
     }
 
     #[cfg(feature = "fifo")]

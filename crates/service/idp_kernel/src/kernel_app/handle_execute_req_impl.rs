@@ -28,15 +28,13 @@ impl super::KernelApp {
         &mut self,
         req: kernel_common::content::ExecuteRequest,
         is_pipeline: bool,
+        py: pyo3::Python,
     ) {
         let start = std::time::Instant::now();
         let run_at = unsafe { libc::time(std::ptr::null_mut()) };
         // self.publish_content(Content::Status {
         //     execution_state: ExecutionState::Busy,
         // });
-
-        let gil = pyo3::Python::acquire_gil();
-        let py = gil.python();
 
         let sys = py.import("sys").unwrap();
         let stdout = sys.getattr("stdout").unwrap();
