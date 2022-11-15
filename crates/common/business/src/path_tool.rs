@@ -115,6 +115,37 @@ pub fn get_conda_env_name_root(team_id: TeamId, conda_env_name: String) -> Strin
     format!("{}/envs/{}", conda_root(team_id), conda_env_name)
 }
 
+///store/{team_id}/projects/project_id/hp[opt_datasource]
+#[inline]
+#[cfg(windows)]
+pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> String {
+    format!(
+        "{team_id_root}/projects/{project_id}/{dir_name}",
+        team_id_root = team_id_root(team_id).to_str().unwrap(),
+        project_id = project_id,
+        dir_name = ProjectFolder::HPOPT_DATASOURCE.inner()
+    )
+}
+#[inline]
+#[cfg(unix)]
+pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> String {
+    format!(
+        "/store/{team_id}/projects/{project_id}/{dir_name}",
+        team_id = team_id,
+        project_id = project_id,
+        dir_name = ProjectFolder::HPOPT_DATASOURCE.inner()
+    )
+}
+
+#[inline]
+pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId,filename: &str) -> String {
+    format!("{}/{}", get_hpopt_datasource_path(team_id, project_id), filename)
+}
+#[cfg(windows)]
+pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId,filename: &str) -> String {
+    format!("{}/{}", get_hpopt_datasource_path(team_id, project_id), filename)
+}
+
 pub fn get_nbconvert_by_team_id(_team_id: String) -> String {
     // format!(
     //     "/store/{}/miniconda3/envs/python39/bin/jupyter-nbconvert",
@@ -138,6 +169,13 @@ pub fn get_conda_env_python_path(_team_id: TeamId, _conda_env_name: String) -> S
 pub fn get_conda_path(team_id: TeamId) -> String {
     format!("/store/{team_id}/miniconda3/bin/conda", team_id = team_id)
 }
+#[inline]
+pub fn get_optuna_dashboard_bin_path() -> String {
+    //TODO change to our develop pod optuna-dashboard bin path.
+    // "/home/ray/anaconda3/bin/optuna-dashboard".to_string()
+    "/Users/huangjin/miniconda3/bin/optuna-dashboard".to_string()
+}
+
 
 #[inline]
 pub fn get_model_file_path(team_id: i64, project_id: i32) -> String {

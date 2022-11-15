@@ -15,3 +15,4 @@
 pub mod pipeline;
 pub mod project;
 pub mod workspace;
+pub mod hpopt;

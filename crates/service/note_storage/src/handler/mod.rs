@@ -28,3 +28,4 @@ pub mod state;
 pub mod team_handler;
 pub mod tensorboard;
 pub mod workspace;
+pub mod hpopt;

@@ -45,6 +45,7 @@ impl ProjectFolder {
     pub const TRASH: Self = Self("trash");
     pub const NOTEBOOKS: Self = Self("notebooks");
     pub const MINICONDA3: Self = Self("miniconda3");
+    pub const HPOPT_DATASOURCE: Self = Self("hpopt_datasource");
 
     #[inline]
     pub const fn inner(&self) -> &'static str {

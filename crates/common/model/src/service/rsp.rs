@@ -14,7 +14,7 @@
 
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize,Debug)]
 pub struct Rsp<T>
 where
     T: Serialize,
