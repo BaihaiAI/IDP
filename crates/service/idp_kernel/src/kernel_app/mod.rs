@@ -28,36 +28,21 @@ pub struct KernelApp {
 }
 
 impl KernelApp {
-    #[cfg(not)]
-    #[cfg(feature = "fifo")]
-    pub fn new(args: kernel_common::Header) -> Self {
-        let (output_sender, output_receiver) = std::sync::mpsc::channel::<Message>();
-        let python_defines =
-            crate::kernel_init::init_python::init_python(output_sender.clone(), &args);
-        output_sender_thread::spawn_output_sender_thread(output_receiver, 0);
-        KernelApp {
-            ctx: ExecuteCodeTransportCtx {
-                last_req_cell_id: "".to_string(),
-                output_sender,
-                args,
-            },
-            execution_count: 1,
-            python_defines,
-        }
-    }
-
-    #[cfg(feature = "tcp")]
     pub fn new(
         output_tx: crossbeam_channel::Sender<Message>,
         input_reply_receiver: std::sync::mpsc::Receiver<String>,
         args: kernel_common::Header,
     ) -> Self {
         let (output_sender, output_receiver) = std::sync::mpsc::channel::<Message>();
-        let python_defines = crate::kernel_init::init_python::init_python(
-            output_sender.clone(),
-            input_reply_receiver,
-            &args,
-        );
+        pyo3::prepare_freethreaded_python();
+        let python_defines = pyo3::Python::with_gil(|py| {
+            crate::kernel_init::init_python::init_python(
+                output_sender.clone(),
+                input_reply_receiver,
+                &args,
+                py,
+            )
+        });
         output_sender_thread::spawn_output_sender_thread(output_tx, output_receiver);
 
         KernelApp {
