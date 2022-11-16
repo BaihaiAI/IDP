@@ -327,7 +327,7 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
     }
 
     let mut json = serde_json::to_value(nb)?;
-    for cell in json["cell"].as_array_mut().unwrap() {
+    for cell in json["cells"].as_array_mut().unwrap() {
         let cell = cell.as_object_mut().unwrap();
         if cell["cell_type"] == "markdown" {
             cell.remove("outputs");
