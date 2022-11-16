@@ -87,7 +87,7 @@ pub async fn kernel_main_loop(
 
 impl KernelCtx {
     fn handle_shutdown_idle_kernel_callback(&self) -> bool {
-        if matches!(self.state, State::Idle) {
+        if !matches!(self.state, State::Idle) {
             return false;
         }
         let now = std::time::SystemTime::now()
