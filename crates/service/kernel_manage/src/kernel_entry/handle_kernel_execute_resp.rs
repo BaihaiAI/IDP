@@ -217,7 +217,7 @@ async fn put_cell_update_req(req: PartialUpdateCellReq, team_id: u64) {
         .build()
         .unwrap();
     let cell_ids = req.cells.iter().map(|x| x.id.clone()).collect::<Vec<_>>();
-    tracing::info!(
+    tracing::debug!(
         "req->note_storage[partial_update_cell]: path={}, project_id={}, cell_ids={:?}",
         req.path,
         req.project_id,

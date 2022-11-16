@@ -87,13 +87,17 @@ pub async fn kernel_main_loop(
 
 impl KernelCtx {
     fn handle_shutdown_idle_kernel_callback(&self) -> bool {
+        if matches!(self.state, State::Idle) {
+            return false;
+        }
         let now = std::time::SystemTime::now()
             .duration_since(std::time::SystemTime::UNIX_EPOCH)
             .unwrap();
         if now < self.kernel_shutdown_time {
             return false;
         }
-        tracing::warn!("shutdown idle kernel");
+
+        tracing::warn!("shutdown idle kernel {:?}", self.header);
         let team_id = self.header.team_id;
         let project_id = self.header.project_id;
         let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
