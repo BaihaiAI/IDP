@@ -24,8 +24,10 @@ use crate::entity::cell::CellType::Markdown;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Cell {
     pub cell_type: CellType,
+    /// markdown cell no outputs field
+    /// code cell must has outputs field
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "outputs_skip_serializing_if_cell_type_is_markdown")]
     pub outputs: Vec<serde_json::Map<String, serde_json::Value>>,
     pub source: Vec<String>, // List<String> source;
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -33,6 +35,11 @@ pub struct Cell {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execution_count: Option<usize>,
     pub metadata: serde_json::Map<String, serde_json::Value>,
+}
+
+#[cfg(not)]
+fn outputs_skip_serializing_if_cell_type_is_markdown(cell: &Cell) -> bool {
+    matches!(cell.cell_type, CellType::Markdown)
 }
 
 impl Default for Cell {
