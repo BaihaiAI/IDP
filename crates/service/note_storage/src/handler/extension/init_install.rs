@@ -44,7 +44,7 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
     recommended_extensions_path += "/.";
 
     common_tools::command_tools::copy(&recommended_extensions_path, &installed_extensions_path)?;
- 
+
     let recommended_config_path =
         std::path::Path::new(&recommended_extensions_path).join("extensions_config.json");
 
