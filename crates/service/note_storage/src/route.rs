@@ -190,7 +190,7 @@ pub async fn init_router(
                             "/installedList",
                             on(MethodFilter::GET, extension_handler::installed_list),
                         )
-                        .route("/update", on(MethodFilter::GET, extension_handler::update))
+                        .route("/update", on(MethodFilter::POST, extension_handler::update))
                         .route(
                             "/install",
                             on(MethodFilter::GET, extension_handler::install),
