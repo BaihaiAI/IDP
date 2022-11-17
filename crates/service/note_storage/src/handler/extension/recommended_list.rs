@@ -31,7 +31,7 @@ pub async fn recommended_list(
     let recommended_config_path =
         std::path::Path::new(&recommended_extensions).join("extensions_config.json");
 
-    let mut recommended_content = super::get_extensions_config(recommended_config_path)?;
+    let mut recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
     for content in recommended_content.iter_mut() {
         let url = format!(
@@ -43,7 +43,7 @@ pub async fn recommended_list(
         content.url = Some(url);
     }
 
-    match super::get_extensions_config(&installed_config_path) {
+    match super::get_extensions_config(&installed_config_path).await {
         Ok(installed_content) => {
             let mut resp = Vec::new();
             'a: for i in &recommended_content {

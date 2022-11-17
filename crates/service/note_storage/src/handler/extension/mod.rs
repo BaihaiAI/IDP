@@ -36,7 +36,7 @@ pub use update::update;
 
 use self::models::ExtensionResp;
 
-pub fn get_extensions_config<P: AsRef<Path>>(
+pub async fn get_extensions_config<P: AsRef<Path>>(
     extension_config_path: P,
 ) -> Result<Vec<ExtensionResp>, ErrorTrace> {
     let jdata = match std::fs::read_to_string(&extension_config_path) {
