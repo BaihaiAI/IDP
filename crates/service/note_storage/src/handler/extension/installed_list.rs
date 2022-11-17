@@ -51,7 +51,7 @@ pub async fn installed_list_handler(
         let mut optional_versions: Vec<String> = Vec::new();
         for j in &recommended_content {
             if i.name == j.name && i.version != j.version {
-                optional_versions.push(i.version.clone());
+                optional_versions.push(j.version.clone());
             }
         }
         i.optional_version = Some(optional_versions);
