@@ -27,16 +27,15 @@ pub async fn init_install(Json(payload): Json<ListReq>) -> Result<Rsp<()>, Error
 }
 
 pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>, ErrorTrace> {
-    //用户安装插件目录
     let installed_extensions_path = business::path_tool::user_extensions_path(team_id, user_id);
-    //用户安装插件列表
+
     let extension_config_path =
         std::path::Path::new(&installed_extensions_path).join("extensions_config.json");
 
     if !extension_config_path.exists() {
         std::fs::create_dir_all(&installed_extensions_path)?;
     }
-    //推荐插件路径
+
     let mut recommended_extensions_path = business::path_tool::recommended_extensions()
         .to_str()
         .unwrap()
@@ -45,10 +44,10 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
     recommended_extensions_path += "/.";
 
     common_tools::command_tools::copy(&recommended_extensions_path, &installed_extensions_path)?;
-    //推荐插件列表路径
+ 
     let recommended_config_path =
         std::path::Path::new(&recommended_extensions_path).join("extensions_config.json");
-    //推荐插件列表
+
     let mut recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
     for content in recommended_content.iter_mut() {

@@ -40,16 +40,13 @@ pub async fn installed_list_handler(
         std::fs::File::create(&extension_config_path)?;
     }
 
-    //读取 installed_config
     let mut installed_content = get_installed_extensions_config(extension_config_path).await?;
 
-    //读取 recommend_config
     let recommended_extensions = business::path_tool::recommended_extensions();
     let recommended_config_path =
         std::path::Path::new(&recommended_extensions).join("extensions_config.json");
     let recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
-    //如果recommend和installed版本不一致,则添加optional_version
     for i in &recommended_content {
         for j in &mut installed_content {
             if i.name == j.name && i.version != j.version {

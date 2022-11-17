@@ -38,7 +38,7 @@ pub async fn install_handler(
     );
     let recommended_extension_path =
         business::path_tool::recommended_extensions().join(&extension_name);
-    //需要安装的插件的路径
+
     let extension_path = format!("{}/{}", &installed_extensions_path, name);
     std::fs::create_dir_all(&extension_path)?;
 
@@ -46,13 +46,13 @@ pub async fn install_handler(
         recommended_extension_path.to_str().unwrap(),
         &extension_path,
     )?;
-    //需要安装的插件config信息
+
     let jdata = std::fs::read_to_string(recommended_extension_path.join("config.json"))?;
     let mut new_extension_config = serde_json::from_str::<ExtensionResp>(&jdata)?;
 
     let url = format!("{installed_extensions_path}/{extension_name}/");
     new_extension_config.url = Some(url.clone());
-    //已安装插件列表
+
     let extensions_config_path =
         std::path::Path::new(&installed_extensions_path).join("extensions_config.json");
 
