@@ -254,7 +254,9 @@ pub async fn init_router(
                             "/ipynbPreview",
                             on(MethodFilter::GET, content::ipynb_preview),
                         )
-                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell)),
+                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell))
+                        // prevent 413 Payload Too Large
+                        .layer(axum::extract::DefaultBodyLimit::disable()),
                 )
                 .nest(
                     "/state",
