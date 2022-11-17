@@ -47,12 +47,14 @@ pub async fn installed_list_handler(
         std::path::Path::new(&recommended_extensions).join("extensions_config.json");
     let recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
-    for i in &recommended_content {
-        for j in &mut installed_content {
+    for i in &mut installed_content {
+        let mut optional_versions: Vec<String> = Vec::new();
+        for j in &recommended_content {
             if i.name == j.name && i.version != j.version {
-                j.optional_version = Some(vec![i.version.clone()]);
+                optional_versions.push(i.version.clone());
             }
         }
+        i.optional_version = Some(optional_versions);
     }
 
     Ok(Rsp::success(installed_content))
