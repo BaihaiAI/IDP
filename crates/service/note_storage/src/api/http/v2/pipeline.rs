@@ -331,6 +331,8 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
         let cell = cell.as_object_mut().unwrap();
         if cell["cell_type"] == "markdown" {
             cell.remove("outputs");
+            cell.remove("execution_count");
+            cell.remove("execution_time");
         }
     }
     tokio::fs::write(&result_file, serde_json::to_string_pretty(&json)?).await?;
