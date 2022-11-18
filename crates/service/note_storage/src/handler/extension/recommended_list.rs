@@ -43,22 +43,54 @@ pub async fn recommended_list(
         content.url = Some(url);
     }
 
-    match super::get_extensions_config(&installed_config_path).await {
-        Ok(installed_content) => {
-            let mut resp = Vec::new();
-            'a: for i in &recommended_content {
-                for j in &installed_content {
-                    if i == j {
-                        continue 'a;
-                    }
-                }
-                resp.push(i.clone())
-            }
-            Ok(Rsp::success(resp))
+    let installed_content = match super::get_extensions_config(&installed_config_path).await {
+        Ok(installed_content) => installed_content,
+        Err(_) => {
+            return Ok(Rsp::success(recommended_content));
         }
-        Err(err) => {
-            tracing::error!("{err},path:{:?}", installed_config_path);
-            Ok(Rsp::success(recommended_content))
+    };
+    let mut resp = Vec::new();
+    // 'a: for i in &recommended_content {
+    //     for j in &installed_content {
+    //         if i.name == j.name {
+    //             continue 'a;
+    //         }
+    //     }
+    //     resp.push(i.clone())
+    // }
+    let recommended_iter = recommended_content.into_iter();
+    let installed_iter = installed_content.into_iter();
+    get_not_installed_recommended_extensions(recommended_iter, installed_iter, &mut resp);
+
+    Ok(Rsp::success(resp))
+}
+
+fn get_not_installed_recommended_extensions(
+    mut recommended_iter: std::vec::IntoIter<ExtensionResp>,
+    mut installed_iter: std::vec::IntoIter<ExtensionResp>,
+    resp: &mut Vec<ExtensionResp>,
+) {
+    let recommended_content = recommended_iter.next();
+    let installed_content = installed_iter.next();
+    match (recommended_content, installed_content) {
+        (None, None) | (None, Some(_)) => {}
+        (Some(recommended_content), None) => {
+            resp.push(recommended_content);
+            recommended_iter.for_each(|x| {
+                resp.push(x);
+            });
+        }
+        (Some(recommended_content), Some(installed_content)) => {
+            if recommended_content.name == installed_content.name {
+                get_not_installed_recommended_extensions(recommended_iter, installed_iter, resp);
+            } else if recommended_content < installed_content {
+                resp.push(recommended_content);
+                recommended_iter.next();
+                get_not_installed_recommended_extensions(recommended_iter, installed_iter, resp);
+            } else {
+                installed_iter.next();
+                get_not_installed_recommended_extensions(recommended_iter, installed_iter, resp);
+            }
         }
     }
 }
