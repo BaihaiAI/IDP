@@ -1452,6 +1452,17 @@ pub fn recursive_global_keyword_search_dir_file(
                         filename.to_string(),
                     );
                 } else {
+                    //dir match
+                    put_dir_result_to_vec(
+                        vec,
+                        path,
+                        keyword.clone(),
+                        short_path.clone(),
+                        team_id,
+                        project_id,
+                        filename.to_string(),
+                    );
+
                     let _r = recursive_global_keyword_search_dir_file(
                         vec,
                         short_path.clone(),
@@ -1541,6 +1552,33 @@ pub fn put_filename_result_to_vec(
     {
         let gsr_file = GlobalSearchResult {
             absolute_path: path.display().to_string(), // x.clone().path.display().to_string(),
+            browser_path: short_path.clone(),
+            project_id: project_id.to_string(),
+            file_name: filename.to_string(),
+            cell_id: "".to_string(),
+            text: filename.to_string(),
+            line: 0,
+        };
+        vec.push(gsr_file);
+    }
+}
+
+pub fn put_dir_result_to_vec(
+    vec: &mut Vec<GlobalSearchResult>,
+    path: PathBuf,
+    keyword: String,
+    short_path: String,
+    _team_id: u64,
+    project_id: u64,
+    filename: String,
+) {
+    // dir match
+    if short_path
+        .to_ascii_lowercase()
+        .contains(&keyword.to_ascii_lowercase())
+    {
+        let gsr_file = GlobalSearchResult {
+            absolute_path: path.display().to_string(),
             browser_path: short_path.clone(),
             project_id: project_id.to_string(),
             file_name: filename.to_string(),
