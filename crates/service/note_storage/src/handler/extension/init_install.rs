@@ -48,7 +48,7 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
     let recommended_config_path =
         std::path::Path::new(&recommended_extensions_path).join("extensions_config.json");
 
-    let mut recommended_content = super::get_extensions_config(recommended_config_path)?;
+    let mut recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
     for content in recommended_content.iter_mut() {
         let url = format!(

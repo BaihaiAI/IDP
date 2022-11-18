@@ -29,7 +29,6 @@ use business::path_tool::escape_path_as_string;
 use business::path_tool::get_nbconvert_by_team_id;
 use business::path_tool::get_pipeline_output_path;
 use business::path_tool::get_store_full_path;
-use common_model::entity::cell::CellType;
 use common_model::enums::mime::Mimetype;
 use common_model::service::rsp::Rsp;
 use common_tools::cookies_tools::get_cookie_value_by_team_id;
@@ -53,7 +52,6 @@ fn path_exists(path: String) -> bool {
     std::fs::metadata(path).is_ok()
 }
 
-//accountId=1520684197767442432-60-85-849646
 #[cfg(not)]
 pub async fn task_state(
     Query(qs): Query<HashMap<String, String>>,
@@ -279,12 +277,13 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
     let mut nb = file_tool::read_notebook_from_disk(&real_path).await?;
     for cell in nb.cells.iter_mut() {
         cell.execution_time = None;
-        if cell.cell_type == CellType::Markdown {
-            cell.execution_count = None;
-            cell.outputs = Vec::new();
-        } else {
-            cell.cell_type = CellType::Code;
-        }
+        // markdown cell outputs field was remove in next iter
+        // if cell.cell_type == CellType::Markdown {
+        //     cell.execution_count = None;
+        //     cell.outputs = Vec::new();
+        // } else {
+        //     cell.cell_type = CellType::Code;
+        // }
         let outputs = &mut cell.outputs;
 
         let useless_keys = ["execution_state", "originData", "originText"];
@@ -327,8 +326,17 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
         outputs.retain(|output| !output.is_empty());
     }
 
-    tracing::info!("file_tool::write_notebook_to_disk({result_file}");
-    file_tool::write_notebook_to_disk(&result_file, &nb).await?;
+    let mut json = serde_json::to_value(nb)?;
+    for cell in json["cells"].as_array_mut().unwrap() {
+        let cell = cell.as_object_mut().unwrap();
+        if cell["cell_type"] == "markdown" {
+            cell.remove("outputs");
+            cell.remove("execution_count");
+            cell.remove("execution_time");
+        }
+    }
+    tokio::fs::write(&result_file, serde_json::to_string_pretty(&json)?).await?;
+    // file_tool::write_notebook_to_disk(&result_file, &nb).await?;
     Ok(result_file)
 }
 

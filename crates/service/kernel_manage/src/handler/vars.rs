@@ -37,7 +37,7 @@ pub fn vars(req: Request<Body>) -> Result<Resp<String>, Error> {
             return Ok(Resp::success("[]".to_string()));
         }
     };
-    if meta.len() > 5 * 1024 * 1024 {
+    if meta.len() > 500 * 1024 * 1024 {
         return Err(Error::new("vars file too large skip loading").code(Error::CODE_WARNING));
     }
 

@@ -79,6 +79,9 @@ pub(crate) fn redis_hvals_to_notebook(val_vec: Vec<String>) -> Result<Notebook, 
     let mut cells: Vec<Cell> = vec![];
     for value_item in val_vec {
         let cell = serde_json::from_str::<Cell>(&value_item)?;
+        if cell.index().is_none() {
+            return Err(ErrorTrace::new("panicked cellId in redis hvals"));
+        }
         cells.push(cell);
     }
 

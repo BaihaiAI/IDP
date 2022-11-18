@@ -16,12 +16,12 @@ use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
 
-use super::models::ExtensionResp;
+use super::models::InstalledExtensionResp;
 use super::models::ListReq;
 
 pub async fn installed_list(
     Query(req): Query<ListReq>,
-) -> Result<Rsp<Vec<ExtensionResp>>, ErrorTrace> {
+) -> Result<Rsp<Vec<InstalledExtensionResp>>, ErrorTrace> {
     let team_id = req.team_id;
     let user_id = req.user_id;
     installed_list_handler(team_id, user_id).await
@@ -30,9 +30,8 @@ pub async fn installed_list(
 pub async fn installed_list_handler(
     team_id: u64,
     user_id: u64,
-) -> Result<Rsp<Vec<ExtensionResp>>, ErrorTrace> {
+) -> Result<Rsp<Vec<InstalledExtensionResp>>, ErrorTrace> {
     let extensions_path = business::path_tool::user_extensions_path(team_id, user_id);
-
     let extension_config_path =
         std::path::Path::new(&extensions_path).join("extensions_config.json");
 
@@ -41,7 +40,43 @@ pub async fn installed_list_handler(
         std::fs::File::create(&extension_config_path)?;
     }
 
-    let content = super::get_extensions_config(&extension_config_path)?;
+    let mut installed_content = get_installed_extensions_config(extension_config_path).await?;
 
-    Ok(Rsp::success(content))
+    let recommended_extensions = business::path_tool::recommended_extensions();
+    let recommended_config_path =
+        std::path::Path::new(&recommended_extensions).join("extensions_config.json");
+    let recommended_content = super::get_extensions_config(recommended_config_path).await?;
+
+    for i in &mut installed_content {
+        let mut optional_versions: Vec<String> = Vec::new();
+        for j in &recommended_content {
+            if i.name == j.name && i.version != j.version {
+                optional_versions.push(j.version.clone());
+            }
+        }
+        i.optional_version = Some(optional_versions);
+    }
+
+    Ok(Rsp::success(installed_content))
+}
+
+async fn get_installed_extensions_config(
+    extension_config_path: std::path::PathBuf,
+) -> Result<Vec<InstalledExtensionResp>, ErrorTrace> {
+    let jdata = match std::fs::read_to_string(&extension_config_path) {
+        Ok(jdata) => jdata,
+        Err(err) => {
+            let path = extension_config_path;
+            tracing::error!("{err},path:{:?}", path);
+            return Err(ErrorTrace::new("extension config no exist"));
+        }
+    };
+    match serde_json::from_str::<Vec<InstalledExtensionResp>>(&jdata) {
+        Ok(content) => Ok(content),
+        Err(err) => {
+            tracing::error!("{err}");
+            let empty: Vec<InstalledExtensionResp> = Vec::new();
+            Ok(empty)
+        }
+    }
 }

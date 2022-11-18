@@ -73,3 +73,17 @@ impl Ord for ExtensionResp {
         self.version.cmp(&other.version)
     }
 }
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct InstalledExtensionResp {
+    pub name: String,
+    pub version: String,
+    pub optional_version: Option<Vec<String>>,
+    pub url: Option<String>,
+    pub entry: Option<String>,
+    pub description: Option<String>,
+    pub publisher: Option<String>,
+    pub icon: Option<String>,
+    pub title: Option<String>,
+}

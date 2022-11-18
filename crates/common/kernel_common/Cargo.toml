@@ -8,7 +8,7 @@ version.workspace = true
 default = []
 # fifo = ["dep:libc"]
 # spawn = ["dep:err"]
-tcp = ["dep:reqwest"]
+tcp = []
 
 [dependencies]
 business = { path = "../business" }
@@ -21,7 +21,7 @@ reqwest = { version = "0.11", default-features = false, features = [
     "rustls-tls",
     "json",
     "blocking",
-], optional = true }
+] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tracing = "0.1"

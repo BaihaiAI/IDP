@@ -80,7 +80,7 @@ pub fn accept_ws_kernel_connect(
                         Ok(msg) => msg,
                         Err(err) => {
                             // e.g. Protocol(ResetWithoutClosingHandshake)
-                            tracing::error!("{err}");
+                            tracing::error!("kernel disconnect! {err}");
                             break;
                         }
                     };

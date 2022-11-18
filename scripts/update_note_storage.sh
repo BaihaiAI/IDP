@@ -1,12 +1,22 @@
 #!/bin/bash
 set -exu
-source ./scripts/k8s_env.sh
+
+remote=ucloud
+namespace=idp #kubectl config set-context --current --namespace=$namespace
+binary=note_storage
+region=a
+team_id=executor
+#node_name=ray-idp-raycluster-a-executor-head
+pod=$(ssh ucloud "kubectl -n $namespace get pod -l app=idp-develop-$region-$team_id -o custom-columns=:metadata.name --no-headers")
+if [ -z "${pod}" ]; then
+    echo "pod not found" && exit 1
+fi
+target=${1:-glibc}
 
 script_dir=$(dirname -- $(readlink -f -- "$0"))
 repo_root=$(dirname $script_dir)
 cd $repo_root
 
-binary=note_storage
 if [ $target == "musl" ]; then
 cargo b --bin $binary --target x86_64-unknown-linux-musl
 cp target/x86_64-unknown-linux-musl/debug/$binary target/$binary

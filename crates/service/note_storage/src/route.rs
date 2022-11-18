@@ -210,7 +210,7 @@ pub async fn init_router(
                             "/installedList",
                             on(MethodFilter::GET, extension_handler::installed_list),
                         )
-                        .route("/update", on(MethodFilter::GET, extension_handler::update))
+                        .route("/update", on(MethodFilter::POST, extension_handler::update))
                         .route(
                             "/install",
                             on(MethodFilter::GET, extension_handler::install),
@@ -274,7 +274,9 @@ pub async fn init_router(
                             "/ipynbPreview",
                             on(MethodFilter::GET, content::ipynb_preview),
                         )
-                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell)),
+                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell))
+                        // prevent 413 Payload Too Large
+                        .layer(axum::extract::DefaultBodyLimit::disable()),
                 )
                 .nest(
                     "/state",
