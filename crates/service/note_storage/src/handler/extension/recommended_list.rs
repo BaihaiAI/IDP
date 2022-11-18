@@ -60,36 +60,35 @@ pub async fn recommended_list(
     // }
     let recommended_iter = recommended_content.into_iter();
     let installed_iter = installed_content.into_iter();
-    get_not_installed_recommended_extensions(recommended_iter, installed_iter, &mut resp);
+    get_not_installed_recommended_extensions(recommended_iter, installed_iter, &mut resp).await;
 
     Ok(Rsp::success(resp))
 }
 
-fn get_not_installed_recommended_extensions(
+async fn get_not_installed_recommended_extensions(
     mut recommended_iter: std::vec::IntoIter<ExtensionResp>,
     mut installed_iter: std::vec::IntoIter<ExtensionResp>,
     resp: &mut Vec<ExtensionResp>,
 ) {
-    let recommended_content = recommended_iter.next();
-    let installed_content = installed_iter.next();
-    match (recommended_content, installed_content) {
-        (None, None) | (None, Some(_)) => {}
-        (Some(recommended_content), None) => {
-            resp.push(recommended_content);
-            recommended_iter.for_each(|x| {
-                resp.push(x);
-            });
+    let mut installed_content = installed_iter.next();
+    let mut recommended_content = recommended_iter.next();
+    while recommended_content.is_some() {
+        if installed_content.is_none() {
+            resp.push(recommended_content.clone().unwrap());
+            recommended_content = recommended_iter.next();
+            continue;
         }
-        (Some(recommended_content), Some(installed_content)) => {
-            if recommended_content.name == installed_content.name {
-                get_not_installed_recommended_extensions(recommended_iter, installed_iter, resp);
-            } else if recommended_content < installed_content {
-                resp.push(recommended_content);
-                recommended_iter.next();
-                get_not_installed_recommended_extensions(recommended_iter, installed_iter, resp);
-            } else {
-                installed_iter.next();
-                get_not_installed_recommended_extensions(recommended_iter, installed_iter, resp);
+        match recommended_content.cmp(&installed_content) {
+            std::cmp::Ordering::Less => {
+                resp.push(recommended_content.clone().unwrap());
+                recommended_content = recommended_iter.next();
+            }
+            std::cmp::Ordering::Equal => {
+                installed_content = installed_iter.next();
+                recommended_content = recommended_iter.next();
+            }
+            std::cmp::Ordering::Greater => {
+                installed_content = installed_iter.next();
             }
         }
     }
