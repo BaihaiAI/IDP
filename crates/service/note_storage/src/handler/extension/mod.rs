@@ -21,6 +21,7 @@ mod models;
 mod recommended_list;
 mod uninstall;
 mod update;
+mod get_extension_config;
 
 use std::path::Path;
 
