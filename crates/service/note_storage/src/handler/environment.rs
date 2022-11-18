@@ -22,7 +22,6 @@ use common_tools::cookies_tools::get_cookie_value_by_team_id;
 use err::ErrorTrace;
 use tokio::process::Child;
 use tokio::process::Command;
-use tracing::error;
 use tracing::info;
 use tracing::instrument;
 
@@ -63,7 +62,6 @@ pub async fn clone_state(
     Query(clone_state_req): Query<CloneStateReq>,
     Extension(app_context): Extension<AppContext>,
 ) -> Result<Rsp<Option<String>>, IdpGlobalError> {
-    info!("query clone state...");
     //get clone state form redis
     Ok(Rsp::success(
         app_context
@@ -178,17 +176,8 @@ pub async fn clone_(
 
     let conda_path = format!("{}/bin/conda", conda_root);
     // clean conda cache first to prevent CondaVerificationError
-    let output = Command::new(&conda_path)
-        .arg("clean")
-        .arg("--all")
-        .arg("-y")
-        .spawn()?
-        .wait()
-        .await?;
-    if !output.success() {
-        return Err(ErrorTrace::new("conda clean fail"));
-    }
-    let mut cmd = Command::new(conda_path);
+
+    let mut cmd = Command::new(&conda_path);
     cmd.arg("create")
         .args(["-y", "-n"])
         .arg(target_name)
@@ -201,59 +190,57 @@ pub async fn clone_(
     let child = cmd.spawn()?;
     let timestamp = chrono::Local::now().timestamp();
     let clone_state_key = format!("{}_{}", timestamp, child.id().unwrap_or(923));
-    tokio::spawn(clone_state_monitor(
-        child,
-        redis_cache.clone(),
-        clone_state_key.clone(),
-    ));
-    Ok(Rsp::success(clone_state_key))
-}
-async fn clone_state_monitor(
-    mut child: Child,
-    cache_service: CacheService,
-    clone_state_key: String,
-) {
-    info!("fork child process finished,pid:{:#?}", child.id());
-
-    // firstly set clone state as cloning.
-    if let Err(err) = cache_service
-        .set_clone_state(&clone_state_key, CloneState::Cloning)
-        .await
-    {
-        error!("{err}");
-    }
-
-    match child.wait().await {
-        Ok(status) => {
-            if status.success() {
-                info!("clone success");
-                //set clone state as success.
-                if let Err(err) = cache_service
-                    .set_clone_state(&clone_state_key, CloneState::Success)
-                    .await
-                {
-                    error!("{err}");
-                }
-            } else {
-                //set clone state as failed.
-                error!("clone exit with status:{:?}", status);
-                if let Err(err) = cache_service
-                    .set_clone_state(&clone_state_key, CloneState::Failed)
-                    .await
-                {
-                    error!("{err}");
-                }
-            }
-        }
-        Err(err) => {
-            error!("wait clone error {:?}", err);
-            //set clone state as failed.
-            if let Err(err) = cache_service
+    let clone_state_key_ = clone_state_key.clone();
+    let svc = redis_cache.clone();
+    tokio::spawn(async move {
+        if let Err(err) =
+            clone_state_monitor(child, &svc, clone_state_key.clone(), conda_path).await
+        {
+            tracing::error!("conda clone {err:#?}");
+            if let Err(err) = svc
                 .set_clone_state(&clone_state_key, CloneState::Failed)
                 .await
             {
-                error!("{err}");
+                tracing::error!("{err}");
             }
         }
+    });
+    Ok(Rsp::success(clone_state_key_))
+}
+
+async fn clone_state_monitor(
+    mut child: Child,
+    cache_service: &CacheService,
+    clone_state_key: String,
+    _conda_path: String,
+) -> Result<(), ErrorTrace> {
+    info!("fork child process finished,pid:{:#?}", child.id());
+
+    // firstly set clone state as cloning.
+    cache_service
+        .set_clone_state(&clone_state_key, CloneState::Cloning)
+        .await?;
+
+    /*
+    let output = Command::new(&conda_path)
+        .arg("clean")
+        .arg("--all")
+        .arg("-y")
+        .spawn()?
+        .wait()
+        .await?;
+    if !output.success() {
+        return Err(ErrorTrace::new("conda clean fail"));
+    }
+    */
+
+    let exit_status = child.wait().await?;
+    if exit_status.success() {
+        cache_service
+            .set_clone_state(&clone_state_key, CloneState::Success)
+            .await?;
+        Ok(())
+    } else {
+        Err(ErrorTrace::new("conda clone exit code non zero"))
     }
 }
