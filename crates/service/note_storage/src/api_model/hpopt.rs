@@ -30,12 +30,21 @@ pub struct DatasourceNewReq {
     pub db_name: String,
 }
 
-type StudyId = i32;
+type StudyId = i64;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StudyDetailReq {
     pub study_id: StudyId,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StudyObjectiveCodeReq {
+    pub study_id: StudyId,
+    pub project_id: ProjectId,
+    pub db_name: String,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StudyNewReq {
@@ -50,4 +59,11 @@ pub struct StudyNewReq {
 #[serde(rename_all = "camelCase")]
 pub struct ObjectiveContentReq {
     pub name: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StudyObjectiveCodeResp {
+    pub objective_content: String,
+    pub full_file_path: String,
 }

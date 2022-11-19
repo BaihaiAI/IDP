@@ -15,6 +15,8 @@ use crate::api_model::hpopt::StartHpOptReq;
 use crate::api_model::hpopt::StopHpOptReq;
 use crate::api_model::hpopt::StudyDetailReq;
 use crate::api_model::hpopt::StudyNewReq;
+use crate::api_model::hpopt::StudyObjectiveCodeReq;
+use crate::api_model::hpopt::StudyObjectiveCodeResp;
 use crate::common::error::IdpGlobalError;
 use crate::handler::hpopt;
 use crate::handler::hpopt::control::get_dburl_by_db_file_name;
@@ -141,8 +143,6 @@ pub async fn list_study(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     // datasource_name: String,
 ) -> Redirect {
-    // let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
-    // todo need change get port from redis(will save it when start_hpopt_backend).
     let port = get_hpopt_port_by_cookie(&cookies);
 
     let ip_addr = format!("http://127.0.0.1:{}", port);
@@ -157,18 +157,38 @@ fn get_hpopt_port_by_cookie(cookies: &Cookies) -> u16 {
         Err(_e) => 0,
     }
 }
+
+// not contains objective fun content.
 pub async fn study_detail(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Query(study_detail_req): Query<StudyDetailReq>,
 ) -> Redirect {
-    // let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
-    // todo need change get port from redis(will save it when start_hpopt_backend).
-
     tracing::debug!("study_detail_req:{:?}", study_detail_req);
     let port = get_hpopt_port_by_cookie(&cookies);
     let ip_addr = format!("http://127.0.0.1:{}", port);
     let url = format!("{}/api/studies/{}", &ip_addr, study_detail_req.study_id);
     Redirect::temporary(&url)
+}
+
+pub async fn study_objective_code(
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Query(study_obj_code_req): Query<StudyObjectiveCodeReq>,
+) -> Result<Rsp<StudyObjectiveCodeResp>, IdpGlobalError> {
+    let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
+    match hpopt::study::get_study_objective_code(
+        team_id,
+        study_obj_code_req.project_id,
+        study_obj_code_req.study_id,
+        study_obj_code_req.db_name,
+    )
+    .await
+    {
+        Ok((full_path, code)) => Ok(Rsp::success(StudyObjectiveCodeResp {
+            full_file_path: full_path,
+            objective_content: code,
+        })),
+        Err(e) => Err(IdpGlobalError::NoteError(e.to_string())),
+    }
 }
 
 // todo: need optimize.
