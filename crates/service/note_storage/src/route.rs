@@ -145,6 +145,13 @@ pub async fn init_router(
                         .route(
                             "/dir/global_keyword_search",
                             on(MethodFilter::POST, workspace::global_keyword_search),
+                        )
+                        .route(
+                            "/dir/global_keyword_search_dir_file",
+                            on(
+                                MethodFilter::POST,
+                                workspace::global_keyword_search_dir_file,
+                            ),
                         ),
                 )
                 .nest("/project", {

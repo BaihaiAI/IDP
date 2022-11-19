@@ -795,9 +795,7 @@ pub async fn dir_lazy_load(
             let short_path = format!("/{short_path}");
             // skip hidden file
             // TODO(windows): skip hidden file on windows
-            if filename.starts_with('.') {
-                continue;
-            }
+
             let mut sort_path;
             if path.is_dir() {
                 // TODO(unix): should use device_id in stat to check whether a s3 mount dir
@@ -1276,6 +1274,37 @@ pub async fn global_keyword_search(
     // println!("result = {}", json_str.unwrap());
 }
 
+pub async fn global_keyword_search_dir_file(
+    team_id: u64,
+    project_id: u64,
+    keyword: String,
+) -> Result<Rsp<Vec<GlobalSearchResult>>, IdpGlobalError> {
+    info!("access global_keyword_search_dir_file function .......");
+    let base_path = path_tool::get_store_path(
+        team_id,
+        project_id,
+        business::business_term::ProjectFolder::NOTEBOOKS,
+    );
+    info!("base_path: {:?}", base_path);
+
+    let mut global_search_result_vec = Vec::new();
+
+    let path = "/".to_string();
+    let _r = recursive_global_keyword_search_dir_file(
+        &mut global_search_result_vec,
+        path,
+        base_path,
+        keyword,
+        team_id,
+        project_id,
+    );
+
+    Ok(Rsp::success(global_search_result_vec))
+
+    // let json_str = serde_json::to_string_pretty(&tree_node);
+    // println!("result = {}", json_str.unwrap());
+}
+
 pub fn recursive_global_keyword_search(
     vec: &mut Vec<GlobalSearchResult>,
     path: String,
@@ -1376,6 +1405,80 @@ pub fn recursive_global_keyword_search(
     Ok(Rsp::success("mydata".to_string()))
 }
 
+pub fn recursive_global_keyword_search_dir_file(
+    vec: &mut Vec<GlobalSearchResult>,
+    path: String,
+    base_path: PathBuf,
+    keyword: String,
+    team_id: u64,
+    project_id: u64,
+) -> Result<Rsp<String>, IdpGlobalError> {
+    let mut abs_list_path = base_path.clone();
+    abs_list_path.push(crate::business_::path_tool::get_relative_path(Path::new(
+        &path,
+    )));
+    info!(
+        "recursive_global_keyword_search_dir_file abs_list_path: {:?}",
+        abs_list_path
+    );
+
+    if abs_list_path.is_dir() {
+        for entry in fs::read_dir(abs_list_path.clone())
+            .map_err(|_| IdpGlobalError::NoteError("dir open error".to_string()))?
+        {
+            let entry = entry.map_err(|_| IdpGlobalError::NoteError("get error".to_string()))?;
+            let path = entry.path();
+
+            let short_path = path
+                .display()
+                .to_string()
+                .replace(&base_path.clone().display().to_string(), "");
+
+            let fullpath = path.clone().display().to_string();
+            let pos = fullpath.rfind('/').unwrap();
+            let (_, filename) = fullpath.split_at(pos + 1);
+
+            if !filename.starts_with_ignore_ascii_case(".") {
+                // info!("in recursiveChild    short_path: {:?}", short_path);
+                // info!("in recursiveChild          path: {}", path.display().to_string());
+                if path.is_file() {
+                    put_filename_result_to_vec(
+                        vec,
+                        path,
+                        keyword.clone(),
+                        short_path.clone(),
+                        team_id,
+                        project_id,
+                        filename.to_string(),
+                    );
+                } else {
+                    //dir match
+                    put_dir_result_to_vec(
+                        vec,
+                        path,
+                        keyword.clone(),
+                        short_path.clone(),
+                        team_id,
+                        project_id,
+                        filename.to_string(),
+                    );
+
+                    let _r = recursive_global_keyword_search_dir_file(
+                        vec,
+                        short_path.clone(),
+                        base_path.clone(),
+                        keyword.clone(),
+                        team_id,
+                        project_id,
+                    )
+                    .map_err(|_| IdpGlobalError::NoteError("dir open error".to_string()));
+                }
+            }
+        }
+    }
+    Ok(Rsp::success("mydata".to_string()))
+}
+
 pub fn put_result_to_vec(
     vec: &mut Vec<GlobalSearchResult>,
     path: PathBuf,
@@ -1430,6 +1533,60 @@ pub fn put_result_to_vec(
             };
             vec.push(gsr);
         }
+    }
+}
+
+pub fn put_filename_result_to_vec(
+    vec: &mut Vec<GlobalSearchResult>,
+    path: PathBuf,
+    keyword: String,
+    short_path: String,
+    _team_id: u64,
+    project_id: u64,
+    filename: String,
+) {
+    // filename match?
+    if filename
+        .to_ascii_lowercase()
+        .contains(&keyword.to_ascii_lowercase())
+    {
+        let gsr_file = GlobalSearchResult {
+            absolute_path: path.display().to_string(), // x.clone().path.display().to_string(),
+            browser_path: short_path,
+            project_id: project_id.to_string(),
+            file_name: filename.to_string(),
+            cell_id: "".to_string(),
+            text: filename,
+            line: 0,
+        };
+        vec.push(gsr_file);
+    }
+}
+
+pub fn put_dir_result_to_vec(
+    vec: &mut Vec<GlobalSearchResult>,
+    path: PathBuf,
+    keyword: String,
+    short_path: String,
+    _team_id: u64,
+    project_id: u64,
+    filename: String,
+) {
+    // dir match
+    if short_path
+        .to_ascii_lowercase()
+        .contains(&keyword.to_ascii_lowercase())
+    {
+        let gsr_file = GlobalSearchResult {
+            absolute_path: path.display().to_string(),
+            browser_path: short_path,
+            project_id: project_id.to_string(),
+            file_name: filename.to_string(),
+            cell_id: "".to_string(),
+            text: filename,
+            line: 0,
+        };
+        vec.push(gsr_file);
     }
 }
 
