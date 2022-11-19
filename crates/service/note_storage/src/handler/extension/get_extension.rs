@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 use super::get_extensions_config;
 const EXTENSION_HTTP_URL: &str = "http://baihai.cn-bj.ufileos.com/docker-build/extension-store/";
 const US3CLI_DEST: &str = "/home/ray/us3cli-linux64";
