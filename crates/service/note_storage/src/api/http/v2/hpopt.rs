@@ -58,7 +58,7 @@ pub async fn datasource_new(
 }
 
 /// -----------------------------------
-/// hpopt bacaned control
+/// hpopt backend control
 /// -----------------------------------
 pub async fn start_hpopt_backend(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
@@ -287,6 +287,14 @@ pub async fn objective_code_content(
 
 //     //todo!
 // }
+// pub async fn study_optimize_stop(
+//     team_id: TeamId,
+//     project_id: ProjectId,
+//     datasource_name: String,
+// ) -> Result<String, IdpGlobalError> {
+
+//     //todo!
+// }
 // pub async fn study_optimize_status(
 //     team_id: TeamId,
 //     project_id: ProjectId,
@@ -295,3 +303,7 @@ pub async fn objective_code_content(
 
 //     //todo!
 // }
+
+// objective-code-edit
+// backend-status
+//
