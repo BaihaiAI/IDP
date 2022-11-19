@@ -26,6 +26,8 @@ use test_runner as _;
 use tokio::sync::Mutex;
 pub mod utils;
 use utils::db_utils::init_pg_connect_pool;
+
+use crate::handler::extension::get_extension;
 mod api;
 pub(crate) mod api_model;
 mod app_context;
@@ -63,6 +65,7 @@ pub async fn main() {
     };
 
     tracing::debug!("pg_option->{:#?}", pg_option);
+    tokio::spawn(get_extension::get_extension());
 
     let app =
         route::init_router(project_info_map.clone(), pg_option, reload_log_level_handle).await;

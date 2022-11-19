@@ -21,7 +21,7 @@ mod models;
 mod recommended_list;
 mod uninstall;
 mod update;
-mod get_extension_config;
+pub(crate) mod get_extension;
 
 use std::path::Path;
 
