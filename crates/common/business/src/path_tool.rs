@@ -136,14 +136,27 @@ pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> Stri
         dir_name = ProjectFolder::HPOPT_DATASOURCE.inner()
     )
 }
-
+// get_optimize_objective_example_path
 #[inline]
-pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId,filename: &str) -> String {
-    format!("{}/{}", get_hpopt_datasource_path(team_id, project_id), filename)
+#[cfg(unix)]
+pub fn get_optimize_objective_example_path() -> String {
+    "/store/objective_example".to_string()
+}
+#[inline]
+pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &str) -> String {
+    format!(
+        "{}/{}",
+        get_hpopt_datasource_path(team_id, project_id),
+        filename
+    )
 }
 #[cfg(windows)]
-pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId,filename: &str) -> String {
-    format!("{}/{}", get_hpopt_datasource_path(team_id, project_id), filename)
+pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &str) -> String {
+    format!(
+        "{}/{}",
+        get_hpopt_datasource_path(team_id, project_id),
+        filename
+    )
 }
 
 pub fn get_nbconvert_by_team_id(_team_id: String) -> String {
@@ -175,7 +188,6 @@ pub fn get_optuna_dashboard_bin_path() -> String {
     // "/home/ray/anaconda3/bin/optuna-dashboard".to_string()
     "/Users/huangjin/miniconda3/bin/optuna-dashboard".to_string()
 }
-
 
 #[inline]
 pub fn get_model_file_path(team_id: i64, project_id: i32) -> String {
@@ -367,4 +379,18 @@ fn replace_path(path: &str) -> String {
 #[cfg(windows)]
 fn replace_path(path: &str) -> String {
     path.replace('\\', "___")
+}
+
+pub fn get_study_objective_fun_path(
+    team_id: u64,
+    project_id: u64,
+    db_name: &str,
+    study_id: i64,
+) -> String {
+    // /store/{team_id}/projects/{project_id}/hpopt/study_objective_fun/{db_name}/{study_id}
+
+    format!(
+        "/store/{}/projects/{}/hpopt/study_objective_fun/{}/{}",
+        team_id, project_id, db_name, study_id
+    )
 }

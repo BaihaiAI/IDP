@@ -166,6 +166,27 @@ pub async fn init_router(
                             "/backend/stop",
                             on(MethodFilter::GET, hpopt::stop_hpopt_backend),
                         )
+                        .route(
+                            "/study/list", 
+                            on(MethodFilter::GET, hpopt::list_study)
+                        )
+                        .route(
+                            "/study/detail",
+                             on(MethodFilter::GET, hpopt::study_detail)
+                        )
+                        .route(
+                            "/study/new", 
+                            on(MethodFilter::POST, hpopt::study_new)
+                        )
+                        .route(
+                            "/optimize/example-names",
+                            on(MethodFilter::GET, hpopt::objective_example_names)
+                        ) 
+                        .route(
+                            "/optimize/example-code",
+                             on(MethodFilter::GET, hpopt::objective_code_content)
+                            )
+
                 })
                 .nest("/project", {
                     Router::new()

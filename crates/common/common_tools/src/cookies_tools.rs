@@ -14,7 +14,7 @@
 
 pub type Cookies = axum::headers::Cookie;
 
-fn get_cookie_value_by_key(cookies: &Cookies, key: &str) -> String {
+pub fn get_cookie_value_by_key(cookies: &Cookies, key: &str) -> String {
     let cookie_opt = cookies.get(key);
     if let Some(val) = cookie_opt {
         tracing::debug!("-->cookie key = {:?}, value = {:?} ", key, val);

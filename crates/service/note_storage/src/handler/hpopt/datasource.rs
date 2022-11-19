@@ -1,10 +1,8 @@
 use business::business_term::ProjectId;
 use business::business_term::TeamId;
-use err::ErrorTrace;
-
-use crate::common::error::IdpGlobalError;
 
 use super::control;
+use crate::common::error::IdpGlobalError;
 
 // 拼接db_file_name,通过dashboard启动,指定这个文件,会自动创建sqlite对应数据库
 // English: Splicing db_file_name, start through dashboard, specify this file, will automatically create the corresponding sqlite database
@@ -24,12 +22,25 @@ pub async fn datasource_new(
         ));
     }
     let db_url = control::get_dburl_by_db_file_name(team_id, project_id, &db_file_name);
-    match control::start_hpopt_backend(db_url,team_id,project_id).await{
-        Ok(_) => Ok(db_file_name),
+    match control::start_hpopt_backend(db_url, team_id, project_id).await {
+        Ok(_) => {
+            // if start success, shutdown backend and return db_file_name(we just need create db schema via start backend).
+            let db_url = control::get_dburl_by_db_file_name(team_id, project_id, &db_file_name);
+            control::stop_hpopt_backend(db_url).await?;
+
+            Ok(db_file_name)
+        }
         Err(e) => Err(e),
     }
 }
-
+// pub async fn delete_datasource(
+//     team_id: TeamId,
+//     project_id: ProjectId,
+//     datasource_name: String,
+// ) -> Result<(), IdpGlobalError> {
+//     //todo!
+//     Ok(())
+// }
 ///
 /// /store/{team_id}/projects/project_id/hp[opt_datasource]
 pub async fn get_datasource_list(

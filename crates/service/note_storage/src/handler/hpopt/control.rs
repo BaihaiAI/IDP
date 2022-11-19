@@ -44,7 +44,7 @@ pub async fn start_hpopt_backend(
     db_url: String,
     team_id: TeamId,
     project_id: ProjectId,
-) -> Result<Rsp<()>, IdpGlobalError> {
+) -> Result<u16, IdpGlobalError> {
     // get python bin path from team_id,project_id
     // let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
     // let py_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
@@ -76,9 +76,9 @@ pub async fn start_hpopt_backend(
             // TODO need defind code and err msg.
             return Err(IdpGlobalError::NoteError("undefind error".to_string()));
         }
+        return Ok(port);
     }
-
-    Ok(Rsp::success(()))
+    Err(IdpGlobalError::NoteError("no available port.".to_string()))
 }
 fn port_is_available(port: u16) -> bool {
     std::net::TcpListener::bind(("127.0.0.1", port)).is_ok()
@@ -112,7 +112,9 @@ fn db_rul(db_file_name: String) -> String {
 
 #[cfg(test)]
 mod control_tests {
-    use crate::handler::hpopt::control::{get_dburl_by_db_file_name, start_hpopt_backend, stop_hpopt_backend};
+    use crate::handler::hpopt::control::get_dburl_by_db_file_name;
+    use crate::handler::hpopt::control::start_hpopt_backend;
+    use crate::handler::hpopt::control::stop_hpopt_backend;
     #[tokio::test]
     // #[cfg(not)]
     async fn test_start_hpopt_backend() {
