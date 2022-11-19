@@ -187,7 +187,7 @@ pub fn recommended_extensions() -> PathBuf {
         let home_dir = std::env::var("HOME").unwrap();
         #[cfg(windows)]
         let home_dir = std::env::var("HOMEPATH").unwrap();
-        std::path::Path::new(&home_dir).join("extension-store").to_path_buf()
+        std::path::Path::new(&home_dir).join("extension-store")
     } else {
         STORE_PARENT_DIR.join("store").join("extension-store")
     }

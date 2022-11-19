@@ -1552,11 +1552,11 @@ pub fn put_filename_result_to_vec(
     {
         let gsr_file = GlobalSearchResult {
             absolute_path: path.display().to_string(), // x.clone().path.display().to_string(),
-            browser_path: short_path.clone(),
+            browser_path: short_path,
             project_id: project_id.to_string(),
             file_name: filename.to_string(),
             cell_id: "".to_string(),
-            text: filename.to_string(),
+            text: filename,
             line: 0,
         };
         vec.push(gsr_file);
@@ -1579,11 +1579,11 @@ pub fn put_dir_result_to_vec(
     {
         let gsr_file = GlobalSearchResult {
             absolute_path: path.display().to_string(),
-            browser_path: short_path.clone(),
+            browser_path: short_path,
             project_id: project_id.to_string(),
             file_name: filename.to_string(),
             cell_id: "".to_string(),
-            text: filename.to_string(),
+            text: filename,
             line: 0,
         };
         vec.push(gsr_file);
