@@ -26,6 +26,7 @@ use crate::app_context::AppContext;
 pub mod file_mime_magic;
 pub mod full_path_cat;
 pub mod get_zip_file_list;
+pub mod load;
 
 use std::sync::Arc;
 use std::sync::Mutex;

@@ -244,6 +244,11 @@ pub async fn init_router(
                     Router::new()
                         .route("/cat", on(MethodFilter::GET, content_handler::cat))
                         .route(
+                            "/load",
+                            on(MethodFilter::GET, content_handler::load::load)
+                                .layer(tower_http::compression::CompressionLayer::new()),
+                        )
+                        .route(
                             "/fullPathCat",
                             on(
                                 MethodFilter::GET,
