@@ -76,7 +76,7 @@ pub async fn get_extension() {
             tracing::error!("fail to overwrite past extension_config");
         };
 
-        tokio::time::sleep(std::time::Duration::from_secs(24*3600)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(500)).await;
     }
 }
 
