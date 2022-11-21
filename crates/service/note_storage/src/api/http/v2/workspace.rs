@@ -279,6 +279,18 @@ pub async fn global_keyword_search(
     // }
 }
 
+pub async fn global_keyword_search_dir_file(
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Json(payload): Json<GlobalKeywordSearchPara>,
+) -> Result<Rsp<Vec<GlobalSearchResult>>, IdpGlobalError> {
+    info!("access dir_search api");
+
+    let (project_id, keyword) = (payload.project_id, payload.keyword);
+
+    let team_id = get_cookie_value_by_team_id(cookies);
+    workspace_handler::global_keyword_search_dir_file(team_id, project_id, keyword).await
+}
+
 #[axum_macros::debug_handler]
 pub async fn dir_new(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,

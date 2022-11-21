@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod detail;
+pub(crate) mod get_extension;
 mod init_install;
 mod install;
 mod installed_list;
