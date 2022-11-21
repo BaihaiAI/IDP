@@ -174,12 +174,24 @@ pub async fn init_router(
                             on(MethodFilter::GET, hpopt::study_objective_code),
                         )
                         .route(
+                            "/study/objective-code",
+                            on(MethodFilter::POST, hpopt::edit_study_objective_code),
+                        )
+                        .route(
                             "/optimize/example-names",
                             on(MethodFilter::GET, hpopt::objective_example_names),
                         )
                         .route(
                             "/optimize/example-code",
                             on(MethodFilter::GET, hpopt::objective_code_content),
+                        )
+                        .route(
+                            "/optimize/run",
+                            on(MethodFilter::POST, hpopt::study_optimize_run),
+                        )
+                        .route(
+                            "/optimize/state",
+                            on(MethodFilter::GET, hpopt::optimize_state),
                         )
                 })
                 .nest("/project", {

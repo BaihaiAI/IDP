@@ -12,9 +12,16 @@ pub async fn get_study_objective_code(
 ) -> Result<(String, String), Error> {
     let fun_file_path =
         path_tool::get_study_objective_fun_path(team_id, project_id, &db_name, study_id);
+    tracing::debug!("fun_file_path: {}", fun_file_path);
     //read file content and return.
     let content = tokio::fs::read_to_string(&fun_file_path).await?;
     Ok((fun_file_path, content))
+}
+pub async fn edit_study_objective_code(file_path: String, content: String) -> Result<(), Error> {
+    tracing::debug!("fun_file_path: {}", file_path);
+    //rewrun file content and return.
+    tokio::fs::write(&file_path, content).await?;
+    Ok(())
 }
 
 // pub async fn list_study(

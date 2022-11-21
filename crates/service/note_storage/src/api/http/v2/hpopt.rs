@@ -1,22 +1,24 @@
-use axum::extract::Path;
 use axum::extract::Query;
-use axum::response::IntoResponse;
 use axum::response::Redirect;
+use axum::Extension;
 use axum::Json;
 use common_model::Rsp;
 use common_tools::cookies_tools;
-use futures::future::ok;
 use serde_json::json;
 use serde_json::Value;
 
 use crate::api_model::hpopt::DatasourceListReq;
 use crate::api_model::hpopt::DatasourceNewReq;
+use crate::api_model::hpopt::EditStudyCodeReq;
+use crate::api_model::hpopt::OptRunReq;
+use crate::api_model::hpopt::OptStateReq;
 use crate::api_model::hpopt::StartHpOptReq;
 use crate::api_model::hpopt::StopHpOptReq;
 use crate::api_model::hpopt::StudyDetailReq;
 use crate::api_model::hpopt::StudyNewReq;
 use crate::api_model::hpopt::StudyObjectiveCodeReq;
 use crate::api_model::hpopt::StudyObjectiveCodeResp;
+use crate::app_context::AppContext;
 use crate::common::error::IdpGlobalError;
 use crate::handler::hpopt;
 use crate::handler::hpopt::control::get_dburl_by_db_file_name;
@@ -278,15 +280,33 @@ pub async fn objective_code_content(
         hpopt::optimize::get_optimize_objective_code_content(req.name).await?,
     ))
 }
+pub async fn edit_study_objective_code(
+    Json(edit_study_code_req): Json<EditStudyCodeReq>,
+) -> Result<Rsp<()>, IdpGlobalError> {
+    hpopt::study::edit_study_objective_code(edit_study_code_req.path, edit_study_code_req.content)
+        .await?;
+    Ok(Rsp::success_without_data())
+}
 
-// pub async fn study_optimize_run(
-//     team_id: TeamId,
-//     project_id: ProjectId,
-//     datasource_name: String,
-// ) -> Result<String, IdpGlobalError> {
+pub async fn study_optimize_run(
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Json(opt_run_req): Json<OptRunReq>,
+    Extension(app_context): Extension<AppContext>,
+) -> Result<Rsp<String>, IdpGlobalError> {
+    let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
 
-//     //todo!
-// }
+    let opt_state_key = hpopt::optimize::study_optimize_run(
+        team_id,
+        opt_run_req.project_id,
+        opt_run_req.study_id,
+        opt_run_req.study_name,
+        opt_run_req.db_name,
+        opt_run_req.n_trials,
+        &app_context.redis_cache,
+    )
+    .await?;
+    Ok(Rsp::success(opt_state_key))
+}
 // pub async fn study_optimize_stop(
 //     team_id: TeamId,
 //     project_id: ProjectId,
@@ -295,15 +315,19 @@ pub async fn objective_code_content(
 
 //     //todo!
 // }
-// pub async fn study_optimize_status(
-//     team_id: TeamId,
-//     project_id: ProjectId,
-//     datasource_name: String,
-// ) -> Result<String, IdpGlobalError> {
+pub async fn optimize_state(
+    Query(opt_state_req): Query<OptStateReq>,
+    Extension(app_context): Extension<AppContext>,
+) -> Result<Rsp<Option<String>>, IdpGlobalError> {
+    tracing::info!("query opt state...");
+    //get clone state form redis
+    Ok(Rsp::success(
+        app_context
+            .redis_cache
+            .get_optimize_state(&opt_state_req.opt_state_key)
+            .await?,
+    ))
+}
 
-//     //todo!
-// }
-
-// objective-code-edit
 // backend-status
 //

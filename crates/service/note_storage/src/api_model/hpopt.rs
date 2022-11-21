@@ -61,9 +61,32 @@ pub struct ObjectiveContentReq {
     pub name: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EditStudyCodeReq {
+    pub content: String,
+    pub path: String,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StudyObjectiveCodeResp {
     pub objective_content: String,
     pub full_file_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OptRunReq {
+    pub project_id: ProjectId,
+    pub study_id: StudyId,
+    pub study_name: String,
+    pub db_name: String,
+    pub n_trials: i64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OptStateReq {
+    pub opt_state_key: String,
 }

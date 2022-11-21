@@ -1,6 +1,5 @@
 use business::business_term::ProjectId;
 use business::business_term::TeamId;
-use common_model::Rsp;
 
 use crate::common::error::IdpGlobalError;
 
@@ -42,8 +41,8 @@ async fn get_pid_by_name(db_url: &str) -> Result<u32, IdpGlobalError> {
 
 pub async fn start_hpopt_backend(
     db_url: String,
-    team_id: TeamId,
-    project_id: ProjectId,
+    _team_id: TeamId,
+    _project_id: ProjectId,
 ) -> Result<u16, IdpGlobalError> {
     // get python bin path from team_id,project_id
     // let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
@@ -93,12 +92,13 @@ pub fn get_dburl_by_db_file_name(
 ) -> String {
     let db_file_fullpath =
         business::path_tool::get_hpopt_db_fullpath(team_id, project_id, db_file_name);
-    let db_url = db_rul(db_file_fullpath);
+    
 
-    db_url
+    db_rul(db_file_fullpath)
 }
 
 #[inline]
+#[cfg(not)]
 pub fn get_db_full_file_name_by_dburl(db_url: &str) -> String {
     //substring by prefix "sqlite:///"
     let db_file_fullpath = &db_url[10..];
@@ -129,10 +129,16 @@ mod control_tests {
         assert!(rsp.is_ok());
     }
 
+    fn get_db_full_file_name_by_dburl(db_url: &str) -> String {
+        //substring by prefix "sqlite:///"
+        let db_file_fullpath = &db_url[10..];
+        db_file_fullpath.to_string()
+    }
+
     #[tokio::test]
     async fn test_get_file_name_by_dburl() {
         let db_url = "sqlite:////store/19980923/projects/1001/hpopt_datasource/111.db";
-        let file_name = crate::handler::hpopt::control::get_db_full_file_name_by_dburl(db_url);
+        let file_name = get_db_full_file_name_by_dburl(db_url);
         println!("file_name: {}", file_name);
         // assert_eq!(file_name, "111.db");
     }
