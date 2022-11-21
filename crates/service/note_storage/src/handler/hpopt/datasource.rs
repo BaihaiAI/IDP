@@ -17,8 +17,8 @@ use business::business_term::TeamId;
 use super::control;
 use crate::common::error::IdpGlobalError;
 
-// 拼接db_file_name,通过dashboard启动,指定这个文件,会自动创建sqlite对应数据库
-// English: Splicing db_file_name, start through dashboard, specify this file, will automatically create the corresponding sqlite database
+
+// Splicing db_file_name, start through dashboard, specify this file, will automatically create the corresponding sqlite database
 pub async fn datasource_new(
     team_id: TeamId,
     project_id: ProjectId,
