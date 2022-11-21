@@ -65,7 +65,9 @@ pub async fn main() {
     };
 
     tracing::debug!("pg_option->{:#?}", pg_option);
-    tokio::spawn(get_extension::get_extension());
+    if business::kubernetes::is_k8s() {
+        tokio::spawn(get_extension::get_extension());
+    }
 
     let app =
         route::init_router(project_info_map.clone(), pg_option, reload_log_level_handle).await;
