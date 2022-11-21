@@ -46,6 +46,8 @@ impl ProjectFolder {
     pub const NOTEBOOKS: Self = Self("notebooks");
     pub const MINICONDA3: Self = Self("miniconda3");
     pub const HPOPT: Self = Self("hpopt");
+
+    pub const HPOPT_RUN: Self = Self("hpopt/run ");
     pub const HPOPT_DATASOURCE: Self = Self("hpopt/datasource");
     pub const HPOPT_STUDY_OBJECTIVE_FUN: Self = Self("hpopt/study_objective_fun");
 

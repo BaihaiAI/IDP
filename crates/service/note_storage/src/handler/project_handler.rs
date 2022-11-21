@@ -123,6 +123,39 @@ pub async fn create_project_children_dir_one_by_one(
     tracing::debug!("project_trash_root_path: {:?}", project_trash_root_path);
     tokio::fs::create_dir(project_trash_root_path).await?;
 
+
+    let project_hpopt_root_path = path_tool::get_store_path(
+        team_id,
+        project_id,
+        business::business_term::ProjectFolder::HPOPT,
+    );
+    tracing::debug!("project_hpopt_root_path: {:?}", project_hpopt_root_path);
+    tokio::fs::create_dir(project_hpopt_root_path).await?;
+
+    let project_hpopt_run_root_path = path_tool::get_store_path(
+        team_id,
+        project_id,
+        business::business_term::ProjectFolder::HPOPT_RUN,
+    );
+    tracing::debug!("project_hpopt_run_root_path: {:?}", project_hpopt_run_root_path);
+    tokio::fs::create_dir(project_hpopt_run_root_path).await?;
+
+    let project_hpopt_datasource_root_path = path_tool::get_store_path(
+        team_id,
+        project_id,
+        business::business_term::ProjectFolder::HPOPT_DATASOURCE,
+    );
+    tracing::debug!("project_hpopt_datasource_root_path: {:?}", project_hpopt_datasource_root_path);
+    tokio::fs::create_dir(project_hpopt_datasource_root_path).await?;
+
+    let project_hpopt_fun_root_path = path_tool::get_store_path(
+        team_id,
+        project_id,
+        business::business_term::ProjectFolder::HPOPT_STUDY_OBJECTIVE_FUN,
+    );
+    tracing::debug!("project_hpopt_fun_root_path: {:?}", project_hpopt_fun_root_path);
+    tokio::fs::create_dir(project_hpopt_fun_root_path).await?;
+
     let project_miniconda3_root_path = path_tool::get_store_path(
         team_id,
         project_id,
@@ -155,6 +188,21 @@ pub async fn create_project_children_dir_one_by_one(
 
     Ok(())
 }
+
+// #[test]
+// pub fn test_1(){
+//     let team_id = 111;
+//     let project_id = 100;
+//     let project_hpopt_root_path = path_tool::get_store_path(
+//         team_id,
+//         project_id,
+//         business::business_term::ProjectFolder::HPOPT_DATASOURCE,
+//     );
+//     println!("project_hpopt_root_path: {:?}", project_hpopt_root_path);
+//
+//     let sub1= project_hpopt_root_path.clone().join("datasource");
+//     println!("sub1: {:?}", sub1);
+// }
 
 #[instrument]
 pub async fn delete(team_id: u64, project_id: u64) -> Result<Rsp<()>, err::ErrorTrace> {
