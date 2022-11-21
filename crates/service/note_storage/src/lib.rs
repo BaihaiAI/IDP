@@ -72,6 +72,7 @@ pub async fn main() {
     let app =
         route::init_router(project_info_map.clone(), pg_option, reload_log_level_handle).await;
 
+    dbg!(app.clone());
     let address = std::net::SocketAddr::from((
         std::net::Ipv4Addr::UNSPECIFIED,
         business::note_storage_port(),

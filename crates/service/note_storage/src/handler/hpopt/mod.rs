@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub const CLONE_STATE_PREFIX: &str = "clone_state:";
-pub const OPTIMIZE_STATE_PREFIX: &str = "optimize_state:";
-pub fn snapshot_key(path: &str, project_id: u64) -> String {
-    format!("snapshot_{project_id}_{path}")
-}
-
-pub fn ipynb_key(path: &str, project_id: u64) -> String {
-    format!("ipynbv2_{project_id}_{path}")
-}
+pub mod control;
+pub mod datasource;
+pub mod optimize;
+pub mod study;

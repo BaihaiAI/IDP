@@ -59,6 +59,20 @@ impl std::fmt::Display for CloneState {
         }
     }
 }
+pub enum OptimizeState {
+    Running,
+    Success,
+    Failed,
+}
+impl std::fmt::Display for OptimizeState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OptimizeState::Running => write!(f, "running"),
+            OptimizeState::Success => write!(f, "success"),
+            OptimizeState::Failed => write!(f, "failed"),
+        }
+    }
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct SnapshotRedisListItem {

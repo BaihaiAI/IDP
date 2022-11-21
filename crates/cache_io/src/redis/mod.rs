@@ -16,6 +16,7 @@ mod cell;
 pub mod conda_env;
 mod disk_read_write;
 mod full;
+pub mod hpopt;
 pub mod refresh_disk;
 pub mod snapshot;
 use std::collections::HashMap;

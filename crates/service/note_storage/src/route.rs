@@ -23,6 +23,7 @@ use sqlx::Pool;
 use sqlx::Postgres;
 use tokio::sync::Mutex;
 
+use crate::api::http::v2::hpopt;
 use crate::api::http::v2::pipeline;
 use crate::api::http::v2::project;
 use crate::api::http::v2::workspace;
@@ -154,6 +155,52 @@ pub async fn init_router(
                             ),
                         ),
                 )
+                .nest("/hpopt", {
+                    Router::new()
+                        .route(
+                            "/datasource/list",
+                            on(MethodFilter::GET, hpopt::datasource_list),
+                        )
+                        .route(
+                            "/datasource/new",
+                            on(MethodFilter::POST, hpopt::datasource_new),
+                        )
+                        .route(
+                            "/backend/start",
+                            on(MethodFilter::GET, hpopt::start_hpopt_backend),
+                        )
+                        .route(
+                            "/backend/stop",
+                            on(MethodFilter::GET, hpopt::stop_hpopt_backend),
+                        )
+                        .route("/study/list", on(MethodFilter::GET, hpopt::list_study))
+                        .route("/study/detail", on(MethodFilter::GET, hpopt::study_detail))
+                        .route("/study/new", on(MethodFilter::POST, hpopt::study_new))
+                        .route(
+                            "/study/objective-code",
+                            on(MethodFilter::GET, hpopt::study_objective_code),
+                        )
+                        .route(
+                            "/study/objective-code",
+                            on(MethodFilter::POST, hpopt::edit_study_objective_code),
+                        )
+                        .route(
+                            "/optimize/example-names",
+                            on(MethodFilter::GET, hpopt::objective_example_names),
+                        )
+                        .route(
+                            "/optimize/example-code",
+                            on(MethodFilter::GET, hpopt::objective_code_content),
+                        )
+                        .route(
+                            "/optimize/run",
+                            on(MethodFilter::POST, hpopt::study_optimize_run),
+                        )
+                        .route(
+                            "/optimize/state",
+                            on(MethodFilter::GET, hpopt::optimize_state),
+                        )
+                })
                 .nest("/project", {
                     Router::new()
                         .route("/new", on(MethodFilter::POST, project::new))

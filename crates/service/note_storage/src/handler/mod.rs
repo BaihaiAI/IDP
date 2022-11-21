@@ -16,6 +16,7 @@ pub mod content;
 pub mod environment;
 pub mod extension;
 pub mod git_service;
+pub mod hpopt;
 pub mod inner;
 pub mod kernel;
 pub mod note;
