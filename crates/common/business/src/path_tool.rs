@@ -199,9 +199,8 @@ pub fn get_conda_path(team_id: TeamId) -> String {
 }
 #[inline]
 pub fn get_optuna_dashboard_bin_path() -> String {
-    //TODO change to our develop pod optuna-dashboard bin path.
-    // "/home/ray/anaconda3/bin/optuna-dashboard".to_string()
-    "/Users/huangjin/miniconda3/bin/optuna-dashboard".to_string()
+    "/home/ray/anaconda3/bin/optuna-dashboard".to_string()
+    // "/Users/huangjin/miniconda3/bin/optuna-dashboard".to_string()
 }
 
 #[inline]
