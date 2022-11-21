@@ -14,10 +14,10 @@
 
 pub mod content;
 pub mod environment;
+pub mod hpopt;
 pub mod pipeline;
 pub mod project;
 pub mod workspace;
-pub mod hpopt;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]

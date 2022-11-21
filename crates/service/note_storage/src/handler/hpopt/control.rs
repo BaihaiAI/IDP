@@ -92,7 +92,6 @@ pub fn get_dburl_by_db_file_name(
 ) -> String {
     let db_file_fullpath =
         business::path_tool::get_hpopt_db_fullpath(team_id, project_id, db_file_name);
-    
 
     db_rul(db_file_fullpath)
 }

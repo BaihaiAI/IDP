@@ -49,7 +49,6 @@ impl ProjectFolder {
     pub const HPOPT_DATASOURCE: Self = Self("hpopt/datasource");
     pub const HPOPT_STUDY_OBJECTIVE_FUN: Self = Self("hpopt/study_objective_fun");
 
-
     #[inline]
     pub const fn inner(&self) -> &'static str {
         self.0
