@@ -124,6 +124,7 @@ fn db_rul(db_file_name: String) -> String {
 }
 
 #[cfg(test)]
+#[cfg(not)]
 mod control_tests {
     use crate::handler::hpopt::control::get_dburl_by_db_file_name;
     use crate::handler::hpopt::control::start_hpopt_backend;
