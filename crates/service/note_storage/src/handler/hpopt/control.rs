@@ -72,7 +72,7 @@ pub async fn start_hpopt_backend(
         if child_opt.is_err() {
             //print log on console
             // tracing::error!("{stderr}");
-            // TODO need defind code and err msg.
+            // TODO need defined code and err msg.
             return Err(IdpGlobalError::NoteError("undefind error".to_string()));
         }
         return Ok(port);

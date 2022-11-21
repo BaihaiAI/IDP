@@ -75,7 +75,7 @@ pub async fn start_hpopt_backend(
                 start_hpopt.project_id,
                 &db_file_name,
             );
-            //if exsits,
+            //if exist,
             if std::path::Path::new(&db_file_fullpath).exists() {
                 let db_url = hpopt::control::get_dburl_by_db_file_name(
                     team_id,

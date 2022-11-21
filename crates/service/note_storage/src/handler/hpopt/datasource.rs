@@ -13,7 +13,7 @@ pub async fn datasource_new(
 ) -> Result<String, IdpGlobalError> {
     let db_file_name = format!("idp_{}.db", datasource_name);
     let datasource_list = get_datasource_list(team_id, project_id).await?;
-    // if exsits the same name, return error
+    // if exists the same name, return error
     if datasource_list.contains(&db_file_name) {
         //TODO change status code
         return Err(IdpGlobalError::ErrorCodeMsg(

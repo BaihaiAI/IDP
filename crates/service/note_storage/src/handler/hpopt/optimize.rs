@@ -59,7 +59,7 @@ study = optuna.load_study"#;
 pub const HPOPT_PYTHON_FOOTER: &str = r#"
 study.optimize(objective, n_trials=int(sys.argv[1]))
 "#;
-//TODO: support parrallel.
+//TODO: support parallel.
 pub async fn study_optimize_run(
     team_id: TeamId,
     project_id: ProjectId,
