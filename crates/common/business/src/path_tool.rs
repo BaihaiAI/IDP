@@ -142,6 +142,21 @@ pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> Stri
 pub fn get_optimize_objective_example_path() -> String {
     "/store/objective_example".to_string()
 }
+pub fn optimize_run_path(
+    team_id: TeamId,
+    project_id: ProjectId,
+    db_name: String,
+    study_id: i64,
+) -> String {
+    // /store/{team_id}/projects/{project_id}/hpopt/run/{db_name}/{study_id}.py
+    format!(
+        "/store/{team_id}/projects/{project_id}/hpopt/run/{db_name}/{study_id}.py",
+        team_id = team_id,
+        project_id = project_id,
+        db_name = db_name,
+        study_id = study_id,
+    )
+}
 #[inline]
 pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &str) -> String {
     format!(
@@ -215,6 +230,26 @@ pub fn project_conda_env(team_id: TeamId, project_id: ProjectId) -> String {
         .to_string()
 }
 
+pub fn get_project_conda_env(team_id: TeamId, project_id: ProjectId) -> String {
+    let project_env_path = format!(
+        "/store/{team_id}/projects/{project_id}/miniconda3/conda.env",
+        team_id = team_id,
+        project_id = project_id
+    );
+    std::fs::read_to_string(project_env_path)
+        .unwrap_or_else(|_| "python39".to_string())
+        .trim_end()
+        .to_string()
+}
+
+pub fn get_conda_python_path(team_id: TeamId, project_id: ProjectId) -> String {
+    let conda_env_name = get_project_conda_env(team_id, project_id);
+    format!(
+        "/store/{team_id}/miniconda3/envs/{conda_env_name}/bin/python",
+        team_id = team_id,
+        conda_env_name = conda_env_name
+    )
+}
 fn project_tmp(team_id: TeamId, project_id: ProjectId) -> String {
     format!(
         "{}/{}",
