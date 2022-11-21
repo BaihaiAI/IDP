@@ -17,7 +17,6 @@ use business::business_term::TeamId;
 use super::control;
 use crate::common::error::IdpGlobalError;
 
-
 // Splicing db_file_name, start through dashboard, specify this file, will automatically create the corresponding sqlite database
 pub async fn datasource_new(
     team_id: TeamId,
