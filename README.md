@@ -42,6 +42,15 @@ Then open http://localhost:3000 with your browser.
 - [macOS macOS](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-arm64.tar.gz)
 - [Linux x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
 
+For example start IDP with pre-built binary in Linux
+
+```
+wget http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz
+tar zxf idp-studio-v1.0.0-linux-x64.tar.gz
+cd idp-studio-v1.0.0-linux-x64
+./idp
+```
+
 ### Start with IDP on Cloud:
 Quickly check out IDP SaaS with <https://www.baihai.co/invitation.html>
 
