@@ -15,8 +15,6 @@
 mod delete_file_or_dir;
 mod dir_export;
 mod download;
-// #[allow(dead_code)]
-// pub mod workspace_kubernetes;
 use business::path_tool::get_store_path;
 use common_model::entity::cell::CellType;
 pub use delete_file_or_dir::delete_file_or_dir;

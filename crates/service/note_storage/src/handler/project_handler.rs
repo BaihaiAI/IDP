@@ -41,8 +41,8 @@ use crate::status_code::PROJECT_NOT_FOUND_FAIL_CODE;
 use crate::status_code::PROJECT_NOT_FOUND_FAIL_MSG;
 use crate::status_code::SUCCESS_CODE;
 
-static FULL_PROJECT_NEW_URL: &str = "http://idp-resource-svc:10005/api/v1/project/new";
-static FULL_PROJECT_DELETE_URL: &str = "http://idp-resource-svc:10005/api/v1/project/delete";
+const FULL_PROJECT_NEW_URL: &str = "http://idp-resource-svc:10005/api/v1/project/new";
+const FULL_PROJECT_DELETE_URL: &str = "http://idp-resource-svc:10005/api/v1/project/delete";
 
 pub fn parse_return_success_code(retcode: u32) -> bool {
     if retcode == SUCCESS_CODE || retcode == 200u32 {
