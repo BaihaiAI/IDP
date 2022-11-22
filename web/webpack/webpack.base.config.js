@@ -57,7 +57,7 @@ const baseConfig = {
     output: {
         publicPath: getPublicPath(),
         path: path.join(__dirname, "../dist"),
-        filename: `js/[name].js`,
+        filename: `js/[name].[hash].js`,
         ...loadRescriptsrc()
     },
     resolve: {
@@ -78,8 +78,9 @@ const baseConfig = {
                     {
                         loader: 'url-loader',
                         options: {
-                            name: path.join('../dist/img/[name].[hash:7].[ext]'),
-                            publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : getPublicPath(),
+                            name: 'img/[name].[hash:7].[ext]',
+                            limit: 1024,
+                            publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : `/child/idpStudio-idp`,
                         }
                     }]
             }

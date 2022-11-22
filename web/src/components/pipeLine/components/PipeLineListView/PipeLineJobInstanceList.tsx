@@ -519,7 +519,7 @@ function PipeLineJobInstanceList(props) {
               addTabPane({
                 key: "createJonInstance" + tabKeyCount,
                 title: intl.get("CREATE_A_WORKFLOW") + tabKeyCount,
-                content: <DAG experimentId={"0"} />,
+                content: <DAG experimentId={"0_" + (new Date().getTime())} />,
               })
             }}
           >

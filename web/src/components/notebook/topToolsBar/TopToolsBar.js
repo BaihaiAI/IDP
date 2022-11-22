@@ -21,7 +21,7 @@ const TopToolsBar = (props) => {
   const [restartKernelDisabled, setRestartKernelDisabled] = useState(false)
 
   return (
-    <Row className="toptoolsbar">
+    <Row className="toptoolsbar" wrap={false}>
       <Col>
         <Space>
           {isPaused ? <Tooltip placement="bottom" title={intl.get("RESUME_RUN_TIP")}>
@@ -95,7 +95,7 @@ const TopToolsBar = (props) => {
           </Tooltip>
         </Space>
       </Col>
-      <Col span={13}>
+      <Col span={17}>
         <ResourceBar resourceRef={resourceRef} />
       </Col>
     </Row>

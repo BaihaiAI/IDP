@@ -75,6 +75,7 @@ const graphToTask = ({ nodes, links }) => {
       resource: {
         machine: node.machine,
         env: '',
+        envName: node.envName,
         taskResourceType: 1,
         priority: Number(node.priority),
       },
@@ -117,6 +118,7 @@ const taskToGraph = (tasks) => {
           id: `${taskId}_out_1`,
         },
       ],
+      envName: item.resource.envName,
       machine: item.resource.machine,
       preNodeRelation: item.config.preNodeRelation,
       priority: item.resource.priority,
@@ -188,9 +190,9 @@ export const addNode = (nodeMeta: NodeParams) => {
       },
     ],
     script: nodeMeta.id,
-    machine: '0.1vCPUs 0.1GB',
+    machine: '0.5vCPUs 0.5GB',
     preNodeRelation: 'ALL_SUCCESS',
-    priority: 50,
+    priority: 3,
     positionX: x,
     positionY: y,
     status: 3,
@@ -204,11 +206,11 @@ const defaultExperiment = () => {
       gmtCreate: '',
       description: '未命名工作流',
       name: '未命名工作流',
-      id: 0,
+      id: '0_' + (new Date().getTime()),
       taskParallel: 5,
       maxRetryTimes: 2,
       envName: getCurrentEnv() || '',
-      priority: 50,
+      priority: 3,
     },
     graph: {
       nodes: [],
@@ -218,7 +220,8 @@ const defaultExperiment = () => {
 }
 
 export const queryExperiment = async (id: string) => {
-  if ('0' === id) return defaultExperiment();
+  // if ('0' === id) return defaultExperiment();
+  if (id.startsWith('0_')) return defaultExperiment();
   let experiment = {};
   let graph = {};
   let status = '';

@@ -8,12 +8,14 @@ const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
 const AddAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin');
 const AntdDayjsWebpackPlugin = require('antd-dayjs-webpack-plugin');
 const { createHtmlWebpackPlugin } = require('../config/htmlWebpackPlugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const proConfig = {
     mode: 'production',
     devtool: false, // source-map
     plugins: [
         new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin(),
         new UglifyJsPlugin(),
         new AntdDayjsWebpackPlugin(),
         new ScriptExtHtmlWebpackPlugin({

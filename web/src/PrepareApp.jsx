@@ -4,7 +4,7 @@ import { connect } from "react-redux"
 import cookie from "react-cookies"
 import intl from "react-intl-universal"
 
-import {Layout, Modal, notification} from "antd"
+import {Layout, Modal, notification, Spin} from "antd"
 import { NotificationOutlined } from "@ant-design/icons"
 
 import "./App.less"
@@ -67,11 +67,17 @@ const defaultOpenFile = {
 }
 
 const setDefaultLang = ()=>{
-  let lang = cookie.load("locale")
+  let lang = cookie.load("locale") || navigator.language || navigator.browserLanguage
   if (undefined === lang || "" === lang) {
     lang = "zhCN"
-    cookie.save("locale", lang)
+  } else {
+    if (lang.indexOf('zh') !== -1) {
+      lang = 'zhCN'
+    } else {
+      lang = 'enUS'
+    }
   }
+  cookie.save("locale", lang)
 }
 
 function isIpynb(suffix) {
@@ -84,15 +90,23 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
+    // 获取项目信息
+    globalData.appComponentData.getProjectInfo();
+
+    // 防止js没加载之前白屏
+    document.getElementById('loading-gif').style.display = 'none'
+
     setDefaultLang()
     // 初始化historyFile
     initHistoryFile()
 
+    this.showInitTips = window.location.pathname.endsWith('workspace')
     this.state = {
       intlInit: false,
       theme: "dark-theme",
       isHealth: false,
-      initTips: "正在为您配置计算资源...",
+      initTips: this.showInitTips ? "正在为您配置计算资源..." : "",
+      cover: 'none'
     }
     // 根据累加次数切换初始化信息
     this.healthCheckCount = 0
@@ -232,11 +246,16 @@ class App extends React.Component {
         }
       })
     }else {
+      this.setState({ cover: ''})
       this.props.addFileAndContentAsync(openFile).then((res)=>{
+        this.setState({ cover: 'none' })
         if(!res.payload){
           // 打开失败的话 改变local中的状态
           handlerSaveHistoryOpenFile(openFile.path, openFile.name, "close")
         }
+      }).catch((err) => {
+        console.log(err)
+        this.setState({ cover: 'none' })
       })
     }
   }
@@ -397,8 +416,6 @@ class App extends React.Component {
             _this.setState({ isHealth: true })
             _this.openLocalFile()
 
-            // 获取项目信息
-            globalData.appComponentData.getProjectInfo()
             // 版本更新通知
             const majorVersionUpdate = cookie.load("majorVersionUpdate")
             if (!majorVersionUpdate) {
@@ -411,9 +428,9 @@ class App extends React.Component {
           })
         this.healthCheckCount += 1
         if (this.healthCheckCount > 30) {
-          this.setState({ initTips: "正在为您初始化环境..." })
+          this.showInitTips && this.setState({ initTips: "正在为您初始化环境..." })
         } else if (this.healthCheckCount > 15) {
-          this.setState({ initTips: "正在为您配置硬盘存储资源..." })
+          this.showInitTips && this.setState({ initTips: "正在为您配置硬盘存储资源..." })
         }
       }
     }, 2000)
@@ -488,6 +505,11 @@ class App extends React.Component {
                 this.props.children
               }
             </Layout>
+          </div>
+          <div className="cover" style={{
+            display: this.state.cover
+          }}>
+            <Spin size="large" />
           </div>
       </Provider>
     ) : (

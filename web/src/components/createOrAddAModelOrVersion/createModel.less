@@ -1,0 +1,205 @@
+.createmodel-Drawer{
+  user-select: none;
+  .ant-drawer-body{
+    padding: 80px 24px 14px 24px;
+    .drawer-header{
+      height: 32px;
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 8px;
+      box-sizing: content-box;
+      position: fixed;
+      width: 722px;
+      top: 10px;
+      z-index: 10;
+      background-color: #fff;
+      backdrop-filter: blur(5px);
+      background: hsla(0,0%,100%,.8);
+      box-shadow: 0px 2px 6px 0px rgb(0 0 0 / 10%);
+      border-radius: 10px;
+      .dh-name{
+        line-height: 32px;
+        user-select: none;
+        span{
+          color: #999;
+        }
+      }
+      .dh-option{
+        width: 300px;
+        display: flex;
+        justify-content: space-between;
+        .dh-option-r{
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          .ant-checkbox-checked{
+            .ant-checkbox-inner{
+              background-color: #1890ff;
+              border-color: #1890ff;
+            }
+          }
+
+          .ant-radio-wrapper{
+            margin-right: 0;
+          }
+          .ant-radio-inner{
+            border-radius: 12%;
+            border-color: #1890ff;
+          }
+          .ant-radio-inner::after{
+            background-color: #1890ff;
+            border-radius: 12%;
+          }
+          p{
+            width: 16px;
+            height: 16px;
+            box-sizing: border-box;
+            cursor: pointer;
+            border: 1px solid #999;
+            margin: 0;
+            display: flex;
+            span{
+              color: #999;
+            }
+          }
+        }
+        .dh-option-m{
+          border-right: 1px solid #999;
+        }
+        .dh-option-l{
+          width: 150px;
+          display: flex;
+          justify-content: space-between;
+        }
+      }
+    }
+    .createOrAddModelsForm{
+      width: 735px;
+    }
+  }
+  .shared{
+    border: 1px solid #c0bebe;
+    border-radius: 3px;
+    overflow: auto;
+    overflow-y: clip;
+    transition-duration: .4s;
+    box-sizing: border-box;
+    .input-list-container{
+      padding-left: 10px;
+      background-color: #FAFAFA;
+      width: 79%;
+      margin-left: 130px;
+      .input-list-header{
+        height: 40px;
+        line-height: 40px;
+        .arg-name{
+          margin-right: 30px;
+        }
+        .arg-type{
+          margin-right: 40px;
+        }
+      }
+      .input-list-item{
+        min-height: 40px;
+        margin-bottom: 10px;
+        .arg-name{
+          display: inline-block;
+          width: 74px;
+        }
+        .arg-type{
+          margin-right: 25px;
+        }
+        .arg-test{
+          display: flex;
+          .ant-upload{
+            display: flex;
+          }
+          .ant-upload-list{
+            .ant-upload-list-text-container{
+              .ant-upload-list-item{
+                margin-top: 4px !important;
+              }
+            }
+          }
+        }
+      }
+
+
+      .input-list-footer{
+      }
+    }
+
+    .create-header, .configure-header{
+      width: 100%;
+      box-sizing: border-box;
+      height: 40px;
+      background: #f2f2f2;
+      border-bottom: 1px solid #c0bebe;
+      cursor: pointer;
+      line-height: 40px;
+      padding-left: 30px;
+      margin-bottom: 24px;
+      span{
+        display: inline-block;
+        transition-duration: .4s;
+      }
+    }
+    .ant-row, .ant-row-center{
+      padding-bottom: 8px;
+    }
+    .model-info{
+      height: 980px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .version-info{
+      height: 330px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      .add-version{
+        position: relative;
+        .model-name-tip{
+          display: inline-block;
+          position: absolute;
+          right: -8px;
+          top: 7px;
+          cursor: pointer;
+          span{
+            font-size: 20px;
+          }
+        }
+      }
+    }
+    .ant-form-item-control-input-content{
+      width: 100%;
+      .ant-upload, .ant-upload-select, .ant-upload-select-text{
+        width: 100%;
+        button{
+          width: 100%;
+        }
+      }
+    }
+  }
+  .create{
+
+  }
+  .configure{
+    margin-top: 40px;
+    .ant-radio-inner::after{
+      background-color: #1890ff;
+    }
+    .modelEnter, .modelOutput{
+      padding: 0;
+      .ant-row, .ant-form-item{
+        padding: 0;
+      }
+    }
+    .modelEnter-text, .modelOutput-text{
+      .ant-form-item-label{
+        visibility: hidden;
+      }
+    }
+  }
+}

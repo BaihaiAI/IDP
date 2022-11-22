@@ -32,6 +32,17 @@ export const PythonLibEditor: React.FC<Props> = (props: Props) => {
     if (posLine && content && editor) {
       editor.focus()
       editor.setCursor({ line: posLine, ch: posCh })
+      try {
+        editor.scrollIntoView({
+          line: posLine + 15,
+          ch: posCh
+        });
+      } catch(err) {
+        editor.scrollIntoView({
+          line: posLine + 1,
+          ch: posCh
+        });
+      }
     }
   }, [content])
 

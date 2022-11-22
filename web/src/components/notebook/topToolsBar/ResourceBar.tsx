@@ -1,4 +1,5 @@
-import { Input, Space } from "antd"
+import { Input, Space, Checkbox } from "antd"
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { useContext, useEffect, useImperativeHandle } from "react"
 import { useState } from "react"
 import kernelApi from "../../../services/kernelApi"
@@ -13,30 +14,32 @@ interface Props {
 }
 
 export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
-  const minNumCpu = '0.01'
+  const minNumCpu = '0.5'
   const minNumGpu = '0.0'
-  const minMemory = '0.01'
+  const minMemory = '0.5'
   const minPriority = '1'
-  const maxPriority = '100'
+  const maxPriority = '5'
   const [numCpu, setNumCpu] = useState(minNumCpu)
   const [numGpu, setNumGpu] = useState(minNumGpu)
   const [memory, setMemory] = useState(minMemory)
-  const [priority, setPriority] = useState('50')
-  const [maxNumCpu, setMaxNumCpu] = useState('1.0')
-  const [maxNumGpu, setMaxNumGpu] = useState('1.0')
-  const [maxMemory, setMaxMemory] = useState('2.0')
+  const [priority, setPriority] = useState('3')
+  const [maxNumCpu, setMaxNumCpu] = useState('16.0')
+  const [maxNumGpu, setMaxNumGpu] = useState('22.0')
+  const [maxMemory, setMaxMemory] = useState('32.0')
   const [isExecuting, setIsExecuting] = useState(false)
+  const [enableSaveSession, setEnableSaveSession] = useState(false)
   const notebook: any = useContext(NotebookComponentContext)
 
   const kernelList = useSelector(selectKernelList)
 
   // 获取可用资源
   const getAvailableResource = (callback: any) => {
-    clusterApi.suggest().then(res => {
+    clusterApi.suggest({ path: notebook.path }).then(res => {
       // console.log(res.data)
       const availableCpu = res.data.CPU || 0
       const availableGpu = res.data.GPU || 0
       const availableMemory = res.data.memory || 0
+      const priority = res.data.priority || '3'
       // setMaxNumCpu(availableCpu.toFixed(1))
       // setMaxNumGpu(availableGpu.toFixed(1))
       // setMaxMemory((availableMemory / (1024 * 1024 * 1024)).toFixed(1))
@@ -45,6 +48,7 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
         availableCpu,
         availableGpu,
         availableMemory: availableMemory / (1024 * 1024 * 1024),
+        priority,
       })
     }).catch(err => {
       console.log(err)
@@ -52,13 +56,16 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
   }
 
   useEffect(() => {
-    getAvailableResource((available: any) => {
-      const { availableCpu, availableGpu, availableMemory } = available
-      setNumCpu(availableCpu.toFixed(2))
-      setNumGpu(availableGpu.toFixed(2))
-      setMemory(availableMemory.toFixed(2))
-    })
-  }, [])
+    if (notebook.path) {
+      getAvailableResource((available: any) => {
+        const { availableCpu, availableGpu, availableMemory, priority } = available
+        setNumCpu(availableCpu.toFixed(2))
+        setNumGpu(availableGpu.toFixed(2))
+        setMemory(availableMemory.toFixed(2))
+        setPriority(priority)
+      })
+    }
+  }, [notebook.path])
 
   useEffect(() => {
     kernelApi.kernelState().then((response) => {
@@ -142,10 +149,10 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
   const gpuProps = {
     type: 'number',
     addonBefore: 'GPU',
-    addonAfter: '个',
+    addonAfter: 'GB',
     min: minNumGpu,
     max: maxNumGpu,
-    step: '0.1',
+    step: '1',
     value: numGpu,
     style: { width: '130px' },
     disabled: isExecuting,
@@ -190,15 +197,15 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
     max: maxPriority,
     step: '1',
     value: priority,
-    style: { width: '110px' },
+    style: { width: '100px' },
     disabled: isExecuting,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => { setPriority(e.target.value) },
     onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
       const value = e.target.value
       if (value === '' || Number(value) <= 0) {
         setPriority('1')
-      } else if (Number(value) > 100) {
-        setPriority('100')
+      } else if (Number(value) > 5) {
+        setPriority('5')
       }
     }
   }
@@ -214,7 +221,14 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
   const setKernelIsExecuting = (isExecuting: boolean) => {
     setIsExecuting(isExecuting)
   }
-  useImperativeHandle(resourceRef, () => ({ getResource, setKernelIsExecuting }))
+  useImperativeHandle(resourceRef, () => ({ getResource, setKernelIsExecuting, getEnableSaveSession }))
+
+  const autoCheckpoint = (e: CheckboxChangeEvent) => {
+    setEnableSaveSession(e.target.checked)
+  }
+  const getEnableSaveSession = () => {
+    return enableSaveSession
+  }
 
   return (<div className="resourceBar">
     <Space>
@@ -222,6 +236,7 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
       <Input size="small" {...gpuProps} />
       <Input size="small" {...memoryProps} />
       <Input size="small" {...priorityProps} />
+      <Checkbox onChange={autoCheckpoint}>自动保存上下文</Checkbox>
     </Space>
   </div>)
 }

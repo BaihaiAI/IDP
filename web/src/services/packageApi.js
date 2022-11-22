@@ -26,13 +26,13 @@ function searchV3({ packageName, current = 1, size = 50 }) {
 }
 
 function install(options) {
-    const url = `${kernelApiPath}/package/install`;
-    const data = {
+  const url = `${kernelApiPath}/package/install`;
+  const data = {
       projectId: projectId,
-        packageName: options.packageName,
-        version: options.version
-    };
-    return request.post(url, data);
+      packageName: options.packageName,
+      version: options.version
+  };
+  return request.post(url, data);
 }
 
 function uninstall(options) {

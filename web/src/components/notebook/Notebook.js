@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useImperativeHandle, useContext} from "react"
+import React, {memo, useState, useEffect, useRef, useImperativeHandle, useContext} from "react"
 import { useDispatch, useSelector } from "react-redux"
 import kernelApi from "../../services/kernelApi"
 import { kernelWsSend } from "./lib/kernelWs"
@@ -25,7 +25,7 @@ import {
 } from "@/store/features/notebookSlice"
 import Cell from "./cells/Cell"
 import { userId, region, projectId ,teamId} from "@/store/cookie"
-import { selectActivePath } from "@/store/features/filesTabSlice"
+// import { selectActivePath } from "@/store/features/filesTabSlice"
 
 import "./Notebook.less"
 import contentApi from "../../services/contentApi"
@@ -250,6 +250,7 @@ const Notebook = (props, ref) => {
 
     const notebookList = store.getState().notebook.notebookList
     for (const notebook of notebookList  ) {
+      if (path !== notebook.path) continue
       let cells = notebook.cells
       for (let i = 0; i < cells.length; i++) {
         if (cells[i].metadata.id === cellId) {
@@ -266,7 +267,14 @@ const Notebook = (props, ref) => {
           } else if ("execute_input" === msgJson["msgType"]) {
             cell["outputs"] = []
             cellState = "executing"
-          } else if ("reply_on_stop" === msgJson["msgType"] || ('status' === msgJson['msgType'] && 'idle' === msgJson['content']['execution_state'])) {
+          } else if ("reply_on_stop" === msgJson["msgType"]) {
+            cellState = "ready"
+            cell["outputs"] = [{
+              ename: 'StopRunning',
+              evalue: 'Stop running because there are cells with running errors above',
+              traceback: [],
+            }]
+          } else if ('status' === msgJson['msgType'] && 'idle' === msgJson['content']['execution_state']) {
             cellState = "ready"
           } else {
             const res = sendWs.parseMessage(msgJson)
@@ -376,11 +384,11 @@ const Notebook = (props, ref) => {
   let socketErrorCount = 0
   let showSocketError = true
 
-  const activeKey = useSelector(selectActivePath)
-  if (path === activeKey) {
-    sendWs.ws.socketMessage = socketMessage
-    sendWs.ws.handleHeartbeat = handleHeartbeat
-  }
+  // const activeKey = useSelector(selectActivePath)
+  // if (path === activeKey) {
+  //   sendWs.ws.socketMessage = socketMessage
+  //   sendWs.ws.handleHeartbeat = handleHeartbeat
+  // }
 
   const arrToString = (arr) => {
     let str = ""
@@ -456,20 +464,20 @@ const Notebook = (props, ref) => {
     }
 
     // 可视化cell判断是否选择了变量和X/Y维度
-   /* if (cell["cell_type"] === 'visualization') {
+    if (cell["cell_type"] === 'visualization') {
       let warnMsg = ''
       if (!cell.metadata || !cell.metadata.chart || !cell.metadata.df_name) {
-        warnMsg = '请选择变量和维度'
+        warnMsg = '运行数据可视化cell时需要选择变量和维度'
       } else {
         if (!cell.metadata.chart['x'] || !cell.metadata.chart['y']) {
-          warnMsg = '请选择维度(X轴)和维度(Y轴)'
+          warnMsg = '运行数据可视化cell时需要选择维度(X轴)和维度(Y轴)'
         }
       }
       if ('' !== warnMsg) {
-        Modal.warning({ title: warnMsg })
+        message.warning(warnMsg, 3)
         return
       }
-    }*/
+    }
 
     let code = ""
     if (isAll) {
@@ -483,10 +491,11 @@ const Notebook = (props, ref) => {
       code = code || arrToString(cell["source"])
     }
 
-    // 将开始运行时  execution_time 为null
+    // 将开始运行时，清空execution_time 和 output
     const newCell = {
       ...cell,
-      "execution_time":null
+      "execution_time":null,
+      "outputs": []
     }
     dispatch(updateCell({path,cellId,cell:newCell}))
 
@@ -522,7 +531,8 @@ const Notebook = (props, ref) => {
         numGpu: resource.numGpu,
         memory: resource.memory,
         priority: resource.priority,
-      }
+      },
+      enableSaveSession: resourceRef.current.getEnableSaveSession()
     })
 
 
@@ -564,6 +574,7 @@ const Notebook = (props, ref) => {
       code: '',
       meta: {},
       inputReply: value,
+      enableSaveSession: resourceRef.current.getEnableSaveSession()
     })
 
     if (!status) {
@@ -1307,4 +1318,6 @@ const Notebook = (props, ref) => {
   )
 }
 
-export default observer(React.forwardRef((Notebook)))
+export default memo(observer(React.forwardRef(Notebook)), (prevProps, nextProps) => {
+  return nextProps.path !== store.getState().filesTab.activePath
+})

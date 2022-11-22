@@ -32,7 +32,7 @@ import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
 import packageApi from '../../../../services/packageApi';
 import './CodeCell.less'
 import { useNotebookItem } from '../../../../utils/hook/useActiveCellProps';
-import { NotebookComponentContext } from "../../Notebook"
+// import { NotebookComponentContext } from "../../Notebook"
 import { addNewFile } from '../../../../store/features/filesTabSlice';
 
 // 为了自动安装包和恢复版本时更新内容
@@ -64,11 +64,14 @@ export const CodeCell = (props) => {
     runCurrentCellAndAbove,
     runCurrentCellAndBelow,
     content,
+    // cells,
     onAddCell,
     outputs
   } = props;
   const dispatch = useDispatch();
-  const { cells } = useContext(NotebookComponentContext)
+  // const { cells } = useContext(NotebookComponentContext)
+  const notebook = useNotebookItem(path)
+  const cells = notebook ? notebook.cells : []
 
   const [value, setValue] = useState(source);
   const [hideInput, setHideInput] = useState(false);
@@ -461,7 +464,6 @@ export const CodeCell = (props) => {
         >
           <RightTopBar
             outputs={outputs}
-            cellProps={cellProps}
             path={path}
             cellId={cellId}
             index={index}

@@ -10,6 +10,14 @@ export const getTeamId = () => cookie.load('teamId')
 
 export const region = cookie.load('region')
 export const projectId = new URLSearchParams(window.location.search).get('projectId')
+
+const setProjectId = () => {
+  const host = window.location.host
+  const domain = host.startsWith('localhost') ? host : host.substring(host.indexOf('.'))
+  cookie.save('projectId', projectId, { domain: domain, path: '/'})
+}
+setProjectId()
+
 export const getProjectId = () => {
   return new URLSearchParams(window.location.search).get('projectId')
 }

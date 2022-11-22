@@ -32,7 +32,7 @@ button::-moz-focus-inner,
 [type='submit']::-moz-focus-inner {border-style: none;}
 fieldset {border: 0;}
 legend {color: inherit;}
-mark {background-color: #feffe6;}
+mark {background-color: color(~`colorPalette("@{layout-body-background}", 1)`);}
 ::selection {color: #fff;background: @primary-color;}
 .anticon {color: inherit;}
 .ant-fade-enter, .ant-fade-appear {animation-fill-mode: both;}
@@ -1569,7 +1569,7 @@ tr.ant-table-expanded-row:hover > td {background: #fbfbfb;}
 .ant-tag-volcano-inverse {color: #fff;background: #fa541c;border-color: #fa541c;}
 .ant-tag-orange {color: #d46b08;background: #fff7e6;border-color: #ffd591;}
 .ant-tag-orange-inverse {color: #fff;background: #fa8c16;border-color: #fa8c16;}
-.ant-tag-yellow {color: #d4b106;background: #feffe6;border-color: #fffb8f;}
+.ant-tag-yellow {color: #d4b106;background: color(~`colorPalette("@{layout-body-background}", 1)`);border-color: #fffb8f;}
 .ant-tag-yellow-inverse {color: #fff;background: #fadb14;border-color: #fadb14;}
 .ant-tag-gold {color: #d48806;background: #fffbe6;border-color: #ffe58f;}
 .ant-tag-gold-inverse {color: #fff;background: #faad14;border-color: #faad14;}
@@ -1842,7 +1842,7 @@ a.ant-typography.ant-typography-disabled:hover, .ant-typography a.ant-typography
 .ant-layout-header .ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon, .ant-layout-header .ant-menu-dark .ant-menu-item-selected .anticon {color: #3793EF;background-color: @layout-header-background;}
 .ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-selected {background-color: @layout-header-background;}
 .workspace-bg {background-color: @primary-color;}
-.ant-btn-primary {background-color: #3793EF !important;border-color: #3793EF;}
+.ant-btn-primary {background-color: #3793EF;border-color: #3793EF;}
 a, .ant-btn-link {color: #3793EF;}
 .bezierEasingMixin() {
 @functions: ~`(function() {var NEWTON_ITERATIONS = 4;var NEWTON_MIN_SLOPE = 0.001;var SUBDIVISION_PRECISION = 0.0000001;var SUBDIVISION_MAX_ITERATIONS = 10;var kSplineTableSize = 11;var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);var float32ArraySupported = typeof Float32Array === 'function';function A (aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }

@@ -197,7 +197,8 @@ class TextEditor extends React.Component {
     return (
       <div className="main-sql-wrapper" style={{ height: document.clientHeight - 30, overflow: 'scroll' }}>
         {
-          this.state.mime.startsWith('image') ? <img src={`data:${this.state.mime};base64,${this.state.value}`} /> :
+          this.state.mime.startsWith('image') ? 
+            <img style={{ objectFit: 'scale-down', height: this.props.workSpaceHeight ? (this.props.workSpaceHeight) : (terminal.workspaceHeight - 33) }} src={`data:${this.state.mime};base64,${this.state.value}`} /> :
             <CodeMirror
               key={this.props.path}
               height={this.props.workSpaceHeight ? (this.props.workSpaceHeight) : (terminal.workspaceHeight - 93)}

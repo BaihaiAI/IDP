@@ -63,6 +63,27 @@ class Package extends React.Component {
         }
     }
 
+    compareVersion = (v1, v2)  => {
+        if (v1 == v2) {
+            return "已安装";
+        }
+        const vs1 = v1.split(".").map(a => parseInt(a));
+        const vs2 = v2.split(".").map(a => parseInt(a));
+        const length = Math.min(vs1.length, vs2.length);
+        for (let i = 0; i < length; i++) {
+            if (vs1[i] > vs2[i]) {
+                return "已安装";
+            } else if (vs1[i] < vs2[i]) {
+                return "升级";
+            }
+        }
+        if (length == vs1.length) {
+            return "升级";
+        } else {
+            return "已安装";
+        }
+    }
+
     search = (value) => {
         const _this = this;    //先存一下this，以防使用箭头函数this会指向我们不希望它所指向的对象。
         const keyword = value.trim();
@@ -80,7 +101,8 @@ class Package extends React.Component {
                 const records = response.data.records
                 let list = [];
                 for (let item of records) {
-                    item.istate = item.installed ? intl.get('PACKAGE_INSTALLED') : intl.get('PACKAGE_INSTALL');
+                    item.istate = !item.installedVersion ? "安装" :
+                        (_this.compareVersion(item.installedVersion, item.stableVersion))
                     list.push(item);
                 }
                 _this.setState({
@@ -94,25 +116,25 @@ class Package extends React.Component {
             .catch(function (error) {
                 console.log(error);
                 message.error(intl.get('PACKAGE_ERROR_SERACH'));
-                _this.setState({ searchDisable: false });
+                _this.setState({searchDisable: false});
             })
     }
 
-    setSearchList(_this, packageName, version, istate, error = '') {
-        let searchList = _this.state.searchList.slice();
-        for (let item of searchList) {
-            if (packageName == item.packageName && version == item.stableVersion) {
-                item.istate = istate;
-                item.installed = intl.get('PACKAGE_INSTALLED') == istate;
-                if (item.istate === '安装失败') {
-                    item.error = error
+        setSearchList(_this, packageName, version, istate, error='') {
+            let searchList = _this.state.searchList.slice();
+            for (let item of searchList) {
+                if (packageName == item.packageName && version == item.stableVersion) {
+                    item.istate = istate;
+                    item.installed = intl.get('PACKAGE_INSTALLED')  == istate;
+                    if(item.istate === '安装失败'){
+                        item.error = error
+                    }
                 }
             }
+            _this.setState({
+                searchList: searchList,
+            });
         }
-        _this.setState({
-            searchList: searchList,
-        });
-    }
     dataClone = (obj) => {
         // 先检测是不是数组和Object
         // let isArr = Object.prototype.toString.call(obj) === '[object Array]';
@@ -161,7 +183,6 @@ class Package extends React.Component {
             packageName: packageName,
             version: version
         };
-
         _this.setSearchList(_this, packageName, version, intl.get('PACKAGE_INSTALLING'));
         axios.post(`${noteApiPath2}/package/install`, {
             packageName: packageName,
@@ -198,13 +219,21 @@ class Package extends React.Component {
 
     installAction(props) {
         const item = props.item;
-        if (intl.get('PACKAGE_INSTALL') == item.istate || intl.get('PACKAGE_FAILED') == item.istate) {
+        if (intl.get('PACKAGE_INSTALL')  == item.istate || intl.get('PACKAGE_FAILED')  == item.istate || "升级" === item.istate) {
             return (
                 <a key="search-install" onClick={() => props.onClick()}>
                     {item.istate}
                 </a>
             );
-        } if (intl.get('PACKAGE_INSTALLING') == item.istate) {
+        } 
+        if("已安装" === item.istate){
+            return (
+                <a key="search-install" disabled>
+                    {item.istate}
+                </a>
+            );
+        }
+        if (intl.get('PACKAGE_INSTALLING')  == item.istate) {
             return (
                 <LoadingOutlined></LoadingOutlined>
             );

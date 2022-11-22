@@ -3,31 +3,33 @@ import { Form, Input, Select } from 'antd'
 import { useObservableState } from '../../../common/hooks/useObservableState'
 import { useExperimentGraph } from '../../rx-models/experiment-graph'
 import { getCurrentEnv } from '../../../../../store/config'
-import environmentAPI from 'idpServices/environment'
 
 const {Option} = Select;
 export interface Props {
   experimentId: string
   mode?: string
+  environmentList: any
 }
 
-export const ExperimentForm: React.FC<Props> = ({ experimentId, mode }) => {
+export const ExperimentForm: React.FC<Props> = ({ experimentId, mode, environmentList }) => {
   const [form] = Form.useForm()
 
   const expGraph = useExperimentGraph(experimentId)
   const [activeExperiment] = useObservableState(expGraph.experiment$)
-  const [environmentList, setEnvironmentList] = useState<any[]>([])
 
   const onValuesChange = ({ experimentName, taskParallel, maxRetryTimes, envName, priority }: { experimentName: string, taskParallel: string, maxRetryTimes: string, envName: string, priority: number }) => {
     let nextActiveExperiment = { ...activeExperiment };
     if (experimentName !== undefined) nextActiveExperiment = { ...nextActiveExperiment, name: experimentName }
     if (taskParallel) nextActiveExperiment = { ...nextActiveExperiment, taskParallel: Number(taskParallel) }
     if (maxRetryTimes) nextActiveExperiment = { ...nextActiveExperiment, maxRetryTimes: Number(maxRetryTimes) }
-    if (envName) nextActiveExperiment = { ...nextActiveExperiment, envName }
+    if (envName) {
+      nextActiveExperiment = { ...nextActiveExperiment, envName }
+      expGraph.updateAllNodeEnvName(envName);
+    }
     if (priority !== undefined) {
       let nextPriority = priority
-      if (Number(priority) > 100) {
-        nextPriority = 100
+      if (Number(priority) > 5) {
+        nextPriority = 5
       }
       nextActiveExperiment = { ...nextActiveExperiment, priority: nextPriority }
       expGraph.updateAllNodePriority(nextPriority);
@@ -45,14 +47,6 @@ export const ExperimentForm: React.FC<Props> = ({ experimentId, mode }) => {
       priority: activeExperiment ? activeExperiment.priority : 50,
     })
   }, [activeExperiment])
-
-  useEffect(() => {
-    environmentAPI.getEnvironmentList().then(res => {
-      setEnvironmentList(res.data)
-    }).catch((err: any) => {
-      console.log(err)
-    })
-  }, [])
 
   const handlePriorityBlur = (e: any) => {
     const value = e.target.value
@@ -106,7 +100,7 @@ export const ExperimentForm: React.FC<Props> = ({ experimentId, mode }) => {
         </Select>
       </Form.Item>
       <Form.Item label="优先级" name="priority">
-        <Input type="number" min="1" max="100" step="1"
+        <Input type="number" min="1" max="5" step="1"
           disabled={mode === 'view' ? true : false}
           onBlur={handlePriorityBlur} />
       </Form.Item>

@@ -49,7 +49,7 @@ function Content() {
       isShow = true
     }
     return (
-      <WorkspaceLeft isShow={isShow}/>
+      <WorkspaceLeft key={pathname} isShow={isShow}/>
     )
   }
 

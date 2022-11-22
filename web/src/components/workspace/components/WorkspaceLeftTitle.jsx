@@ -146,7 +146,8 @@ function WorkspaceLeftTitle(props) {
           <Dropdown
             overlay={downMenu}
             placement="bottomLeft"
-            trigger={["hover"]}
+            destroyPopupOnHid={true}
+            // trigger={["hover"]}
           >
             <Button
               size="small"

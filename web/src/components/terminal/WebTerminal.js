@@ -64,17 +64,15 @@ function WebTerminal({ terminalId }) {
             if (!pid) return;
             setPid(pid);
             let currentEnv = getCurrentEnv();
-            if (!currentEnv) {
-              await environmentAPI.getEnvironmentName()
-                .then(res => {
-                  const data = res.data
-                  setCurrentEnv(data)
-                  currentEnv = data
-                })
-                .catch(err => {
-                  console.log(err)
-                })
-            }
+            await environmentAPI.getEnvironmentName()
+              .then(res => {
+                const data = res.data
+                setCurrentEnv(data)
+                currentEnv = data
+              })
+              .catch(err => {
+                console.log(err)
+              })
             ws = new WebSocket(terminalWsUrl + pid);
             setWs(ws);
             ws.onopen = () => {

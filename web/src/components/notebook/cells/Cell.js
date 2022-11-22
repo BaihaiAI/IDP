@@ -1,4 +1,4 @@
-import { useImperativeHandle, useEffect, useState, useCallback, useMemo } from "react"
+import { useImperativeHandle, useEffect, useState, useCallback, useMemo, memo } from "react"
 import { useDispatch } from "react-redux"
 import intl from "react-intl-universal"
 import { Row, Col, message } from "antd"
@@ -370,4 +370,6 @@ const Cell = (props) => {
   )
 }
 
-export default Cell
+export default memo(Cell, (prevProps, nextProps) => {
+  return store.getState().filesTab.activePath !== nextProps.path
+})

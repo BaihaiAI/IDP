@@ -1,6 +1,5 @@
-import cookie from "react-cookies"
-
-const redirectUrl = "/login"
+import cookie from "react-cookies";
+import { analysisUrl } from '../../../config/auth';
 
 export function logout() {
   const domain = window.location.host === "localhost:3000" ? "test.baihai.co" : window.location.host
@@ -17,18 +16,31 @@ export function logout() {
   cookie.remove("token", { path: "/", domain: domain })
   cookie.remove("token", { path: "/", domain: "localhost" })
 
-  cookie.remove("region", { path: "/", domain: primayDomain })
-  cookie.remove("region", { path: "/", domain: domain })
-  cookie.remove("region", { path: "/", domain: "localhost" })
-
   cookie.remove("majorVersionUpdate", { path: "/", domain: primayDomain })
   cookie.remove("majorVersionUpdate", { path: "/", domain: domain })
   cookie.remove("majorVersionUpdate", { path: "/", domain: "localhost" })
 
-  window.localStorage.removeItem("historyOpenFile")
+  cookie.remove("region", { path: "/", domain: primayDomain })
+  cookie.remove("region", { path: "/", domain: domain })
+  cookie.remove("region", { path: "/", domain: "localhost" })
   window.localStorage.removeItem("historyOpenProject")
+
+  window.localStorage.removeItem("historyOpenFile")
   window.localStorage.removeItem("avatar")
   window.localStorage.removeItem("permission_list")
-  
-  window.location.href = redirectUrl
+
+  cookie.remove("code", { path: "/", domain: primayDomain })
+  cookie.remove("code", { path: "/", domain: domain })
+  cookie.remove("code", { path: "/", domain: "localhost" })
+
+  cookie.remove("scope", { path: "/", domain: primayDomain })
+  cookie.remove("scope", { path: "/", domain: domain })
+  cookie.remove("scope", { path: "/", domain: "localhost" })
+
+  cookie.remove("state", { path: "/", domain: primayDomain })
+  cookie.remove("state", { path: "/", domain: domain })
+  cookie.remove("state", { path: "/", domain: "localhost" })
+
+  // 退出登录
+  analysisUrl()
 }

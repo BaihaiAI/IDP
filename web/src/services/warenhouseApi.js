@@ -1,6 +1,7 @@
 import { manageApiPath, modelApiPath, noteApiPath2 } from './httpClient';
 import { projectId, teamId, userId } from '@/store/cookie';
 import request from "./request"
+import axios from 'axios';
 
 
 // 老 模型列表 搜索 分页
@@ -215,7 +216,7 @@ function compression({path}){
     teamId,
     projectId: Number(projectId)
   }
-  return request.post(url, data)
+  return axios.post(url, data)
 }
 
 function decompressFile(path, extractTo) {
@@ -223,26 +224,6 @@ function decompressFile(path, extractTo) {
   return request.post(`${noteApiPath2}/workspace/file/decompress`, data);
 }
 
-// 输入名后后查看该名称下版本
-function checkVersion({modelName}){
-  const url = `${manageApiPath}/admin-rs/model-manage/version-list?modelName=${modelName}&projectId=${projectId}`
-  return request.get(url)
-}
-
-// 模型上传客户端
-function uploadClient({path, modelName, version, intro}){
-  const url = `${noteApiPath2}/workspace/model/upload`
-  const data = {
-    path,
-    teamId,
-    userId,
-    projectId: Number(projectId),
-    modelName,
-    version,
-    intro,
-  }
-  return request.post(url, data)
-}
 
 // copy modal to project
 function copyModalToProject({id}){
@@ -270,11 +251,7 @@ function uploadFile(formData){
   return request.post(url, formData)
 }
 
-// cancel upload
-function cancelUpload({id}){
-  const url = `${manageApiPath}/admin-rs/model-manage/cancel`
-  return request.post(url, {id})
-}
+
 
 
 const warenhouseApi = {
@@ -297,11 +274,8 @@ const warenhouseApi = {
   deteleModel,
 
   compression,
-  checkVersion,
-  uploadClient,
   copyModalToProject,
   uploadFile,
-  cancelUpload,
   decompressFile
 }
 

@@ -1,6 +1,10 @@
 [
     {
         "fileName": "menus",
+        "entry": "team.tsx"
+    },
+    {
+        "fileName": "menus",
         "entry": "files.tsx"
     },
     {

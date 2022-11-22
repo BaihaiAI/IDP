@@ -3,7 +3,10 @@ import { userId, teamId, projectId } from '../store/cookie';
 import request from "./request.js"
 // todo
 function jobUpdate(options) {
-  const url = options.jobId === 0 ? `${manageApiPath}/pipeline/job/new` : `${manageApiPath}/pipeline/job/update`;
+  const url = options.jobId.startsWith('0_') ? `${manageApiPath}/pipeline/job/new` : `${manageApiPath}/pipeline/job/update`;
+  if (options.jobId.startsWith('0_')) {
+    delete options.jobId
+  }
   const data = {...options, userId, projectId,teamId}
   return request.post(url, data);
 }

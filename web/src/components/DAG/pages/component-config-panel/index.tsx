@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Tabs } from 'antd'
 import classNames from 'classnames'
 import { useObservableState } from '../../common/hooks/useObservableState'
@@ -8,6 +8,7 @@ import { ExperimentView } from './form/experiment-view'
 import { NodeFormDemo } from './form/node-config'
 import { NodeView } from './form/node-view'
 import css from './index.module.less'
+import environmentAPI from 'idpServices/environment'
 
 interface Props {
   experimentId: string
@@ -24,6 +25,15 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
   )
 
   const nodeId = activeNodeInstance && activeNodeInstance.id;
+
+  const [environmentList, setEnvironmentList] = useState<any[]>([])
+  useEffect(() => {
+    environmentAPI.getEnvironmentList().then(res => {
+      setEnvironmentList(res.data)
+    }).catch((err: any) => {
+      console.log(err)
+    })
+  }, [])
 
   return (
     <div className={classNames(className, css.confPanel)}>
@@ -58,12 +68,14 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
                   nodeId={nodeId}
                   experimentId={experimentId}
                   mode={mode}
+                  environmentList={environmentList}
                 />
               )}
               {!nodeId && (
                 <ExperimentForm
                   experimentId={experimentId}
                   mode={mode}
+                  environmentList={environmentList}
                 />
               )}
             </div>

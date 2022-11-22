@@ -41,8 +41,11 @@ import { unNeedRequestErrMsg } from "@/services/extraRequestConfig"
 import globalData from "idp/global"
 import { observer } from "mobx-react"
 import appContext from "@/context"
-import PublishModel from "@components/publishmodel/PublishModel"
+import CreateModel from '@/components/createOrAddAModelOrVersion/createModel'
 import warenhouseApi from '../../services/warenhouseApi';
+import createOrAddAModelOrVersionApi from '../createOrAddAModelOrVersion/services/createOrAddAModelOrVersionApi'
+import fileManager from "@/idp/global/fileManager";
+import environmentAPI from '../../services/environment'
 
 let lastLoadTime = null
 
@@ -113,17 +116,25 @@ class WorkspaceLeft extends React.Component {
       duration: null,
       durationTitle: '',
 
-      PublishModelVisible: false,
-      // 存储 右键 key
-      rightKey: "",
+      // 存储 创建模型所基于的 文件串 以及文件名
+      modelFile: {
+        string: "",
+        name: ""
+      },
+      // 创建模型时依赖的notebook环境
+      modelEnv: null,
+      // 加载的时候loading
+      cover: 'none',
+      // create 是否显示
+      createDrawerVisible: false,
+      // create 某个类别数组
+      category: [],
 
       apiLock: false,
       unzpiDisabled: true,
       checkedNode: "",
     }
     this.fileTreeRef = React.createRef()
-
-    this.loadNodeList = ["/"]
   }
 
   setExportFileLoading = (exportFileLoading) => {
@@ -225,6 +236,7 @@ class WorkspaceLeft extends React.Component {
         }
       };
     }
+    findFile(treeData)
     if (!fileFlg) {
       crecursionSourceFile(treeData);
       if (filelocation === '/') {
@@ -238,7 +250,6 @@ class WorkspaceLeft extends React.Component {
 
   // 文件移动
   fileDrop = (info, treeData, fileType) => {
-
     let canMove = false;
     let needRequest = false;
     let warnMessage = "";
@@ -250,7 +261,6 @@ class WorkspaceLeft extends React.Component {
     const { newTreeData, targetPath: realTargetPath, isfile } = this.filterDragTree(treeData, sourceFile, targetFile, dropIndex, fileType);
     let data = CloneDeep(newTreeData);
     let targetPath = realTargetPath;
-
     if (!isfile) {
       canMove = true;
       needRequest = true;
@@ -313,7 +323,6 @@ class WorkspaceLeft extends React.Component {
       message.warning(intl.get("INVALID_DRAG"));
       return;
     }
-
     if (!dropToGap) {
       // 文件夹的拖拽 chongyin
       if (info.node.fileType === "DIRECTORY") {
@@ -332,6 +341,8 @@ class WorkspaceLeft extends React.Component {
             warnMessage = intl.get("THERE_IS_A_FILE_WITH_THE_SAME_NAME_IN_THE_DIRECTORY");
           }
         })
+        const loadNodeList = fileManager.getLoadNodeList().filter(it => it.indexOf(dragNode.key) == -1);
+        fileManager.updateLoadNodeList(loadNodeList);
       } else {
         // 文件的拖拽：移动到非最顶级组第一个位置, 此处拖拽文件到目标文件，逻辑重构，思路：拖拽文件，目标文件，目标就近文件夹
         const fileDada = this.fileDrop(info, treeData, info.node.fileType);
@@ -352,6 +363,8 @@ class WorkspaceLeft extends React.Component {
       targetPath = fileDada.targetPath;
       needRequest = fileDada.needRequest;
       warnMessage = fileDada.warnMessage;
+      const loadNodeList = fileManager.getLoadNodeList().filter(it => it.indexOf(dragNode.key) == -1);
+      fileManager.updateLoadNodeList(loadNodeList);
     }
     if (canMove) {
       try {
@@ -400,13 +413,11 @@ class WorkspaceLeft extends React.Component {
 
   onLoadData = (node) => {
     return new Promise((resolve) => {
-      const path = [node.key]
-      if (this.loadNodeList.indexOf(node.key) === -1) {
-        this.loadNodeList.push(node.key)
+      const path = [node.key];
+      if ( node.fileType != 'database' && node.fileType !== 'database-table' && node.fileType != 'FILE' && fileManager.getLoadNodeList().indexOf(node.key) === -1) {
+        fileManager.pushLoadNodeList(node.key)
       }
-      workspaceApi
-        .lazyLoadDirBrowse({ path })
-        .then((res) => {
+      node.fileType != 'database' && node.fileType != 'FILE' && node.fileType !== 'database-table' && workspaceApi.lazyLoadDirBrowse({ path }).then((res) => {
           const { treeData } = this.state
           const nodeChildren = this.setTreeData(res.data.children)
           const newTreeData = updateTreeData(
@@ -415,34 +426,27 @@ class WorkspaceLeft extends React.Component {
             nodeChildren
           )
           this.setState({
-            treeData: newTreeData,
+            treeData: node.key === '/' ? nodeChildren : newTreeData,
           })
           resolve()
-        })
-        .catch(() => {
+        }).catch(() => {
           resolve()
         })
     })
   }
 
-  loadFileList = () => {
-    let allTreeData = []
-    let fileTreeData = []
-    workspaceApi
-      .lazyLoadDirBrowse({ path: this.loadNodeList })
-      .then((result) => {
-        const { children, absolutePath } = result.data
-        fileTreeData = this.setTreeData(children)
-        allTreeData = [].concat(fileTreeData)
-        this.setState({
-          spinning: false,
-          treeData: allTreeData,
-        })
-      })
-      .catch((err) => {
-        this.setState({
-          spinning: false,
-        })
+  // 重新请求workspace/dir/browse接口
+  loadFileList = (pathParms) => {
+    let allTreeData = [];
+    let fileTreeData = [];
+    const path = pathParms ? pathParms : fileManager.getLoadNodeList();
+    workspaceApi.lazyLoadDirBrowse({ path }).then((result) => {
+        const { children } = result.data;
+        fileTreeData = this.setTreeData(children);
+        allTreeData = [].concat(fileTreeData);
+        this.setState({ spinning: false, treeData: allTreeData });
+      }).catch((err) => {
+        this.setState({ spinning: false })
       })
   }
 
@@ -574,7 +578,8 @@ class WorkspaceLeft extends React.Component {
   componentDidMount() {
     console.log("workspace didMount")
     lastLoadTime = null
-    this.loadTree({ loadDataSource: true })
+    const { isShow } = this.props;
+    isShow && this.loadTree({ loadDataSource: true })
     globalData.appComponentData.workspaceRef = this
 
     this.updateSelectKeysSubscriber = PubSub.subscribe(
@@ -585,6 +590,12 @@ class WorkspaceLeft extends React.Component {
         })
       }
     )
+
+    createOrAddAModelOrVersionApi.getCategory({})
+      .then(res => {
+        const { data } = res;
+        this.setState({category: data})
+      })
   }
   componentWillUnmount() {
     PubSub.unsubscribe(this.updateSelectKeysSubscriber)
@@ -636,8 +647,6 @@ class WorkspaceLeft extends React.Component {
   }
 
   onSelect = (keys, info) => {
-    // console.log("onSelect()", info)
-    // this.handleOpenSelectScroll(info)
     const selectedKey = info.node.key //  相对路径 path
     const selectedName = info.node.name // 文件名 name
     const isLeaf = info.node.isLeaf // leaf
@@ -661,6 +670,7 @@ class WorkspaceLeft extends React.Component {
       }
     }
     IdpTerminal.setTerminalVisabled(true);
+
     const visible = this.state.visible
     visible.renameValue = selectedName
     this.setState({ visible })
@@ -670,16 +680,10 @@ class WorkspaceLeft extends React.Component {
     fileInfo.selectedName = selectedName
     fileInfo.isLeaf = isLeaf
     fileInfo.fileType = fileType
-    // console.log(fileInfo,'ddddddddddddddd')
     this.setState({ fileInfo }, () => {
       PubSub.publish("refreshHeader")
     })
-    // console.log(`selectedKey: ${selectedKey}, selectedName: ${selectedName}, isLeaf: ${isLeaf}`);
-    this.setState({
-      selectedKey,
-      selectedName: selectedName,
-      isLeaf,
-    })
+    this.setState({ selectedKey,selectedName: selectedName,isLeaf })
     if (isLeaf) {
       if (fileType === "database-table") {
         const aliasDB = info.node.parentKey
@@ -715,8 +719,20 @@ class WorkspaceLeft extends React.Component {
         path = `${selectedKey}`
       }
     }
-
-    this.setState({ filePath: path })
+    this.setState({ filePath: path },()=> {
+       const filePath = fileManager.getFilePath();
+       if ( !info.node.expanded ) {
+        if ( path == filePath ) {
+          this.onLoadData(info.node);
+        }
+        fileManager.pushExpandedFilePaths(path);
+       } else {
+          const expandedFilePathsList = fileManager.getExpandedFilePaths();
+          const exFile = expandedFilePathsList.filter( it=> it != path );
+          fileManager.updateExpandedFilePaths(exFile);
+       }
+       fileManager.updateFilePath(path);
+    });
   }
 
   // 此处涉及到游览器下载问题，需要进行分情况处理下载功能，目前只对于火狐用FileSaver实现导出，其他游栏器用streamSaver实现导出
@@ -916,6 +932,7 @@ class WorkspaceLeft extends React.Component {
       default:
         break
     }
+    console.log(visible.renameValue);
     this.setState({ visible })
   }
 
@@ -1181,26 +1198,25 @@ class WorkspaceLeft extends React.Component {
 
     const realPath = _this.state.selectedKey
     const isFile = _this.state.isLeaf
-
     workspaceApi
       .fileRename({
         source: _this.state.selectedName,
         path: parentPath,
-        dest,
+        dest: value
       })
       .then(function (response) {
         if (!isFile) {
-          _this.loadNodeList = _this.loadNodeList.filter(item => item !== realPath)
+          const loadNodeList = fileManager.getLoadNodeList().filter(item => item !== path);
+          fileManager.updateLoadNodeList(loadNodeList);
         }
 
         _this.resetVisible()
         _this.loadTree({ forceLoad: true })
         _this.setState({ inputVisible: false })
-
         _this.props.onRename(
           _this.state.selectedKey,
           `${parentPath}${dest}`,
-          dest,
+          value,
           _this.state.isLeaf
         )
         _this.setRoot()
@@ -1215,7 +1231,7 @@ class WorkspaceLeft extends React.Component {
                 .fileRename({
                   source: _this.state.selectedName,
                   path: parentPath,
-                  dest,
+                  value,
                   autoClose: true
                 })
                 .then(function (response) {
@@ -1226,7 +1242,7 @@ class WorkspaceLeft extends React.Component {
                   _this.props.onRename(
                     _this.state.selectedKey,
                     `${parentPath}${dest}`,
-                    dest,
+                    value,
                     _this.state.isLeaf
                   )
                   _this.setRoot()
@@ -1270,6 +1286,14 @@ class WorkspaceLeft extends React.Component {
         return
       }
     }
+    const expandedFilePaths = fileManager.getExpandedFilePaths();
+    const newExpandedFilePaths = expandedFilePaths.filter( it => it.indexOf(props.info.key) == -1);
+    const loadNodeList = fileManager.getLoadNodeList();
+    const newLoadNodeList = loadNodeList.filter( it => it.indexOf(props.info.key) == -1);
+    fileManager.updateExpandedFilePaths(newExpandedFilePaths);
+    fileManager.updateLoadNodeList(newLoadNodeList);
+    const filePath = fileManager.getFilePath();
+    if ( filePath === props.info.key ) fileManager.updateFilePath('');
     let visible = this.state.visible
     visible.delete = true
     this.setState({ visible })
@@ -1292,7 +1316,8 @@ class WorkspaceLeft extends React.Component {
       })
       .then(function (response) {
         if (!isFile) {
-          _this.loadNodeList = _this.loadNodeList.filter(item => item !== path)
+          const loadNodeList = fileManager.getLoadNodeList().filter(item => item !== path);
+          fileManager.updateLoadNodeList(loadNodeList);
         }
 
         _this.resetVisible()
@@ -1493,14 +1518,6 @@ class WorkspaceLeft extends React.Component {
               })
             }
           )
-
-          // this.onSelect([node.key],
-          //         {node: {
-          //         key: node.key,
-          //         name: node.name,
-          //         isLeaf: false,
-          // }});
-
           return
         }
         node.children &&
@@ -1779,6 +1796,8 @@ class WorkspaceLeft extends React.Component {
 
 
   handlerCutFile = ({ props }) => {
+    fileManager.updateSourceFileNode(props.info);
+    fileManager.updateFileOperationType('CUT');
     this.setSelect(props.info)
     this.setState({
       cutOrCopyKey: props.info.key,
@@ -1787,6 +1806,8 @@ class WorkspaceLeft extends React.Component {
     message.success("剪切成功")
   }
   handlerCopyFile = ({ props }) => {
+    fileManager.updateSourceFileNode(props.info);
+    fileManager.updateFileOperationType('COPY');
     this.setSelect(props.info)
     this.setState({
       cutOrCopyKey: props.info.key,
@@ -1806,7 +1827,6 @@ class WorkspaceLeft extends React.Component {
     }
     const fileOrDirName = findFileOrDirName(this.state.cutOrCopyKey)
     originParentKey = findFileTreeParentKey(this.state.cutOrCopyKey)
-    // console.log(originParentKey, "aaa", targetParentKey, "bbb", fileOrDirName, "ccc")
     const originPath = originParentKey + "/" + fileOrDirName
     const targetPath = targetParentKey + "/" + fileOrDirName
 
@@ -1839,50 +1859,68 @@ class WorkspaceLeft extends React.Component {
     })
 
     if (this.state.pasteType === "cut") {
-      unNeedRequestErrMsg()
-      workspaceApi
-        .moveFileOrDir({ originPath, targetPath })
-        .then((res) => {
-          this.loadFileList()
-          this.setState({
-            cutOrCopyKey: "",
-            pasteType: "",
-          })
-          message.success("粘贴成功")
+      unNeedRequestErrMsg();
+      workspaceApi.moveFileOrDir({ originPath, targetPath }).then((res) => {
+          const sourceFileNode = fileManager.getSourceFileNode();
+          const loadNodeList = fileManager.getLoadNodeList();
+          const fileList = loadNodeList.filter( it => it != sourceFileNode.key);
+          fileManager.updateLoadNodeList(fileList);
+          const menuFileActionType = fileManager.getFileOperationType();
+          if ( menuFileActionType == 'CUT') {
+            fileManager.updateHistoryOpenFile(originPath, targetPath);
+            this.props.onRename(originPath, targetPath, sourceFileNode.name, true);
+          }
+          this.loadFileList();
+          this.setState({cutOrCopyKey: "",pasteType: "" });
+          message.success("粘贴成功");
         }).catch(error => {
           if (error.code === 41001001) {
             Modal.confirm({
               title: '有相关联的kernel正在运行 继续操作将会关闭它/它们 是否继续操作?',
               onOk: () => {
-                return workspaceApi
-                  .moveFileOrDir({ originPath, targetPath, autoClose: true })
-                  .then((res) => {
-                    this.loadFileList()
-                    this.setState({
-                      cutOrCopyKey: "",
-                      pasteType: "",
-                    })
-                    message.success("粘贴成功")
-                  })
+                return workspaceApi.moveFileOrDir({ originPath, targetPath, autoClose: true }).then((res) => {
+                  this.loadFileList();
+                  this.setState({ cutOrCopyKey: "",pasteType: ""});
+                  message.success("粘贴成功");
+                })
               }
             })
+          } else {
+            message.error('粘贴失败')
           }
         })
     }
 
     if (this.state.pasteType === "copy") {
-      workspaceApi
-        .copyFileOrDir({ originPath, targetPath })
-        .then((res) => {
-          this.loadFileList()
-          this.setState({
-            cutOrCopyKey: "",
-            pasteType: "",
-          })
-          message.success(intl.get("PASTED_SUCCESSFULLY"))
-        })
+      workspaceApi.copyFileOrDir({ originPath, targetPath }).then((res) => {
+        const file = fileManager.getSourceFileNode();
+        if ( file && file.fileType === 'DIRECTORY') {
+          fileManager.pushLoadNodeList(targetPath);
+        }
+        this.loadFileList();
+        this.setState({ cutOrCopyKey: "", pasteType: "" });
+        message.success(intl.get("PASTED_SUCCESSFULLY"));
+      })
     }
 
+  }
+
+  handleSaveAs = (event, props, outputType) => {
+    if (props.info.isLeaf) {
+      event.preventDefault()
+      const selectedKey = props.info.key
+      workspaceApi.convertFile({ path: encodeURIComponent(selectedKey), outputType })
+        .then(() => {
+          message.success('保存成功')
+          this.loadFileList()
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    } else {
+      console.log("需要选择文件")
+      message.warning(intl.get("SELECT_FILE"))
+    }
   }
 
 
@@ -1956,10 +1994,13 @@ class WorkspaceLeft extends React.Component {
       const nodeClass = document.getElementById(nodeIds);
       nodeClass.style.opacity = 1;
       try {
-        const reuslt = await warenhouseApi.decompressFile(key, nodePath);
+        const reuslt = await warenhouseApi.decompressFile(key, nodePath.length === 0 ? '/' : nodePath);
         if (reuslt.code == '21000000') {
           nodeClass.style.opacity = 0;
-          this.onLoadData({ key: nodePath });
+          this.onLoadData({ key: nodePath.length === 0 ? '/' : nodePath });
+        } else {
+          nodeClass.style.opacity = 0;
+          message.error(`解压ZIP失败${reuslt.message}`)
         }
       } catch (error) {
         nodeClass.style.opacity = 0;
@@ -1979,6 +2020,15 @@ class WorkspaceLeft extends React.Component {
         { key: "STICK", name: intl.get('PASTE'), handler: this.handlerStickFile },
         { key: "SEPARATOR_2" },
         { key: "RENAME", name: intl.get("RENAME"), handler: this.rename },
+        {
+          key: "SAVE_AS",
+          name: intl.get("SAVE_AS"),
+          children: [{
+            key: "SAVE_AS_PY",
+            name: ".py",
+            handler: ({ event, props }) => this.handleSaveAs(event, props, 'python')
+          }]
+        },
         { key: "DELETE", name: intl.get("DELETE"), handler: this.delete },
         {
           key: "EXPORT",
@@ -2044,38 +2094,75 @@ class WorkspaceLeft extends React.Component {
             const { key } = e.props.info;
             warenhouseApi.compression({ path: key })
               .then(res => {
-                message.success('压缩成功')
-                this.loadTree({ forceLoad: true })
+                const { code, message: msg } = res.data
+                if (code > 20000000 && code < 30000000) {
+                  message.success('压缩成功')
+                  this.loadTree({ forceLoad: true })
+                }else{
+                  if(code === 51040000){
+                    message.warning("压缩目录不得为空！")
+                  }else{
+                    message.error(
+                      `${
+                        process.env.NODE_ENV === "development" ? "后端接口" + code + "异常" : ""
+                      } ${msg ? "message:" + msg : ""}`,
+                      1.5
+                    )
+                  }
+                }
               })
           }
         },
         { key: "SEPARATOR_6" },
         {
-          key: "PUBLISH_MODEL",
-          name: "发布模型",
-          handler: (e) => {
-            console.log(e.props.info.key)
+          key: "CREATE_MODEL",
+          name: '创建并发布模型',
+          handler: async (e) => {
+            // console.log(e, "--------e-------")
+            const { key, name, isLeaf } = e.props.info;
+            if(isLeaf && name.substring(name.length-3) !== "zip"){
+              message.warning("只有zip压缩包可以创建并发布模型")
+              return
+            }
+            // this.setState({
+            //   cover: 'block'
+            // })
+            let packageName
+            // 获取当前notebook环境
+            let currentEnv = null;
+            await environmentAPI.getEnvironmentName()
+              .then(res => {
+                const data = res.data
+                currentEnv = data
+              })
+              .catch(err => {
+                console.log(err)
+              })
+
+            const modelFileName = isLeaf ? key : `${key}/`
+            const modelEnv = isLeaf ? null : `IDP:${currentEnv}`
+            if(isLeaf){
+              packageName = await createOrAddAModelOrVersionApi.getSuccessString({path:key}).then(res => res.data.packageName)
+            }
+
             this.setState({
-              rightKey: e.props.info.key
+              modelFile: {
+                string: packageName? packageName : modelFileName,
+                name: modelFileName
+              },
+              modelEnv: modelEnv
             })
-            this.changePublishModelVisible()
+
+            this.changeCreateModelVisible(true)
           }
         }
       ],
     }
   }
 
-  changePublishModelVisible = () => {
-    if (this.state.PublishModelVisible) {
-      this.setState({
-        PublishModelVisible: false
-      })
-    } else {
-      this.setState({
-        PublishModelVisible: true
-      })
-    }
-  }
+  changeCreateModelVisible = (bool) => this.setState({createDrawerVisible: bool});
+
+
 
   render() {
     const contextMenu = this.getContextMenu()
@@ -2183,12 +2270,31 @@ class WorkspaceLeft extends React.Component {
             fileNameValidator={this.state.visible.fileNameValidator}
           />
 
-          <PublishModel
-            PublishModelVisible={this.state.PublishModelVisible}
-            change={this.changePublishModelVisible}
-            rightKey={this.state.rightKey}
-            whetherUpload={false} />
+          {/* 创建模型 发布模型 */}
+          <CreateModel
+            clicksViewFlg={false}
+            loadPage={1}
+            createDrawerVisible={this.state.createDrawerVisible}
+            changeCreateDrawerVisible={() => {
+              this.setState({
+                createDrawerVisible: false,
+                modelFile: {string: "", name: ""}
+              })
+            }}
+            createOrAdd={0}   // 创建模型还是添加新版本 0创建 1新增
+            category={this.state.category}
+            setCreateDrawerVisible={this.changeCreateModelVisible}
+            packageId={"000"} // 新增版本 ID 目前传递任意 string 即可
+            PreFillIn={undefined}
+            noteBookModelFile={this.state.modelFile}
+            noteBookModelEnv={this.state.modelEnv}
+          />
 
+          <div className="cover" style={{
+            display: this.state.cover
+          }}>
+            <Spin size="large" />
+          </div>
         </div>
       </Sider>
     )
@@ -2223,4 +2329,4 @@ export default connect(
     updateNotebookListFromTabListAsync,
     clearTabsFromList,
   }
-)(withRouter(observer(WorkspaceLeftWithContext)))
+)(withRouter(WorkspaceLeftWithContext))

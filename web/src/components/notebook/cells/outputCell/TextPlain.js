@@ -16,6 +16,7 @@ function addScript(parentId, scripts) {
       for (let i = 0; i < scriptDom.length; i++) {
         dom.removeChild(scriptDom[i]);
       }
+
       const path = process.env.NODE == 'dev'? `//${window.location.hostname}:${rescriptsrc.devServer().port}/` : (process.env.NODE_OPEN === 'true' ? `${window.location.origin}/` : '/child/idpStudio-idp/');
       for (let text of scripts) {
         // 替换lets-plot.min.js

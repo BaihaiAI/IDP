@@ -6,6 +6,7 @@ import 'antd/lib/style/index.css'
 import { InfoCircleOutlined } from '@ant-design/icons'
 import workspaceApi from 'idpServices/workspaceApi';
 import { ScriptView } from './script-view'
+import { getCurrentEnv } from '../../../../../store/config'
 
 const { Option } = Select;
 
@@ -22,12 +23,14 @@ export interface Props {
   nodeId: string
   experimentId: string
   mode?: string
+  environmentList: any
 }
 
 export const NodeFormDemo: React.FC<Props> = ({
   nodeId,
   experimentId,
   mode,
+  environmentList,
 }) => {
 
   const [treeData, setTreeData] = useState([]);
@@ -37,13 +40,16 @@ export const NodeFormDemo: React.FC<Props> = ({
   const [node] = useObservableState(() => expGraph.activeNodeInstance$)
   const [scriptPath, setScriptPath] = useState(node ? node.script : '');
 
-  const onValuesChange = async ({ name, script, machine, preNodeRelation, priority }: { name: string, script: string, machine: string, preNodeRelation: string, priority: number }) => {
+  const onValuesChange = async ({ name, script, envName, machine, preNodeRelation, priority }: { name: string, script: string, envName: string, machine: string, preNodeRelation: string, priority: number }) => {
     if (name && node.name !== name) {
       await expGraph.renameNode(nodeId, name)
     }
     if (script && node.script !== script) {
       setScriptPath(script)
       await expGraph.updateNodeScript(nodeId, script);
+    }
+    if (envName && node.envName !== envName) {
+      await expGraph.updateNodeEnvName(nodeId, envName);
     }
     if (machine && node.machine !== machine) {
       await expGraph.udpateNodeMachine(nodeId, machine);
@@ -55,8 +61,8 @@ export const NodeFormDemo: React.FC<Props> = ({
       let nextPriority = priority
       if (!priority) {
         nextPriority = 1
-      } else if (Number(priority) > 100) {
-        nextPriority = 100
+      } else if (Number(priority) > 5) {
+        nextPriority = 5
       }
       await expGraph.updateNodePriority(nodeId, nextPriority);
       if (priority !== nextPriority) {
@@ -93,6 +99,14 @@ export const NodeFormDemo: React.FC<Props> = ({
       });
   }, [experimentId]);
 
+  useEffect(() => {
+    if (node) {
+      if (!node.envName) {
+        expGraph.updateNodeEnvName(nodeId, getCurrentEnv());
+      }
+    }
+  }, [])
+
   const [scriptVisible, setScriptVisible] = useState(false)
 
   return (
@@ -106,6 +120,7 @@ export const NodeFormDemo: React.FC<Props> = ({
           machine: node ? node.machine : '2vCPUs 8GB',
           preNodeRelation: node ? node.preNodeRelation : 'ALL_SUCCESS',
           priority: node ? node.priority : 0,
+          envName: (node && node.envName) ? node.envName : getCurrentEnv()
         }}
         onValuesChange={onValuesChange}
         requiredMark={false}
@@ -127,16 +142,21 @@ export const NodeFormDemo: React.FC<Props> = ({
 
 
         </Form.Item>
+        <Form.Item name="envName" label="运行环境">
+          <Select placeholder="请选择运行环境" disabled={mode === 'view' ? true : false}>
+            {environmentList.map(item => <Option key={item} value={item}>{item}</Option>)}
+          </Select>
+        </Form.Item>
         <Form.Item label="资源配置" name="machine">
           <Select style={{ width: "100%" }} disabled={mode === 'view' ? true : false}>
-            <Option value="0.1vCPUs 0.1GB">0.1vCPUs 0.1GB</Option>
+            <Option value="0.5vCPUs 0.5GB">0.5vCPUs 0.5GB</Option>
             <Option value="1vCPUs 1GB">1vCPUs 1GB</Option>
             <Option value="1vCPUs 2GB">1vCPUs 2GB</Option>
             <Option value="2vCPUs 4GB">2vCPUs 4GB</Option>
             <Option value="4vCPUs 4GB">4vCPUs 4GB</Option>
             <Option value="4vCPUs 8GB">4vCPUs 8GB</Option>
             <Option value="8vCPUs 16GB">8vCPUs 16GB</Option>
-            <Option value="0.1vCPUs 0.1GB 0.1GPUs">0.1vCPUs 0.1GB 0.1GPUs</Option>
+            <Option value="0.5vCPUs 0.5GB 1GPUs">0.5vCPUs 0.5GB 1GPUs</Option>
             <Option value="1vCPUs 1GB 1GPUs">1vCPUs 1GB 1GPUs</Option>
             <Option value="1vCPUs 2GB 1GPUs">1vCPUs 2GB 1GPUs</Option>
             <Option value="2vCPUs 4GB 1GPUs">2vCPUs 4GB 1GPUs</Option>
@@ -154,7 +174,7 @@ export const NodeFormDemo: React.FC<Props> = ({
           </Select>
         </Form.Item>
         <Form.Item label="优先级" name="priority">
-          <Input type="number" min="1" max="100" step="1" disabled={mode === 'view' ? true : false} />
+          <Input type="number" min="1" max="5" step="1" disabled={mode === 'view' ? true : false} />
         </Form.Item>
       </Form>
       <ScriptView path={scriptPath} visible={scriptVisible} onClose={() => setScriptVisible(false)} expGraph={expGraph}  />

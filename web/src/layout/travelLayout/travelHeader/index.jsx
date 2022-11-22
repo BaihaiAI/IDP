@@ -1,4 +1,6 @@
 import React from 'react'
+import { analysisUrl } from '../../../../../config/auth';
+
 import "./index.less"
 
 function TravelHeader(props) {
@@ -21,7 +23,7 @@ function TravelHeader(props) {
         </div>
         <div className="header-right">
           <span onClick={()=>{
-            window.location.href = '/login'
+            analysisUrl();
           }}>
             登录/注册
           </span>

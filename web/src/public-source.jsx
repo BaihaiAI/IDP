@@ -31,7 +31,6 @@ import DAG from "idpStudio/components/DAG/DAG";
 import { HtmlView } from "idpStudio/components/DAG/pages/component-config-panel/form/html-view";
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import PipeLineHome from '@/components/pipeLine/PipeLineHome';
-import PublishModel from '@/components/publishmodel/PublishModel';
 import UsageFooterBar from '@/idp/component/usageFooterBar'
 
 import { teamId, userId, projectId, region, userDir } from '@/store/cookie';
@@ -55,7 +54,6 @@ export default {
     getUserDir: () => userDir,
     getUserExtensionConfig: () => userExtensionConfig,
     CodeMirror,
-    PublishModel,
     LspWebsocket,
     AppContext: appContext,
     IdpComponents: (type) => loadModule(type),
