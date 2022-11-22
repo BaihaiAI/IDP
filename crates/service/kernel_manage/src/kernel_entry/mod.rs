@@ -115,8 +115,8 @@ impl KernelEntry {
                         header.pipeline_opt.is_some()
                     );
                 }
-                if retry == 120 {
-                    return Err(Error::new("timeout(>60s): no enough resource"));
+                if retry == 65 {
+                    return Err(Error::new("kernel ws connect timeout"));
                 }
             }
         };
@@ -135,7 +135,7 @@ impl KernelEntry {
         {
             Ok(req_to_kernel) => req_to_kernel?,
             Err(_) => {
-                return Err(Error::new("timeout: no enough resource"));
+                return Err(Error::new("timeout"));
             }
         };
 
