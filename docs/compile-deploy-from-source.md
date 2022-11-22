@@ -2,20 +2,20 @@
 title: Compile And Deploy IDP From Source
 ---
 
-# Compile And Deploy IDP From Source
+# Compile and Deploy IDP From Source
 
 ## System Requirements
 
-You will need Git, Rustup, Python 3, the Node.js active LTS (v16.17.0), yarn, and npm (v8+). You may need to make `python3`(v3.8+) the default if Python 2.7 is default for your OS. Also, if you don't have anything named `python` on your machine and only have python3, you will need something like `python-is-python3`
+You will need Git, Rustup, Python 3(v3.8+), the Node.js active LTS (v16.17.0), yarn, and npm (v8+). 
 
 ### Linux additional build dependencies
 
-If you are using Ubuntu/Debian, additionally install:
+If you are using Ubuntu/Debian, please additionally install:
 
 ```shell
 > apt install build-essential python3-dev python3-pip openssl git libgit2-dev
 ```
-If you are using Fedora/Centos, additionally install:
+If you are using Fedora/Centos, please additionally install:
 
 ```shell
 > dnf install base-devel python3-devel python3-pip openssl-devel git libgit2-devel
@@ -23,13 +23,13 @@ If you are using Fedora/Centos, additionally install:
 
 ### Windows additional build dependencies
 
-require x86_64-pc-windows-msvc target, can't compile with windows-gnu target
+x86_64-pc-windows-msvc target is required. Compiling with windows-gnu target will not be successful.
 
 Follow [Visual Studio guide to install msvc](https://learn.microsoft.com/en-us/windows/dev-environment/rust/setup#install-visual-studio-recommended-or-the-microsoft-c-build-tools)
 
 ### macOS
 
-macOS can't use system bundle's python3 because it's static linked and no dylib, you can install python3 with dylib from conda/miniconda3/brew.
+For macOS，you can't use the python3 that comes with the system because it's static linked and no dylib. You can install python3 with dylib from conda/miniconda3/brew.
 
 copy .cargo/config.toml and edit it to where your python installed
 ```shell
@@ -43,7 +43,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
 ```
 
-#### homebrew's python
+#### Homebrew's Python
 
 edit .cargo/config.toml
 
@@ -65,7 +65,7 @@ the output of `echo $CONDA_PREFIX` from your terminal.)
 rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C", "link-arg=-Wl,-rpath,`CONDA_PREFIX`/lib"]
 ```
 
-## compile and run
+## Compile and Run
 
 ```shell
 ./scripts/build.sh
@@ -74,7 +74,7 @@ rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C",
 
 ---
 
-## build docker image
+## Build Docker Image
 ```shell
 > docker build -t note -f Dockerfile --target release .
 ```
