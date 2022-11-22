@@ -13,7 +13,7 @@
 // limitations under the License.
 
 pub const CLONE_STATE_PREFIX: &str = "clone_state:";
-
+pub const OPTIMIZE_STATE_PREFIX: &str = "optimize_state:";
 pub fn snapshot_key(path: &str, project_id: u64) -> String {
     format!("snapshot_{project_id}_{path}")
 }

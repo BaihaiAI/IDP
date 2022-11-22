@@ -39,6 +39,9 @@ pub async fn put_cell(
     }
 
     let path = business::path_tool::get_store_full_path(team_id, project_id, path);
+    if !path.exists() {
+        return Err(ErrorTrace::new(&format!("{path:?} not exist")));
+    }
     let mut futs = Vec::new();
     for cell_update_item in cells {
         /*
@@ -60,4 +63,21 @@ pub async fn put_cell(
     }
     futures::future::try_join_all(futs).await?;
     Ok(Rsp::success(()))
+}
+
+#[test]
+#[ignore]
+fn test_put_cell() {
+    let large_payload = "1".repeat(3 * 1024 * 1024);
+    let rsp = reqwest::blocking::Client::new()
+        .put("http://127.0.0.1:8082/api/v2/idp-note-rs/content/cell?teamId=1")
+        .json(&PartialUpdateCellReq {
+            path: large_payload,
+            project_id: 1,
+            cells: Vec::new(),
+        })
+        .send()
+        .unwrap();
+    dbg!(rsp.status());
+    dbg!(rsp.text().unwrap());
 }

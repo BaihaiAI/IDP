@@ -29,6 +29,7 @@ pub mod partial_update_cell;
 pub mod share_cell;
 pub use cat::cat;
 pub use cat::full_path_cat;
+pub use cat::load;
 pub use partial_update_cell::put_cell;
 pub use share_cell::share_cell;
 pub mod save_cell;

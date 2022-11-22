@@ -109,7 +109,7 @@
                 }
             ],
             "source": [
-                "!pip install lets_plot",
+                "!pip install lets_plot\n",
                 "import numpy as np\n",
                 "from lets_plot import *\n",
                 "\n",

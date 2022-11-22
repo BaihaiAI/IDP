@@ -1,0 +1,28 @@
+{
+    "init":[
+        "modelwarenhouse",
+        "teams",
+        "notification",
+        "usage",
+        "environment",
+        "networkstatus",
+        "centre",
+        "datalabel",
+        "dataSet",
+        "workflow",
+        "tensorboard",
+        "monitor",
+        "feedback",
+        "contact"
+    ],
+    "invisible":[
+        "teams",
+        "notification",
+        "feedback",
+        "usage",
+        "environment",
+        "networkstatus",
+        "centre",
+        "contact"
+    ]
+}

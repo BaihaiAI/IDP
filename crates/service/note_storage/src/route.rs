@@ -23,6 +23,7 @@ use sqlx::Pool;
 use sqlx::Postgres;
 use tokio::sync::Mutex;
 
+use crate::api::http::v2::hpopt;
 use crate::api::http::v2::pipeline;
 use crate::api::http::v2::project;
 use crate::api::http::v2::workspace;
@@ -145,8 +146,61 @@ pub async fn init_router(
                         .route(
                             "/dir/global_keyword_search",
                             on(MethodFilter::POST, workspace::global_keyword_search),
+                        )
+                        .route(
+                            "/dir/global_keyword_search_dir_file",
+                            on(
+                                MethodFilter::POST,
+                                workspace::global_keyword_search_dir_file,
+                            ),
                         ),
                 )
+                .nest("/hpopt", {
+                    Router::new()
+                        .route(
+                            "/datasource/list",
+                            on(MethodFilter::GET, hpopt::datasource_list),
+                        )
+                        .route(
+                            "/datasource/new",
+                            on(MethodFilter::POST, hpopt::datasource_new),
+                        )
+                        .route(
+                            "/backend/start",
+                            on(MethodFilter::GET, hpopt::start_hpopt_backend),
+                        )
+                        .route(
+                            "/backend/stop",
+                            on(MethodFilter::GET, hpopt::stop_hpopt_backend),
+                        )
+                        .route("/study/list", on(MethodFilter::GET, hpopt::list_study))
+                        .route("/study/detail", on(MethodFilter::GET, hpopt::study_detail))
+                        .route("/study/new", on(MethodFilter::POST, hpopt::study_new))
+                        .route(
+                            "/study/objective-code",
+                            on(MethodFilter::GET, hpopt::study_objective_code),
+                        )
+                        .route(
+                            "/study/objective-code",
+                            on(MethodFilter::POST, hpopt::edit_study_objective_code),
+                        )
+                        .route(
+                            "/optimize/example-names",
+                            on(MethodFilter::GET, hpopt::objective_example_names),
+                        )
+                        .route(
+                            "/optimize/example-code",
+                            on(MethodFilter::GET, hpopt::objective_code_content),
+                        )
+                        .route(
+                            "/optimize/run",
+                            on(MethodFilter::POST, hpopt::study_optimize_run),
+                        )
+                        .route(
+                            "/optimize/state",
+                            on(MethodFilter::GET, hpopt::optimize_state),
+                        )
+                })
                 .nest("/project", {
                     Router::new()
                         .route("/new", on(MethodFilter::POST, project::new))
@@ -190,7 +244,7 @@ pub async fn init_router(
                             "/installedList",
                             on(MethodFilter::GET, extension_handler::installed_list),
                         )
-                        .route("/update", on(MethodFilter::GET, extension_handler::update))
+                        .route("/update", on(MethodFilter::POST, extension_handler::update))
                         .route(
                             "/install",
                             on(MethodFilter::GET, extension_handler::install),
@@ -237,6 +291,11 @@ pub async fn init_router(
                     Router::new()
                         .route("/cat", on(MethodFilter::GET, content_handler::cat))
                         .route(
+                            "/load",
+                            on(MethodFilter::GET, content_handler::load::load)
+                                .layer(tower_http::compression::CompressionLayer::new()),
+                        )
+                        .route(
                             "/fullPathCat",
                             on(
                                 MethodFilter::GET,
@@ -254,7 +313,9 @@ pub async fn init_router(
                             "/ipynbPreview",
                             on(MethodFilter::GET, content::ipynb_preview),
                         )
-                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell)),
+                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell))
+                        // prevent 413 Payload Too Large
+                        .layer(axum::extract::DefaultBodyLimit::disable()),
                 )
                 .nest(
                     "/state",

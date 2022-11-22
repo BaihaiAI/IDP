@@ -29,9 +29,17 @@ pub struct ExtensionReq {
 }
 
 pub async fn uninstall(Query(req): Query<ExtensionReq>) -> Result<Rsp<()>, ErrorTrace> {
-    let extensions_path = business::path_tool::user_extensions_path(req.team_id, req.user_id);
+    uninstall_handler(req.team_id, req.user_id, &req.name).await
+}
 
-    let uninstall_extension_path = std::path::Path::new(&extensions_path).join(&req.name);
+pub async fn uninstall_handler(
+    team_id: u64,
+    user_id: u64,
+    name: &str,
+) -> Result<Rsp<()>, ErrorTrace> {
+    let extensions_path = business::path_tool::user_extensions_path(team_id, user_id);
+
+    let uninstall_extension_path = std::path::Path::new(&extensions_path).join(name);
     tracing::info!("run extensions uninstall api, path:{uninstall_extension_path:?}");
 
     if let Err(err) = std::fs::remove_dir_all(uninstall_extension_path) {
@@ -42,8 +50,8 @@ pub async fn uninstall(Query(req): Query<ExtensionReq>) -> Result<Rsp<()>, Error
     let extensions_config_path =
         std::path::Path::new(&extensions_path).join("extensions_config.json");
 
-    let mut content = super::get_extensions_config(&extensions_config_path)?;
-    content.retain(|extension| extension.name != req.name);
+    let mut content = super::get_extensions_config(&extensions_config_path).await?;
+    content.retain(|extension| extension.name != name);
 
     let data = serde_json::to_string(&content)?;
     let mut f = std::fs::File::create(extensions_config_path)?;

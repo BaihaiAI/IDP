@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod detail;
+pub(crate) mod get_extension;
 mod init_install;
 mod install;
 mod installed_list;
@@ -36,7 +37,7 @@ pub use update::update;
 
 use self::models::ExtensionResp;
 
-pub fn get_extensions_config<P: AsRef<Path>>(
+pub async fn get_extensions_config<P: AsRef<Path>>(
     extension_config_path: P,
 ) -> Result<Vec<ExtensionResp>, ErrorTrace> {
     let jdata = match std::fs::read_to_string(&extension_config_path) {
@@ -49,7 +50,14 @@ pub fn get_extensions_config<P: AsRef<Path>>(
     };
 
     match serde_json::from_str::<Vec<ExtensionResp>>(&jdata) {
-        Ok(content) => Ok(content),
+        Ok(content) => {
+            let mut content = content
+                .into_iter()
+                .filter(|x| x.is_visible())
+                .collect::<Vec<ExtensionResp>>();
+            content.sort();
+            Ok(content)
+        }
         Err(err) => {
             tracing::error!("{err}");
             let empty: Vec<ExtensionResp> = Vec::new();

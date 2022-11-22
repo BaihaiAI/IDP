@@ -117,7 +117,8 @@ pub async fn read_notebook_from_disk(abs_path: &str) -> Result<Notebook, ErrorTr
         Ok(str) => str,
         Err(_) => {
             let mut buf = Vec::new();
-            let mut f = std::fs::File::open(abs_path)?;
+            let mut f = std::fs::File::open(abs_path)
+                .map_err(|err| ErrorTrace::new(&format!("{abs_path} {err}")))?;
             std::io::Read::read_to_end(&mut f, &mut buf)?;
             encoding_rs::GB18030.decode(&buf).0.to_string()
         }

@@ -14,6 +14,8 @@ __pycache__
 
 dist
 *.tar.gz
+/*.whl
+/*.zip
 
 kernel_manage.db
 crates/service/kernel_manage/kernel_manage.db

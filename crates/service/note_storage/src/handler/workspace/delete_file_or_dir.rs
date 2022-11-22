@@ -20,7 +20,6 @@ use crate::api_model::workspace::FullFileTreeNode;
 use crate::app_context::AppContext;
 use crate::common::error::IdpGlobalError;
 use crate::handler::workspace::dir_recursive_load;
-use crate::handler::workspace::sync_heap_counter_after_delete;
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -65,7 +64,6 @@ pub async fn delete_file_or_dir(
     let meta = std::fs::metadata(&abs_path)?;
     if meta.is_file() {
         tokio::fs::remove_file(&abs_path).await?;
-        sync_heap_counter_after_delete(abs_path.to_str().unwrap()).await?;
         if path.ends_with(".ipynb") || path.ends_with(".idpnb") {
             ctx.redis_cache
                 .del_file_cache_key(&cache_io::keys::ipynb_key(

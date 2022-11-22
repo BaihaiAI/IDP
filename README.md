@@ -1,4 +1,4 @@
-![](docs/logo.jpg)
+![](docs/logo_new.png)
 
 [![LICENSE](https://img.shields.io/badge/licence-Apache%202.0-brightgreen)](https://github.com/BaihaiAI/IDP/blob/main/LICENSE)
 [![Language](https://img.shields.io/badge/language-Rust-brightgreen)](https://www.rust-lang.org/)
@@ -8,12 +8,12 @@
 
 ## What is IDP?
 
-IDP is an open source web IDE with strong support for Python & SQL language, contains code assistance, file and environment management at the same time.
-IDP is designed for data scientists, algorithm engineers and big data engineers to maximize working efficiency all through the AI development process.
-It is Written in Rust to exhibits excellent performance and security. 
+IDP is an open source AI IDE, natively supporting Python & SQL - the two most commonly used language in the field of AI and data science. 
+
+IDP is designed to make data scientists and algorithm engineers more productive. Also, with the kernel written in Rust, IDP exhibits excellent execution performance.
 
 ## Key Features
-IDP aims to help data scientists and algorithm engineers focus more on their own work,  algorithm development by taking care of all the engineering work, from environment and file management to plug-in development and configuration, etc..
+With the help of IDP, data scientists and algorithm engineers can focus more on their core work- algorithm development. IDP will take care of all the engineering work, from environment and file management to plug-in development and configuration, etc..
 
 The core features of IDP are as follows:
 * Mixed language support: deeply support Python, SQL and Markdown language in the same notebook.
@@ -63,10 +63,10 @@ Please refer to the [Code of Conduct](/docs/code-of-conduct.md), which describes
 
 ## Community
 If you have any question, feel free to reach out to us in the following ways:
- - [On Slack](https://join.slack.com/t/sas-yjr2860/shared_invite/zt-1difcfmhw-9RU2ULRKDdV8CdYOgjzX4Q)
+ - [On Slack](https://join.slack.com/t/idp-tjo1834/shared_invite/zt-1kee8cd8x-iNZ0rvwClRfx7sLgmmKKyg)
  - [On Twitter](https://twitter.com/baihaiAI)
  - [On Linkedin](https://www.linkedin.com/company/80179567/admin/)
- - [Mail to us](https://www.baihai.co/introduce.html)
+ - [Mail to us](https://baihai.co/contactus.html)
 
 
 ## Case Study

@@ -84,7 +84,7 @@ fn test_new_file_it() {
     let ctx = test_runner::IntegrationTestCtx::get();
     let resp = ctx
         .client
-        .post("http://127.0.0.1:3003/a/api/v2/idp-note-rs/workspace/file?teamId=12345")
+        .post("http://127.0.0.1:3003/a/api/v2/idp-note-rs/workspace/file?teamId=1")
         .json(&NewFileReq {
             path: "demo2.ipynb".to_string(),
             project_id: ctx.project_id,
@@ -277,6 +277,18 @@ pub async fn global_keyword_search(
     // } else {
     //     workspace_handler::global_keyword_search(team_id, project_id, keyword).await
     // }
+}
+
+pub async fn global_keyword_search_dir_file(
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Json(payload): Json<GlobalKeywordSearchPara>,
+) -> Result<Rsp<Vec<GlobalSearchResult>>, IdpGlobalError> {
+    info!("access dir_search api");
+
+    let (project_id, keyword) = (payload.project_id, payload.keyword);
+
+    let team_id = get_cookie_value_by_team_id(cookies);
+    workspace_handler::global_keyword_search_dir_file(team_id, project_id, keyword).await
 }
 
 #[axum_macros::debug_handler]

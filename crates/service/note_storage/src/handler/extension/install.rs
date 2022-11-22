@@ -22,16 +22,24 @@ use super::models::ExtensionReq;
 use crate::handler::extension::models::ExtensionResp;
 
 pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, ErrorTrace> {
-    let installed_extensions_path =
-        business::path_tool::user_extensions_path(req.team_id, req.user_id);
-    let extension_name = format!("{}/{}", req.name, req.version);
+    install_handler(req.team_id, req.user_id, &req.name, &req.version).await
+}
+
+pub async fn install_handler(
+    team_id: u64,
+    user_id: u64,
+    name: &str,
+    version: &str,
+) -> Result<Rsp<String>, ErrorTrace> {
+    let installed_extensions_path = business::path_tool::user_extensions_path(team_id, user_id);
+    let extension_name = format!("{}/{}", name, version);
     tracing::info!(
         "run extensions install api, path:{installed_extensions_path} ,name:{extension_name}"
     );
     let recommended_extension_path =
         business::path_tool::recommended_extensions().join(&extension_name);
 
-    let extension_path = format!("{}/{}", &installed_extensions_path, &req.name);
+    let extension_path = format!("{}/{}", &installed_extensions_path, name);
     std::fs::create_dir_all(&extension_path)?;
 
     common_tools::command_tools::copy(
@@ -48,7 +56,7 @@ pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, Err
     let extensions_config_path =
         std::path::Path::new(&installed_extensions_path).join("extensions_config.json");
 
-    let mut contents = super::get_extensions_config(&extensions_config_path)?;
+    let mut contents = super::get_extensions_config(&extensions_config_path).await?;
 
     contents.push(new_extension_config);
 

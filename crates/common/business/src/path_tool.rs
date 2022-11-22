@@ -115,6 +115,65 @@ pub fn get_conda_env_name_root(team_id: TeamId, conda_env_name: String) -> Strin
     format!("{}/envs/{}", conda_root(team_id), conda_env_name)
 }
 
+///store/{team_id}/projects/project_id/hp[opt_datasource]
+#[inline]
+#[cfg(windows)]
+pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> String {
+    format!(
+        "{team_id_root}/projects/{project_id}/{dir_name}",
+        team_id_root = team_id_root(team_id).to_str().unwrap(),
+        project_id = project_id,
+        dir_name = ProjectFolder::HPOPT_DATASOURCE.inner()
+    )
+}
+#[inline]
+#[cfg(unix)]
+pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> String {
+    format!(
+        "/store/{team_id}/projects/{project_id}/{dir_name}",
+        team_id = team_id,
+        project_id = project_id,
+        dir_name = ProjectFolder::HPOPT_DATASOURCE.inner()
+    )
+}
+// get_optimize_objective_example_path
+#[inline]
+#[cfg(unix)]
+pub fn get_optimize_objective_example_path() -> String {
+    "/store/objective_example".to_string()
+}
+pub fn optimize_run_path(
+    team_id: TeamId,
+    project_id: ProjectId,
+    db_name: String,
+    study_id: i64,
+) -> String {
+    // /store/{team_id}/projects/{project_id}/hpopt/run/{db_name}/{study_id}.py
+    format!(
+        "/store/{team_id}/projects/{project_id}/hpopt/run/{db_name}/{study_id}.py",
+        team_id = team_id,
+        project_id = project_id,
+        db_name = db_name,
+        study_id = study_id,
+    )
+}
+#[inline]
+pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &str) -> String {
+    format!(
+        "{}/{}",
+        get_hpopt_datasource_path(team_id, project_id),
+        filename
+    )
+}
+#[cfg(windows)]
+pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &str) -> String {
+    format!(
+        "{}/{}",
+        get_hpopt_datasource_path(team_id, project_id),
+        filename
+    )
+}
+
 pub fn get_nbconvert_by_team_id(_team_id: String) -> String {
     // format!(
     //     "/store/{}/miniconda3/envs/python39/bin/jupyter-nbconvert",
@@ -137,6 +196,11 @@ pub fn get_conda_env_python_path(_team_id: TeamId, _conda_env_name: String) -> S
 #[inline]
 pub fn get_conda_path(team_id: TeamId) -> String {
     format!("/store/{team_id}/miniconda3/bin/conda", team_id = team_id)
+}
+#[inline]
+pub fn get_optuna_dashboard_bin_path() -> String {
+    "/home/ray/anaconda3/bin/optuna-dashboard".to_string()
+    // "/Users/huangjin/miniconda3/bin/optuna-dashboard".to_string()
 }
 
 #[inline]
@@ -165,6 +229,26 @@ pub fn project_conda_env(team_id: TeamId, project_id: ProjectId) -> String {
         .to_string()
 }
 
+pub fn get_project_conda_env(team_id: TeamId, project_id: ProjectId) -> String {
+    let project_env_path = format!(
+        "/store/{team_id}/projects/{project_id}/miniconda3/conda.env",
+        team_id = team_id,
+        project_id = project_id
+    );
+    std::fs::read_to_string(project_env_path)
+        .unwrap_or_else(|_| "python39".to_string())
+        .trim_end()
+        .to_string()
+}
+
+pub fn get_conda_python_path(team_id: TeamId, project_id: ProjectId) -> String {
+    let conda_env_name = get_project_conda_env(team_id, project_id);
+    format!(
+        "/store/{team_id}/miniconda3/envs/{conda_env_name}/bin/python",
+        team_id = team_id,
+        conda_env_name = conda_env_name
+    )
+}
 fn project_tmp(team_id: TeamId, project_id: ProjectId) -> String {
     format!(
         "{}/{}",
@@ -183,7 +267,11 @@ pub fn user_extensions_path(team_id: TeamId, user_id: UserId) -> String {
 
 pub fn recommended_extensions() -> PathBuf {
     if std::path::Path::new("/var/run/secrets/kubernetes.io").exists() {
-        std::path::Path::new("/home/ray/extension-store").to_path_buf()
+        #[cfg(unix)]
+        let home_dir = std::env::var("HOME").unwrap();
+        #[cfg(windows)]
+        let home_dir = std::env::var("HOMEPATH").unwrap();
+        std::path::Path::new(&home_dir).join("extension-store")
     } else {
         STORE_PARENT_DIR.join("store").join("extension-store")
     }
@@ -329,4 +417,18 @@ fn replace_path(path: &str) -> String {
 #[cfg(windows)]
 fn replace_path(path: &str) -> String {
     path.replace('\\', "___")
+}
+
+pub fn get_study_objective_fun_path(
+    team_id: u64,
+    project_id: u64,
+    db_name: &str,
+    study_id: i64,
+) -> String {
+    // /store/{team_id}/projects/{project_id}/hpopt/study_objective_fun/{db_name}/{study_id}
+
+    format!(
+        "/store/{}/projects/{}/hpopt/study_objective_fun/{}/{}",
+        team_id, project_id, db_name, study_id
+    )
 }

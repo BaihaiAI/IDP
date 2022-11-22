@@ -37,12 +37,11 @@ pub fn init_signal_handler(py: pyo3::Python) {
     .unwrap();
 }
 
-#[cfg(test)]
-const N_TIMES: u128 = 10;
-
+#[cfg(not)]
 #[test]
 #[ignore = "signal only works in main thread"]
 fn test_init_signal_code_1_eval_performance() {
+    const N_TIMES: u128 = 10;
     pyo3::prepare_freethreaded_python();
     let gil = pyo3::Python::acquire_gil();
     let py = gil.python();
@@ -65,6 +64,7 @@ fn test_init_signal_code_1_eval_performance() {
     dbg!(time_cost_list.into_iter().sum::<u128>() / N_TIMES);
 }
 
+#[cfg(not)]
 #[test]
 #[ignore = "signal only works in main thread"]
 fn test_init_signal_code_1_run_performance() {
@@ -73,7 +73,7 @@ fn test_init_signal_code_1_run_performance() {
     let py = gil.python();
 
     let mut time_cost_list = Vec::new();
-    for _ in 0..N_TIMES {
+    for _ in 0..10 {
         let start = std::time::Instant::now();
         py.eval(
             r#"__import__('signal').signal(

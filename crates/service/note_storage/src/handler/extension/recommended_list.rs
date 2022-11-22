@@ -31,7 +31,7 @@ pub async fn recommended_list(
     let recommended_config_path =
         std::path::Path::new(&recommended_extensions).join("extensions_config.json");
 
-    let mut recommended_content = super::get_extensions_config(recommended_config_path)?;
+    let mut recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
     for content in recommended_content.iter_mut() {
         let url = format!(
@@ -43,22 +43,53 @@ pub async fn recommended_list(
         content.url = Some(url);
     }
 
-    match super::get_extensions_config(&installed_config_path) {
-        Ok(installed_content) => {
-            let mut resp = Vec::new();
-            'a: for i in &recommended_content {
-                for j in &installed_content {
-                    if i == j {
-                        continue 'a;
-                    }
-                }
-                resp.push(i.clone())
-            }
-            Ok(Rsp::success(resp))
+    let installed_content = match super::get_extensions_config(&installed_config_path).await {
+        Ok(installed_content) => installed_content,
+        Err(_) => {
+            return Ok(Rsp::success(recommended_content));
         }
-        Err(err) => {
-            tracing::error!("{err},path:{:?}", installed_config_path);
-            Ok(Rsp::success(recommended_content))
+    };
+    let mut resp = Vec::new();
+    // 'a: for i in &recommended_content {
+    //     for j in &installed_content {
+    //         if i.name == j.name {
+    //             continue 'a;
+    //         }
+    //     }
+    //     resp.push(i.clone())
+    // }
+    let recommended_iter = recommended_content.into_iter();
+    let installed_iter = installed_content.into_iter();
+    get_not_installed_recommended_extensions(recommended_iter, installed_iter, &mut resp).await;
+
+    Ok(Rsp::success(resp))
+}
+
+async fn get_not_installed_recommended_extensions(
+    mut recommended_iter: std::vec::IntoIter<ExtensionResp>,
+    mut installed_iter: std::vec::IntoIter<ExtensionResp>,
+    resp: &mut Vec<ExtensionResp>,
+) {
+    let mut installed_content = installed_iter.next();
+    let mut recommended_content = recommended_iter.next();
+    while recommended_content.is_some() {
+        if installed_content.is_none() {
+            resp.push(recommended_content.clone().unwrap());
+            recommended_content = recommended_iter.next();
+            continue;
+        }
+        match recommended_content.cmp(&installed_content) {
+            std::cmp::Ordering::Less => {
+                resp.push(recommended_content.clone().unwrap());
+                recommended_content = recommended_iter.next();
+            }
+            std::cmp::Ordering::Equal => {
+                installed_content = installed_iter.next();
+                recommended_content = recommended_iter.next();
+            }
+            std::cmp::Ordering::Greater => {
+                installed_content = installed_iter.next();
+            }
         }
     }
 }

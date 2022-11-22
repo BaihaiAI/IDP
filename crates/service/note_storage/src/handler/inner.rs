@@ -33,7 +33,7 @@ pub struct QueryString {
     level: String,
 }
 
-// http://192.168.12.12:8082/a/api/v2/idp-note-rs/inner/change_log?level=info,sqlx=warn,note_storage=debug,cache_io=debug
+// GET /idp-note-rs/inner/change_log?level=info,sqlx=warn,note_storage=debug,cache_io=debug
 pub async fn change_log_level(
     Query(qs): Query<QueryString>,
     Extension(reload_handle): Extension<logger::ReloadLogLevelHandle>,
