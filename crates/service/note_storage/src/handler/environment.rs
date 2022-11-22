@@ -20,10 +20,8 @@ use cache_io::CloneState;
 use common_model::service::rsp::Rsp;
 use common_tools::cookies_tools::get_cookie_value_by_team_id;
 use err::ErrorTrace;
-use tokio::process::Child;
 use tokio::process::Command;
 use tracing::info;
-use tracing::instrument;
 
 use crate::api_model::environment::*;
 use crate::api_model::TeamIdProjectIdQueryString;
@@ -164,37 +162,30 @@ async fn send_change_compute_type_to_resource_(
     Ok(())
 }
 
-#[instrument(skip(redis_cache))]
 pub async fn clone_(
     team_id: u64,
     origin_name: String,
     target_name: String,
     redis_cache: &CacheService,
 ) -> Result<Rsp<String>, ErrorTrace> {
-    use std::process::Stdio;
     let conda_root = business::path_tool::conda_root(team_id);
 
     let conda_path = format!("{}/bin/conda", conda_root);
     // clean conda cache first to prevent CondaVerificationError
 
-    let mut cmd = Command::new(&conda_path);
-    cmd.arg("create")
-        .args(["-y", "-n"])
-        .arg(target_name)
-        .arg("--clone")
-        .arg(origin_name)
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit());
-    info!("conda clone command {cmd:#?}");
-    let child = cmd.spawn()?;
     let timestamp = chrono::Local::now().timestamp();
-    let clone_state_key = format!("{}_{}", timestamp, child.id().unwrap_or(923));
+    let clone_state_key = format!("conda_clone_{team_id}_{origin_name}_{target_name}_{timestamp}");
     let clone_state_key_ = clone_state_key.clone();
     let svc = redis_cache.clone();
     tokio::spawn(async move {
-        if let Err(err) =
-            clone_state_monitor(child, &svc, clone_state_key.clone(), conda_path).await
+        if let Err(err) = clone_state_monitor(
+            &svc,
+            clone_state_key.clone(),
+            conda_path,
+            origin_name,
+            target_name,
+        )
+        .await
         {
             tracing::error!("conda clone {err:#?}");
             if let Err(err) = svc
@@ -209,19 +200,19 @@ pub async fn clone_(
 }
 
 async fn clone_state_monitor(
-    mut child: Child,
     cache_service: &CacheService,
     clone_state_key: String,
-    _conda_path: String,
+    conda_path: String,
+    origin_name: String,
+    target_name: String,
 ) -> Result<(), ErrorTrace> {
-    info!("fork child process finished,pid:{:#?}", child.id());
+    use std::process::Stdio;
 
     // firstly set clone state as cloning.
     cache_service
         .set_clone_state(&clone_state_key, CloneState::Cloning)
         .await?;
 
-    /*
     let output = Command::new(&conda_path)
         .arg("clean")
         .arg("--all")
@@ -232,7 +223,18 @@ async fn clone_state_monitor(
     if !output.success() {
         return Err(ErrorTrace::new("conda clean fail"));
     }
-    */
+
+    let mut cmd = Command::new(&conda_path);
+    let mut child = cmd
+        .arg("create")
+        .args(["-y", "-n"])
+        .arg(target_name)
+        .arg("--clone")
+        .arg(origin_name)
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .spawn()?;
 
     let exit_status = child.wait().await?;
     if exit_status.success() {
