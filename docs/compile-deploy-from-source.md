@@ -1,7 +1,3 @@
----
-title: Compile And Deploy IDP From Source
----
-
 # Compile and Deploy IDP From Source
 
 ## System Requirements
@@ -39,8 +35,8 @@ copy .cargo/config.toml and edit it to where your python installed
 #### Install Rust
 
 ```shell
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source "$HOME/.cargo/env"
+> curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+> source "$HOME/.cargo/env"
 ```
 
 #### Homebrew's Python
@@ -68,8 +64,8 @@ rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup", "-C",
 ## Compile and Run
 
 ```shell
-./scripts/build.sh
-./target/release/idp
+> ./scripts/build.sh
+> ./target/release/idp
 ```
 
 ---
