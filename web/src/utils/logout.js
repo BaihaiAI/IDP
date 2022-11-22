@@ -1,5 +1,5 @@
 import cookie from "react-cookies";
-import { analysisUrl } from '../../../config/auth';
+import { analysisUrl } from '../../config/auth';
 
 export function logout() {
   const domain = window.location.host === "localhost:3000" ? "test.baihai.co" : window.location.host
