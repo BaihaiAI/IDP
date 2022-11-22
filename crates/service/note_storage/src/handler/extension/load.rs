@@ -25,33 +25,6 @@ pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTr
     let mime_type = mime_guess::from_path(&path).first_or_text_plain();
     let mime_type_str = mime_type.to_string();
 
-    if mime_type_str.starts_with("image") {
-        let f = tokio::fs::File::open(&path).await?;
-        let stream = tokio_util::io::ReaderStream::new(f);
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header(
-                header::CONTENT_TYPE,
-                HeaderValue::from_str(&mime_type_str).unwrap(),
-            )
-            .body(axum::body::StreamBody::new(stream))
-            .unwrap());
-    }
-
-    if mime_type_str == "application/gzip" {
-        let f = tokio::fs::File::open(&path).await?;
-        let stream = tokio_util::io::ReaderStream::new(f);
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header(
-                header::CONTENT_TYPE,
-                HeaderValue::from_str(&mime_type_str).unwrap(),
-            )
-            // .header(header::CONTENT_ENCODING, HeaderValue::from_static("gzip"))
-            .body(axum::body::StreamBody::new(stream))
-            .unwrap());
-    }
-
     let f = tokio::fs::File::open(&path).await?;
     let stream = tokio_util::io::ReaderStream::new(f);
     tracing::info!(
