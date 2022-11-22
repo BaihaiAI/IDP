@@ -285,14 +285,16 @@ pub async fn open_output(
 
     //null
     let package_name_lowercase = if package_name.is_empty() {
-        "{".to_string().to_ascii_lowercase()
+        "{".to_string()
     } else {
         package_name.to_ascii_lowercase()
     };
 
-    for line_text in std::io::BufReader::new(std::fs::File::open(path)?)
-        .lines()
-        .flatten()
+    for line_text in std::io::BufReader::new(
+        std::fs::File::open(&path).map_err(|err| ErrorTrace::new(&format!("{path:?} {err}")))?,
+    )
+    .lines()
+    .flatten()
     {
         if line_text.contains(&package_name_lowercase) {
             let line_value = line_text.to_string().trim().to_string();

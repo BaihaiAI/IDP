@@ -15,8 +15,6 @@
 mod delete_file_or_dir;
 mod dir_export;
 mod download;
-// #[allow(dead_code)]
-// pub mod workspace_kubernetes;
 use business::path_tool::get_store_path;
 use common_model::entity::cell::CellType;
 pub use delete_file_or_dir::delete_file_or_dir;
@@ -1431,7 +1429,7 @@ pub fn put_result_to_vec(
     let content = match std::fs::read_to_string(&path) {
         Ok(content) => content,
         Err(err) => {
-            tracing::error!("{path:?} {err}");
+            tracing::debug!("{path:?} {err}");
             return;
         }
     };

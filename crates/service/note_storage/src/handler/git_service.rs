@@ -24,7 +24,7 @@ use crate::handler::project_handler::parse_return_success_code;
 const PROTOCOLS_HTTPS: &str = "https://";
 const PROTOCOLS_OAUTH2: &str = "oauth2";
 
-static FULL_PROJECT_DELETE_URL: &str = "http://idp-resource-svc:10005/api/v1/project/delete";
+const FULL_PROJECT_DELETE_URL: &str = "http://idp-resource-svc:10005/api/v1/project/delete";
 
 pub async fn git_clone(
     url: String,
