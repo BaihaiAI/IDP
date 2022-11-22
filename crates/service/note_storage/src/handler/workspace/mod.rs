@@ -25,7 +25,6 @@ use uuid::Uuid;
 pub mod compress;
 pub mod decompress;
 pub mod example_project;
-use std::collections::BinaryHeap;
 use std::collections::HashMap;
 use std::fs;
 use std::io::SeekFrom;
@@ -45,7 +44,6 @@ pub use dir_export::dir_export;
 pub use download::download;
 pub use download::download_file;
 use err::ErrorTrace;
-use futures::io;
 use lazy_static::lazy_static;
 use regex::Regex;
 use reqwest::Body;
@@ -79,9 +77,6 @@ use crate::business_::path_tool::name_convert;
 use crate::common::error::IdpGlobalError;
 use crate::handler;
 use crate::status_code::*;
-
-const HEAP_SUFFIX: &str = ".counter";
-const HEAP_DIR: &str = "/.cursors/";
 
 // static full_datasource_url: String = "http://idp-commandservice-svc:8083/api/command/datasource/list".to_string();
 // static active_datasource_url: String = "http://127.0.0.1:8083/api/command/database/active".to_string();
@@ -241,14 +236,6 @@ pub async fn file_dir_copy(
     team_id: u64,
     project_id: u64,
 ) -> Result<Rsp<()>, ErrorTrace> {
-    #[inline]
-    fn get_unix_timestamp_ms() -> i64 {
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as i64
-    }
-
     info!("copy file /dir..");
     let base_path = path_tool::get_store_path(
         team_id,
@@ -264,80 +251,14 @@ pub async fn file_dir_copy(
         &target_path,
     )));
 
-    let from_path_str = from_path.to_str().unwrap();
-    let mut to_path_str = to_path.to_str().unwrap();
-
-    let is_same_file = from_path_str == to_path_str;
     if to_path.exists() {
-        if to_path.is_dir() {
-            let mut to_path_string = to_path_str.to_string();
-            let s1 = "_".to_string();
-            let s2 = get_unix_timestamp_ms().to_string();
-            to_path_string += &s1;
-            to_path_string += &s2;
-            to_path_str = to_path_string.as_str();
-            info!(
-                "from_path: {:?},to_path_str: {:?}",
-                from_path_str, &to_path_str
-            );
-            common_tools::command_tools::copy(from_path_str, to_path_str)?;
-        } else {
-            tracing::info!("start copy file...");
-            let to_path_string = to_path_str.to_string();
-            let pos_ext = to_path_string.rfind('.');
-            if pos_ext == None {
-                let mut to_path_string = to_path_str.to_string();
-                if is_same_file {
-                    let s1 = get_filename_number(&to_path_string)
-                        .await
-                        .unwrap_or_else(|e| {
-                            tracing::info!("failed to get filename number, reason: {}", e);
-                            format!("_{}", get_unix_timestamp_ms())
-                        });
-                    to_path_string += &s1;
-                }
-
-                to_path_str = to_path_string.as_str();
-                info!(
-                    "from_path: {:?},to_path_str: {:?}",
-                    from_path_str, &to_path_str
-                );
-
-                common_tools::command_tools::copy(from_path_str, to_path_str)?;
-            } else {
-                let to_path_string = to_path_str.to_string();
-                let _pos_ext = pos_ext.unwrap();
-                let (filename_pre, filename_ext) = to_path_string.split_at(_pos_ext);
-                let ext = filename_ext.to_string();
-                let mut filename_pre_string = filename_pre.to_string();
-
-                if is_same_file {
-                    let s1 = get_filename_number(&to_path_string)
-                        .await
-                        .unwrap_or_else(|e| {
-                            tracing::info!("failed to get filename number, reason: {}", e);
-                            format!("_{}", get_unix_timestamp_ms())
-                        });
-                    filename_pre_string += &s1;
-                }
-                filename_pre_string += &ext;
-
-                to_path_str = filename_pre_string.as_str();
-
-                info!(
-                    "from_path: {:?},to_path_str: {:?}",
-                    from_path_str, &to_path_str
-                );
-                common_tools::command_tools::copy(from_path_str, to_path_str)?;
-            }
-        }
-    } else {
-        info!(
-            "from_path: {:?},to_path_str: {:?}",
-            from_path_str, &to_path_str
-        );
-        common_tools::command_tools::copy(from_path_str, to_path_str)?;
+        to_path = rename_path_if_path_exist(to_path);
     }
+
+    let from_path_str = from_path.to_str().unwrap();
+    let to_path_str = to_path.to_str().unwrap();
+
+    common_tools::command_tools::copy(from_path_str, to_path_str)?;
 
     Ok(Rsp::success(()))
 }
@@ -2079,100 +2000,4 @@ pub fn is_valid_to_create(file_path: &str) -> bool {
     }
 
     !RE.is_match(file_path)
-}
-
-fn extract_file_num(input: &str) -> Option<&str> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"\((?P<num>\d+)\)(\.*\w*$)").unwrap();
-    }
-
-    RE.captures(input)
-        .and_then(|cap| cap.name("num").map(|num| num.as_str()))
-}
-
-fn extract_original_filepath(input: &str) -> String {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"(_\(\d+\))?\.*\w*$").unwrap();
-    }
-
-    RE.replace(input, "").to_string()
-}
-
-async fn get_heap_location(file_path: &str) -> io::Result<String> {
-    let file_path = extract_original_filepath(file_path);
-    let path = Path::new(&file_path);
-    let filename = match path.file_name() {
-        Some(val) => val.to_str().unwrap_or("error"),
-        None => "error",
-    };
-    let dir = path.parent().unwrap().to_str().unwrap();
-    let heap_loc = String::from(dir) + HEAP_DIR + filename + HEAP_SUFFIX;
-    let parent = Path::new(&heap_loc).parent().unwrap();
-    if !Path::new(&heap_loc).exists() {
-        tokio::fs::create_dir_all(parent).await?;
-    };
-    Ok(heap_loc)
-}
-
-async fn get_heap_from_path(heap_loc: &str) -> io::Result<BinaryHeap<i64>> {
-    tracing::info!("start to get heap, heap_loc is {}", heap_loc);
-
-    let heap_file = match tokio::fs::read_to_string(&heap_loc).await {
-        Ok(heap) => heap,
-        Err(_) => {
-            let mut new_heap = BinaryHeap::new();
-            new_heap.push(-1_i64);
-            let new_heap = serde_json::to_string(&new_heap).unwrap();
-            tokio::fs::File::create(&heap_loc).await?;
-            tokio::fs::write(&heap_loc, new_heap).await?;
-            tokio::fs::read_to_string(&heap_loc).await.unwrap()
-        }
-    };
-    let heap: BinaryHeap<i64> = serde_json::from_str(&heap_file).unwrap();
-    Ok(heap)
-}
-
-async fn sync_heap_counter_after_delete(file_path: &str) -> io::Result<String> {
-    let to_path_string = file_path.to_string();
-    let suffix = match to_path_string.rfind('.') {
-        Some(val) => {
-            let (_, filename_ext) = to_path_string.split_at(val);
-            String::from(filename_ext)
-        }
-        None => String::new(),
-    };
-    let heap_loc = get_heap_location(file_path).await? + &suffix;
-    tracing::info!("get heap location when sync counter. {}", heap_loc);
-    let mut heap = get_heap_from_path(&heap_loc).await?;
-    let file_num = extract_file_num(file_path).unwrap_or("0");
-    tracing::info!("get file num is {}", file_num);
-    heap.push(-file_num.parse::<i64>().unwrap());
-    let heap_json = serde_json::to_string(&heap).unwrap();
-    tokio::fs::write(&heap_loc, heap_json).await?;
-
-    Ok(String::new())
-}
-
-async fn get_filename_number(file_path: &str) -> io::Result<String> {
-    // To avoid duplicated version numbers, such as: 1234_(1)_(2)_(1).txt
-    let mimic_path = String::from(file_path) + "_(0)";
-    tracing::info!("start get filename number.");
-    let heap_loc = get_heap_location(&mimic_path).await?;
-    tracing::info!("start get heap from path.");
-    let mut heap = get_heap_from_path(&heap_loc).await?;
-    tracing::info!("get heap from path successful.");
-    let current_num = -heap.pop().expect("heap file store errors.");
-    let cursor = -(current_num + 1);
-
-    if heap.is_empty() {
-        heap.push(cursor);
-    }
-    let heap_json = serde_json::to_string(&heap).unwrap();
-    tokio::fs::write(&heap_loc, heap_json).await?;
-
-    if current_num == 0 {
-        Ok(String::new())
-    } else {
-        Ok(format!("_({})", current_num))
-    }
 }
