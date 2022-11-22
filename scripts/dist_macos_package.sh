@@ -4,11 +4,13 @@ set -exu
 script_dir=$(dirname -- $(readlink -f -- "$0"))
 repo_root=$(dirname $script_dir)
 cd $repo_root
+source ./scripts/release_version.sh
 
 arch=${1:-arm64}
 #arch=x64
 
-dir=IDPStudio-macOS-$arch-v$(date +'%y%m%d-%H%M%S')
+#dir=IDPStudio-macOS-$arch-v$(date +'%y%m%d-%H%M%S')
+dir=idp-studio-$release_version-darwin-arm64
 mkdir -p $dir/{bin,lib}
 
 cp -r docker_build/store $dir/store
