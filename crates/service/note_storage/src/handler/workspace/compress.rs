@@ -20,7 +20,7 @@ use common_model::Rsp;
 use err::ErrorTrace;
 use tracing::info;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspacePathRto {
     pub team_id: String,
@@ -29,17 +29,14 @@ pub struct WorkspacePathRto {
 }
 
 pub async fn dir_zip(Json(payload): Json<WorkspacePathRto>) -> impl axum::response::IntoResponse {
-    info!("access workspace dir_zip api");
+    info!("access workspace dir_zip api payload={payload:?}");
 
     let (path, project_id, team_id) = (payload.path, payload.project_id, payload.team_id);
-    info!("path: {:?}", path);
-    info!("project_id: {:?}", project_id);
-    tracing::info!("team_id: {:?}", team_id);
 
     dir_zip_(path, team_id, project_id).await
 }
 
-#[tracing::instrument]
+// #[tracing::instrument]
 async fn dir_zip_(path: String, team_id: String, project_id: u64) -> Result<Rsp<()>, ErrorTrace> {
     let team_id = team_id.parse::<u64>()?;
     let base_path = path_tool::get_store_path(
