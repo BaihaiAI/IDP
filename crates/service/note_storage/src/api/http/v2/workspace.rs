@@ -84,7 +84,7 @@ fn test_new_file_it() {
     let ctx = test_runner::IntegrationTestCtx::get();
     let resp = ctx
         .client
-        .post("http://127.0.0.1:3003/a/api/v2/idp-note-rs/workspace/file?teamId=12345")
+        .post("http://127.0.0.1:3003/a/api/v2/idp-note-rs/workspace/file?teamId=1")
         .json(&NewFileReq {
             path: "demo2.ipynb".to_string(),
             project_id: ctx.project_id,

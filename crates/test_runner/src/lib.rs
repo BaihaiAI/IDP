@@ -67,7 +67,7 @@ pub struct IntegrationTestCtx {
 
 impl IntegrationTestCtx {
     pub fn get() -> Self {
-        let team_id = 12345;
+        let team_id = 1;
         let client = reqwest::blocking::ClientBuilder::new()
             .default_headers({
                 let mut headers = reqwest::header::HeaderMap::new();
@@ -86,7 +86,7 @@ impl IntegrationTestCtx {
                 .unwrap(),
             client,
             team_id,
-            project_id: 6789,
+            project_id: 1,
             region: "a",
         }
     }
