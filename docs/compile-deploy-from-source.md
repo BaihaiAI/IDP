@@ -1,7 +1,3 @@
----
-title: Compile And Deploy IDP From Source
----
-
 # Compile and Deploy IDP From Source
 
 ## System Requirements
