@@ -1429,7 +1429,7 @@ pub fn put_result_to_vec(
     let content = match std::fs::read_to_string(&path) {
         Ok(content) => content,
         Err(err) => {
-            tracing::error!("{path:?} {err}");
+            tracing::debug!("{path:?} {err}");
             return;
         }
     };
