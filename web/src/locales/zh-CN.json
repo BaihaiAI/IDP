@@ -152,6 +152,9 @@
   "DATA_INTEGRATION": "数据集成",
   "NOTEBOOK_LIST": "Notebook 大纲",
   "TERMINAL": "终端",
+  "TERMINAL_OPEN": "展开终端面板",
+  "TERMINAL_CLOSE": "收起终端面板",
+  "TERMINAL_MAXIMIZE": "最大化终端面板",
   "NETWORK_ERROR": "网络错误！",
   "NETWORK_ABNORMAL": "网络异常",
   "NETWORK_NORMAL": "网络正常",
@@ -271,6 +274,9 @@
   "NAME_THIS_SNAPSHOT": "为该快照命名",
   "INPUT_CAN_NOT_BE_EMPTY": "输入不能为空",
   "PLEASE_ENTER_A_SNAPSHOT_NAME": "请输入快照名称",
+  "SNAPSHOT_REVISION": "修订历史快照",
+  "SNAPSHOT_HIDE_CONTENT": "隐藏未变更的内容",
+  "SNAPSHOT_NO": "没有可以对比的快照",
   "SEARCH_VARIABLE_NAME": "搜索变量名",
   "CLOSE": "关闭",
   "CLOSE_ALL_TABS": "关闭所有标签页",
@@ -465,5 +471,9 @@
   "NO_ENOUGH_RESOURCE": "资源不够，请调小资源或者关闭运行中的kernel释放资源",
   "STARTUP_PARAMETERS": "启动参数：",
   "STARTUP_PARAMETERS_DESCRIPTION": "输入启动参数，如果为空不需要填",
-  "START_KERNEL": "kernel启动中..."
+  "START_KERNEL": "kernel启动中...",
+  "RESOURCEBAR_CORE": "核",
+  "RESOURCEBAR_MEMORY": "内存",
+  "RESOURCEBAR_PRIORITY": "优先级",
+  "RESOURCEBAR_CHECKPOINT": "自动保存上下文"
 }

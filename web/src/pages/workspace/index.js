@@ -10,11 +10,12 @@ import { Tooltip } from 'antd';
 
 import { selectActivePath } from '@/store/features/filesTabSlice';
 import { useSelector } from "react-redux";
+import intl from "react-intl-universal";
 
 const iconTextArrays = {
-    0: '收起终端面板',
-    1: '展开终端面板',
-    2: '最大化终端面板'
+  0: intl.get('TERMINAL_CLOSE'),
+  1: intl.get('TERMINAL_OPEN'),
+  2: intl.get('TERMINAL_MAXIMIZE')
 }
 
 function Workspace(props) {
@@ -82,7 +83,7 @@ function Workspace(props) {
                 Terminal.terminalVisabled ? <>
                     <div className="bar-group-icons" style={{ height: '36px' }}>
                         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => terminal()}>
-                            <span className="terminal-title">终端</span>
+                          <span className="terminal-title">{intl.get('TERMINAL')}</span>
                         </div>
                         <div className="workspace_icon">
                             <div style={{ marginRight: '10px', width: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>

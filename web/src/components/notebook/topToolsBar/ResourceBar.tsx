@@ -8,6 +8,7 @@ import './resourceBar.less'
 import clusterApi from "../../../services/clusterApi"
 import { selectKernelList } from "../../../store/features/kernelSlice"
 import { useDispatch, useSelector } from "react-redux"
+import intl from "react-intl-universal"
 
 interface Props {
   resourceRef: any
@@ -127,7 +128,7 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
   const cpuProps = {
     type: 'number',
     addonBefore: 'CPU',
-    addonAfter: '核',
+    addonAfter: intl.get('RESOURCEBAR_CORE'),
     min: minNumCpu,
     max: maxNumCpu,
     step: '0.1',
@@ -170,7 +171,7 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
   }
   const memoryProps = {
     type: 'number',
-    addonBefore: '内存',
+    addonBefore: intl.get('RESOURCEBAR_MEMORY'),
     addonAfter: 'GB',
     min: minMemory,
     max: maxMemory,
@@ -192,7 +193,7 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
   }
   const priorityProps = {
     type: 'number',
-    addonBefore: '优先级',
+    addonBefore: intl.get('RESOURCEBAR_PRIORITY'),
     min: minPriority,
     max: maxPriority,
     step: '1',
@@ -236,7 +237,7 @@ export const ResourceBar: React.FC<Props> = ({ resourceRef }) => {
       <Input size="small" {...gpuProps} />
       <Input size="small" {...memoryProps} />
       <Input size="small" {...priorityProps} />
-      <Checkbox onChange={autoCheckpoint}>自动保存上下文</Checkbox>
+      <Checkbox onChange={autoCheckpoint}>{intl.get('RESOURCEBAR_CHECKPOINT')}</Checkbox>
     </Space>
   </div>)
 }

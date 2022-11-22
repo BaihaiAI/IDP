@@ -1,5 +1,5 @@
 import React from 'react'
-import { analysisUrl } from '../../../../../config/auth';
+import { analysisUrl } from '../../../../config/auth';
 
 import "./index.less"
 

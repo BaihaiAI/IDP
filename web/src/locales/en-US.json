@@ -152,6 +152,9 @@
   "DATA_INTEGRATION": "Data integration",
   "NOTEBOOK_LIST": "Notebook outline",
   "TERMINAL": "Terminal",
+  "TERMINAL_OPEN": "Open terminal",
+  "TERMINAL_CLOSE": "Close terminal",
+  "TERMINAL_MAXIMIZE": "Maximize terminal",
   "NETWORK_ERROR": "Network error!",
   "NETWORK_ABNORMAL": "Network abnormal",
   "NETWORK_NORMAL": "The Network is normal",
@@ -271,6 +274,9 @@
   "NAME_THIS_SNAPSHOT": "Name this snapshot",
   "INPUT_CAN_NOT_BE_EMPTY": "Input can not be empty",
   "PLEASE_ENTER_A_SNAPSHOT_NAME": "Please enter a snapshot name",
+  "SNAPSHOT_REVISION": "Revision history snapshot",
+  "SNAPSHOT_HIDE_CONTENT": "Hide unchanged content",
+  "SNAPSHOT_NO": "No snapshots to compare",
   "SEARCH_VARIABLE_NAME": "Search variable name",
   "CLOSE": "Close",
   "CLOSE_ALL_TABS": "Close all tabs",
@@ -465,5 +471,9 @@
   "NO_ENOUGH_RESOURCE": "Insufficient resources. Please reduce the resources or close the running kernel to release resources",
   "STARTUP_PARAMETERS": "startup parameters:",
   "STARTUP_PARAMETERS_DESCRIPTION": "Enter the startup parameter. If it's null, it's unnecessary to fill in",
-  "START_KERNEL": "kernel starting ..."
+  "START_KERNEL": "kernel starting ...",
+  "RESOURCEBAR_CORE": "Core",
+  "RESOURCEBAR_MEMORY": "Memory",
+  "RESOURCEBAR_PRIORITY": "Priority",
+  "RESOURCEBAR_CHECKPOINT": "Auto checkpoint"
 }

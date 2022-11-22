@@ -590,12 +590,6 @@ class WorkspaceLeft extends React.Component {
         })
       }
     )
-
-    createOrAddAModelOrVersionApi.getCategory({})
-      .then(res => {
-        const { data } = res;
-        this.setState({category: data})
-      })
   }
   componentWillUnmount() {
     PubSub.unsubscribe(this.updateSelectKeysSubscriber)
@@ -2145,10 +2139,18 @@ class WorkspaceLeft extends React.Component {
               packageName = await createOrAddAModelOrVersionApi.getSuccessString({path:key}).then(res => res.data.packageName)
             }
 
+            let category = null
+            await createOrAddAModelOrVersionApi.getCategory({})
+              .then(res => {
+                const { data } = res;
+                category = data
+              })
+
             this.setState({
               modelFile: {
                 string: packageName? packageName : modelFileName,
-                name: modelFileName
+                name: modelFileName,
+                category: category
               },
               modelEnv: modelEnv
             })
