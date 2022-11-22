@@ -63,10 +63,10 @@ Please refer to the [Code of Conduct](/docs/code-of-conduct.md), which describes
 
 ## Community
 If you have any question, feel free to reach out to us in the following ways:
- - [On Slack](https://join.slack.com/t/sas-yjr2860/shared_invite/zt-1difcfmhw-9RU2ULRKDdV8CdYOgjzX4Q)
+ - [On Slack](https://join.slack.com/t/idp-tjo1834/shared_invite/zt-1kee8cd8x-iNZ0rvwClRfx7sLgmmKKyg)
  - [On Twitter](https://twitter.com/baihaiAI)
  - [On Linkedin](https://www.linkedin.com/company/80179567/admin/)
- - [Mail to us](https://www.baihai.co/introduce.html)
+ - [Mail to us](https://baihai.co/contactus.html)
 
 
 ## Case Study
