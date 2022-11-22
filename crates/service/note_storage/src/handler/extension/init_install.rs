@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashSet;
 use std::io::Write;
 
 use axum::Json;
 use common_model::Rsp;
 use err::ErrorTrace;
+use lazy_static::lazy_static;
 
+use super::models::ExtensionConfig;
 use super::models::ListReq;
+
+lazy_static! {
+    static ref INIT_EXTENSION: HashSet<&'static str> = {
+        let a = include_bytes!("../../../extension_config/config.json");
+        let extension_config: ExtensionConfig = serde_json::from_slice(a).unwrap();
+        let mut m: HashSet<&'static str> = HashSet::new();
+        extension_config.init.into_iter().for_each(|x| {
+            m.insert(Box::leak(x.into_boxed_str()));
+        });
+        m
+    };
+}
 
 pub async fn init_install(Json(payload): Json<ListReq>) -> Result<Rsp<()>, ErrorTrace> {
     let team_id = payload.team_id;
@@ -36,21 +51,24 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
         std::fs::create_dir_all(&installed_extensions_path)?;
     }
 
-    let mut recommended_extensions_path = business::path_tool::recommended_extensions()
-        .to_str()
-        .unwrap()
-        .to_owned();
+    let recommended_extensions_path = business::path_tool::recommended_extensions();
 
-    recommended_extensions_path += "/.";
-
-    common_tools::command_tools::copy(&recommended_extensions_path, &installed_extensions_path)?;
-
-    let recommended_config_path =
-        std::path::Path::new(&recommended_extensions_path).join("extensions_config.json");
+    let recommended_config_path = recommended_extensions_path.join("extensions_config.json");
 
     let mut recommended_content = super::get_extensions_config(recommended_config_path).await?;
 
-    for content in recommended_content.iter_mut() {
+    for content in recommended_content
+        .iter_mut()
+        .filter(|content| INIT_EXTENSION.contains(content.name.as_str()))
+    {
+        let extension_path = recommended_extensions_path
+            .join(&content.name)
+            .join(&content.version);
+        common_tools::command_tools::copy(
+            extension_path.to_str().unwrap(),
+            &installed_extensions_path,
+        )?;
+
         let url = format!(
             "{}/{}/{}/",
             installed_extensions_path, content.name, content.version

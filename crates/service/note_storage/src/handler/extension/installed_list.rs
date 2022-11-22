@@ -72,7 +72,14 @@ async fn get_installed_extensions_config(
         }
     };
     match serde_json::from_str::<Vec<InstalledExtensionResp>>(&jdata) {
-        Ok(content) => Ok(content),
+        Ok(content) => {
+            let mut content = content
+                .into_iter()
+                .filter(|x| x.is_visible())
+                .collect::<Vec<InstalledExtensionResp>>();
+            content.sort();
+            Ok(content)
+        }
         Err(err) => {
             tracing::error!("{err}");
             let empty: Vec<InstalledExtensionResp> = Vec::new();
