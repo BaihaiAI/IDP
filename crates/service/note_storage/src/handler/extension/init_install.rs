@@ -26,7 +26,7 @@ use super::models::ListReq;
 lazy_static! {
     static ref INIT_EXTENSION: HashSet<&'static str> = {
         let a = include_bytes!("../../../extension_config/config.json");
-        let extension_config: ExtensionConfig = serde_json::from_slice(a).unwrap();// let invisble_extension_name =  extension_config["invisible"];
+        let extension_config: ExtensionConfig = serde_json::from_slice(a).unwrap();
         let mut m: HashSet<&'static str> = HashSet::new();
         extension_config.init.into_iter().for_each(|x| {
             m.insert(Box::leak(x.into_boxed_str()));
