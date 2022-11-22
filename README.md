@@ -1,4 +1,4 @@
-![](docs/IDP logo.png)
+![](docs/IDP Logo.png)
 
 [![LICENSE](https://img.shields.io/badge/licence-Apache%202.0-brightgreen)](https://github.com/BaihaiAI/IDP/blob/main/LICENSE)
 [![Language](https://img.shields.io/badge/language-Rust-brightgreen)](https://www.rust-lang.org/)
