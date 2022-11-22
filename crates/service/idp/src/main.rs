@@ -22,10 +22,10 @@ mod cli_args;
 mod gateway;
 mod spawn_all_services;
 
-const BAIHAI_AID_FILENAME: &str = "baihai_aid-1.3.6.1-py3-none-any.whl";
+const BAIHAI_AID_FILENAME: &str = "baihai_aid-2.0-py3-none-any.whl";
 const BAIHAI_AID: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
-    "/../../../docker_build/store/1/projects/1/notebooks/baihai_aid-1.3.6.1-py3-none-any.whl"
+    "/../../../docker_build/store/1/projects/1/notebooks/baihai_aid-2.0-py3-none-any.whl"
 ));
 
 #[tokio::main]
@@ -64,6 +64,7 @@ async fn main() {
     std::process::Command::new("pip3")
         .arg("install")
         .arg(BAIHAI_AID_FILENAME)
+        .arg("--quiet")
         .spawn()
         .unwrap()
         .wait()
