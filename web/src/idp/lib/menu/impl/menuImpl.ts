@@ -31,7 +31,6 @@ class MenuImpl<T> implements IRegister<T> {
             const _data = toJS(this[`idp${menuType}Map`]);
             _data.splice(0, 0, data);
             this[`idp${menuType}Map`] = _data;
-            console.log(toJS(this[`idp${menuType}Map`]));
         } else {
             this[`idp${menuType}Map`] = this[`idp${menuType}Map`].concat([data]);
         }

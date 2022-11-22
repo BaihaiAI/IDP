@@ -20,8 +20,10 @@ function RouterConfig() {
           }
           return './workspace'
         }
-        return "/modelwarenhouse"
+        return "/modelwarehouse"
     }
+
+
     let finallyRoutes = navConfig.concat(toJS(globalData.routerMenuControl.currentRoutes))
     if(isTraveler()){
       finallyRoutes = finallyRoutes.filter(item=>travelRoutes.includes(item.key))

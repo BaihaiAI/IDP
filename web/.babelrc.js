@@ -1,4 +1,4 @@
-{
+module.exports = {
     "presets": [
         [
             "@babel/preset-env",
@@ -56,5 +56,7 @@
             },
             "antv"
         ]
-    ]
+    ].concat(process.env.NODE_ENV === 'dev' ? [] : [
+        "transform-remove-console"
+    ])
 }

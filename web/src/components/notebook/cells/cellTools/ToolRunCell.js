@@ -1,4 +1,4 @@
-import { useEffect, useMemo,Fragment } from "react"
+import { useEffect, useMemo,Fragment, memo } from "react"
 import { Tooltip, Typography, Button } from "antd"
 import Icons from "../../../Icons/Icons"
 import "./cellTools.less"
@@ -60,7 +60,6 @@ const ToolRunCell = (props) => {
         }
 
         const stateButton = () => {
-            console.log(cellState)
             switch (cellState) {
                 case "pending":
                     return (

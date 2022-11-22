@@ -3,10 +3,11 @@ const webpack = require('webpack'); // 用于访问内置插件
 const webpackBaseConfig = require('./webpack.base.config');
 const rescriptsrc = require('../config/rescriptsrc');
 const { createHtmlWebpackPlugin } = require('../config/htmlWebpackPlugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const devConfig = {
     mode: 'development',
-    devtool: "eval",
+    devtool: "source-map",
     plugins: [
         createHtmlWebpackPlugin({
             options: {
@@ -15,6 +16,7 @@ const devConfig = {
             },
             env: process.env.NODE_ENV
         }),
+        new MiniCssExtractPlugin(),
         new webpack.HotModuleReplacementPlugin()
     ],
 };

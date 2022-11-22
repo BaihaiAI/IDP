@@ -1,4 +1,3 @@
-/// <reference types="react" />
 declare interface Props {
     children?: string;
     linkify?: boolean;

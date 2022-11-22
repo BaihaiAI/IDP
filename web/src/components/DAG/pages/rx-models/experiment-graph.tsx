@@ -31,6 +31,7 @@ import {
 import { queryExperiment, addNode, copyNode, queryExperimentInstance } from '../../services/graph'
 import { queryGraphStatus, runGraph, stopGraphRun } from '../../services/status'
 import { saveExperiment } from '../../services/graph'
+import { string } from 'prop-types'
 
 export function parseStatus(data: NExecutionStatus.ExecutionStatus) {
   const { execInfo, instStatus } = data
@@ -844,6 +845,11 @@ class ExperimentGraph extends GraphCore<BaseNode, BaseEdge> {
     this.updateNodeProps(nodeInstanceId, 'script', script);
   }
 
+  // 修改节点运行环境
+  updateNodeEnvName = async (nodeInstanceId: string, envName: string) => {
+    this.updateNodeProps(nodeInstanceId, 'envName', envName);
+  }
+
   // 修改节点资源配置
   udpateNodeMachine = async (nodeInstanceId: string, machine: string) => {
     this.updateNodeProps(nodeInstanceId, 'machine', machine);
@@ -866,6 +872,17 @@ class ExperimentGraph extends GraphCore<BaseNode, BaseEdge> {
           this.updateNodeProps(cell.id, 'priority', priority);
         }
       }
+    )
+  }
+
+  // 修改所有节点环境
+  updateAllNodeEnvName = async (envName: string) => {
+    const cells = this.getCells()
+    cells.forEach((cell) => {
+      if (cell?.isNode()) {
+        this.updateNodeProps(cell.id, 'envName', envName);
+      }
+    }
     )
   }
 

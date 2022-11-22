@@ -3,7 +3,7 @@ const { name } = require('../package.json');
 let target = "";
 
 if (process.env.NODE_OPEN === 'true') {
-    target = 'http://192.168.12.12:3003'; // http://192.168.12.12:3033
+    target = 'http://192.168.12.12:3000'; // http://192.168.12.12:3033
 } else {
     target = require('../../config/global.js').originTargetUrl;
 }

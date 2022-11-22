@@ -94,8 +94,8 @@ export const handleCode = ({ code, message: msg, url, data }) => {
       }
       break
   }
-  if (url) {
-    // submitErrInfo(url, msg)
+  if (url && url.indexOf('feedback/save') !== -1) {
+    submitErrInfo(url, msg)
   }
   judgeNeedErrMsg()
 }
@@ -144,7 +144,9 @@ function interceptorsRequestUseReject(error) {
 function interceptorsResponseResolve(response) {
   const { data, config } = response
   const requestUrl = config.url
-  let { code, msg, message, data: realData } = data
+  let { code, msg, message, data: realData } = data;
+
+  interceptAuthJwtResponseReject(response);
 
   if (requestUrl.includes("/api/v2/idp-note-rs/content/cat")) {
     const qsParam = requestUrl.split("?")[1]
@@ -183,9 +185,28 @@ function interceptorsResponseResolve(response) {
   }
 }
 
+/**
+ * jwt认证拦截器
+ * @param {*} res 
+ */
+function interceptAuthJwtResponseReject(res) {
+  const { status, data } = res;
+  // 处理id_token有问题的情况，避免页面出错
+  if ( status == '401' && data == 'Jwt verification fails' ) {
+    logout();
+    return Promise.reject(new Error('登录信息已经过期或失效，请重新登录'));
+  } 
+  if (status == '403' && data == 'RBAC: access denied') {  
+    logout();
+    return Promise.reject(new Error('对不起，资源访问受限，系统自动将为您跳转到登录页'));
+  }
+}
+
 function interceptorsResponseReject(error) {
   const requestUrl = error.response.config.url
-  const { response, message } = error
+  const dataMessage = typeof error.response.data ==='object' ? error.response.data.message :null
+  let { response, message } = error
+  message = dataMessage || message
   if (response.status === httpExpiredCode) {
     const { status } = response
     handleCode({
@@ -204,8 +225,9 @@ function interceptorsResponseReject(error) {
     const { status, data } = response
     handleCode({
       code: status,
-      message: data.msg || message,
+      message:typeof data ==='object'? (data.msg || message):(data || message),
       data,
+      url:requestUrl
     })
     return Promise.reject({ message: data.msg || message })
   } else {
@@ -221,7 +243,7 @@ function interceptorsResponseReject(error) {
       message = "后端接口" + code + "异常"
     }
     messageShow.error(message || `后端接口未知异常`, 1.5)
-    // submitErrInfo(requestUrl, message)
+    submitErrInfo(requestUrl, message)
     judgeNeedErrMsg()
     return Promise.reject({ message })
   }

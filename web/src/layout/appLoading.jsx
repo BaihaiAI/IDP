@@ -1,6 +1,6 @@
 import React from 'react'
 import {Col, Row} from "antd"
-import loadingImg from "@/assets/public/loading.gif"
+import loadingImg from "../assets/public/loading.gif"
 
 function AppLoading(props) {
 

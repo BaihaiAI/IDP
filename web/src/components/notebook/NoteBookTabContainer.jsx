@@ -4,6 +4,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  createRef,
 } from "react"
 import { Tabs, Tooltip } from "antd"
 import "./NoteBookTabContainer.less"
@@ -47,6 +48,7 @@ import MarkdownFile from '../markdownFile/markdownFile'
 import { observer } from "mobx-react"
 
 import IdpTerminal from '@/idp/lib/terminal';
+import { ExcelEditor } from "../editor/excel"
 
 const { TabPane } = Tabs
 
@@ -54,7 +56,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
   const { item, workSpaceHeight, sourceVeiw } = props
   let detailItem
   detailItem = useNotebookItem(item.path)
-  if (item.suffix === "ipynb" || item.suffix === 'idpnb') {
+  if (item.contentType === 'notebook' || item.suffix === "ipynb" || item.suffix === 'idpnb') {
     return (
       <Notebook
         key={item.path}
@@ -111,6 +113,15 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
             sourceVeiw={sourceVeiw}
           />
         )
+      case "xls":
+      case "xlsx":
+        return (
+          <ExcelEditor
+            key={item.path}
+            item={item}
+            deleteflag={item.deleteFlag}
+          />
+        )
       default:
         return (
           <TextEditor
@@ -140,6 +151,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
 
 function NoteBookTabContainer(props, ref) {
   const { workSpaceHeight, sourceVeiw } = props
+  const [renderFileRef, setRenderFileRef] = useState({})
   useImperativeHandle(ref, () => ({
     updateDeleteFlag(targetKey) {
       return Promise.resolve(dispatch(updateFileDeleteFlag(targetKey)))
@@ -151,35 +163,35 @@ function NoteBookTabContainer(props, ref) {
     fun() {
       if (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) {
         // console.log(renderFileRef.current[`${activeKey}`].switchRecalculation())
-        renderFileRef.current[`${activeKey}`].switchRecalculation()
+        renderFileRef[`${activeKey}`].current.switchRecalculation()
       } else {
         console.log(activeKey)
       }
     },
     runCell: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].runCell(),
+      renderFileRef[`${activeKey}`].current.runCell(),
     runPreCell: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].runPreCell(),
+      renderFileRef[`${activeKey}`].current.runPreCell(),
     runNextCell: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].runNextCell(),
+      renderFileRef[`${activeKey}`].current.runNextCell(),
     runAllCell: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].runAllCell(),
+      renderFileRef[`${activeKey}`].current.runAllCell(),
     stopCell: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].stopCell(),
+      renderFileRef[`${activeKey}`].current.stopCell(),
     stopAllCell: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].stopAllCell(),
+      renderFileRef[`${activeKey}`].current.stopAllCell(),
     restartKernel: () =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].restartKernel(),
+      renderFileRef[`${activeKey}`].current.restartKernel(),
     updateDeleteflag: (value) =>
       (activeKey.endsWith("ipynb") || activeKey.endsWith("idpnb")) &&
-      renderFileRef.current[`${activeKey}`].updateDeleteflag(value),
+      renderFileRef[`${activeKey}`].current.updateDeleteflag(value),
   }))
 
   const [rightSelectPath, setRightSelectPath] = useState("")
@@ -187,7 +199,6 @@ function NoteBookTabContainer(props, ref) {
   const tabList = useSelector(selectTabList)
   const notebookList = useSelector(selectNotebookList)
   const dispatch = useDispatch()
-  const renderFileRef = useRef({})
   const [kernelData, setKernelData] = useState([])
 
   useEffect(() => {
@@ -238,6 +249,10 @@ function NoteBookTabContainer(props, ref) {
         }
       }
 
+      const fileRef = createRef()
+      renderFileRef[item.path] = fileRef
+      setRenderFileRef(renderFileRef)
+
       return {
         title: (
           <span>
@@ -255,9 +270,7 @@ function NoteBookTabContainer(props, ref) {
             notebookList={notebookList}
             workSpaceHeight={workSpaceHeight}
             sourceVeiw={sourceVeiw}
-            ref={(element) => {
-              renderFileRef.current[item.path] = element
-            }}
+            ref={fileRef}
           />
         ),
         key: item.path,

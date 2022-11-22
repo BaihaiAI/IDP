@@ -23,6 +23,7 @@ function VisualizationCell(props) {
     runCellAndGotoNext,
     stopCell,
     onFocus,
+    onBlur,
     outputs,
     cellProp,
     runCurrentCellAndAbove,
@@ -58,7 +59,7 @@ function VisualizationCell(props) {
     <VisualizationCellContext.Provider
       value={{ cellId, metadata, outputs, runCell, cellProp, path }}
     >
-      <Row className="code-cell" onClick={() => onFocus(cellId)}>
+      <Row className="code-cell" tabIndex={-1} onClick={() => onFocus(cellId)} onBlur={() => onBlur(cellId, '')}>
         <Col className="sider-left-controlbar">
           <div
             className="editor-cell-statebar"

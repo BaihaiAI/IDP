@@ -1,4 +1,5 @@
 import { UnControlled as CodeMirror } from 'react-codemirror2'
+import * as codeMirror from 'codemirror';
 import { useContext, useEffect, useState } from "react";
 import axios from 'axios';
 import appContext from "../../../context"
@@ -6,13 +7,14 @@ import contentApi from '../../../services/contentApi';
 import { TopToolBar } from "./TopToolBar";
 import { Output } from './Output';
 import { region, teamId, projectId } from '../../../store/cookie';
-import { terminalWsUrl, getCurrentEnv } from '../../../store/config';
+import { terminalWsUrl, getCurrentEnv, setCurrentEnv } from '../../../store/config';
 import "./python.less";
 import { message } from 'antd';
 import { selectFileList, addFile, removeFile, addFileOutput } from '../../../store/features/pythonSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import globalData from "idp/global"
 import terminalApi from '../../../services/terminalApi'
+import environmentAPI from '../../../services/environment'
 
 interface Props {
   workSpaceHeight: number
@@ -60,7 +62,7 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
   }
 
   const editorInputRead = (instance, change) => {
-    if (change.text.toString() !== ' ') {
+    if (change.origin === '+input' && change.text.toString() !== ' ') {
       instance.showHint();
     }
   }
@@ -112,17 +114,26 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
   }
   const isComplete = (data: String) => {
     return data === 'complete' || data.indexOf('bash-') !== -1 || data.indexOf('idp-raycluster') !== -1
-      || (data.startsWith('~') && data.indexOf('notebooks') !== -1)
+      || (data.startsWith('~') && data.indexOf('notebooks') !== -1) || data.indexOf('idp-develop') !== -1
   }
   async function asyncInitSysEnv() {
     let ws = null;
     const pid = await initSysEnv();
     if (!pid) return;
+    let currentEnv = getCurrentEnv();
+    await environmentAPI.getEnvironmentName()
+      .then(res => {
+        const data = res.data
+        setCurrentEnv(data)
+        currentEnv = data
+      })
+      .catch(err => {
+        console.log(err)
+      })
     ws = new WebSocket(terminalWsUrl + pid);
     // ws = new WebSocket(pythonWsUrl)
     setWs(ws);
     ws.onopen = () => {
-      const currentEnv = getCurrentEnv();
       if (ws.readyState === 1 && currentEnv) {
         ws.send(`source /root/.bash_profile\n`)
         ws.send(`source activate ${currentEnv} \n`);
@@ -145,6 +156,18 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
       dispatch(removeFile({ path }))
     };
   }, [])
+
+  const setExtraKeys = () => {
+    const mac = codeMirror.keyMap.default === codeMirror.keyMap.macDefault;
+    let extraKeys = {
+      'Tab': (cm) => {
+        const spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+        cm.replaceSelection(spaces);
+    }}
+    const saveKey = mac ? 'Cmd-S' : 'Ctrl-S';
+    extraKeys[saveKey] = saveFile
+    return extraKeys;
+  }
 
   const [showOutput, setShowOutput] = useState(false)
 
@@ -188,12 +211,7 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
                 alignWithWord: true,
               },
               indentUnit: 4,  // 缩进的空格数
-              extraKeys: {
-                'Tab': (cm) => {
-                  const spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-                  cm.replaceSelection(spaces);
-                }
-              },
+              extraKeys: setExtraKeys()
             }}
           />
         </div>

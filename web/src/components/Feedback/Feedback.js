@@ -1,8 +1,8 @@
 import React from "react"
-import { userId } from "@/store/cookie"
+import { userId, teamId, projectId } from "@/store/cookie"
 import feedbackApi from "@/services/feedbackApi"
 import intl from "react-intl-universal"
-import {  Modal, Form, Input, Upload } from "antd"
+import {  Modal, Form, Input, Upload, message } from "antd"
 
 import { PlusOutlined } from "@ant-design/icons"
 import "./Feedback.css"
@@ -84,25 +84,39 @@ class Feedback extends React.Component {
         })
 
         let vals = _this.dataFormat(values)
-        feedbackApi.save(vals)
-          .then(function (res) {
-            form.resetFields()
-            Modal.success({
-              title: `${intl.get("YOUR_FEEDBACK_HAS_BEEN_SUCCESSFULLY_SUBMITTED")}！`,
-              content: `${intl.get("THANKS_FOR_YOUR_FEEDBACK")}！`,
+        if(_this.state.category === "11"){
+          feedbackApi.save_new(vals)
+            .then(res => {
+              console.log(res)
+              form.resetFields()
+              message.success("已提交您的需求申请")
+              _this.props.onOk()
+              _this.setState({
+                fileList: [],
+              })
             })
-            _this.props.onOk()
-            _this.setState({
-              fileList: [],
+        }else{
+          
+          feedbackApi.save(vals)
+            .then(res => {
+              form.resetFields()
+              _this.props.onCancel()
+              _this.setState({
+                fileList: [],
+              })
+              Modal.success({
+                title: `${intl.get("YOUR_FEEDBACK_HAS_BEEN_SUCCESSFULLY_SUBMITTED")}！`,
+                content: `${intl.get("THANKS_FOR_YOUR_FEEDBACK")}！`,
+              })
             })
-          })
-          .catch(function (error) {
-            Modal.error({
-              title: `${intl.get("SUBMISSION_FAILED")}！`,
-              content: `${intl.get("PLEASE_CHECK_YOUR_NETWORK")}！`,
+            .catch(function (error) {
+              Modal.error({
+                title: `${intl.get("SUBMISSION_FAILED")}！`,
+                content: `${intl.get("PLEASE_CHECK_YOUR_NETWORK")}！`,
+              })
             })
-          })
-        //onCreate(values);
+        }
+
       })
       .catch((info) => {
         console.log("Validate Failed:", info)
@@ -160,6 +174,7 @@ class Feedback extends React.Component {
     this.setState({ fileList })
   }
   dataFormat = (values) => {
+    // console.log(values, ")))))))))-")
     let arr = {}
     arr.category = this.props.category || "2"
     arr.userId = userId
@@ -171,9 +186,14 @@ class Feedback extends React.Component {
     this.state.fileList
         .filter((item) => item.status === "done")
         .forEach(function (item, i) {
-          arr.fileIdList.push(item.response.data)
+          if(arr.category === "11"){
+            arr.fileIdList.push(item.response.data[0])
+          }else{
+            arr.fileIdList.push(item.response.data)
+          }
         })
 
+    // console.log(arr, ")))))))))-")
     return arr
   }
 
@@ -238,7 +258,7 @@ class Feedback extends React.Component {
               >
                 <TextArea
                   showCount
-                  maxLength={200}
+                  // maxLength={1024}
                   placeholder={isShowLabel?"请输入需求描述": intl.get("SUGGESTION_TEXTAREA_PLACEHOLDER")}
                 />
               </Form.Item>
@@ -258,10 +278,10 @@ class Feedback extends React.Component {
                 <Upload
                   accept={category!=="11" &&'image/*'}
                   listType={"picture-card"}
-                  action="/0/api/v1/feedback/uploadfile"
+                  action={category!=="11"? "/0/api/v1/feedback/uploadfile" : `/0/api/v1/files?userId=${userId}&teamId=${teamId}`}
                   fileList={fileList}
                   onChange={this.handleChange}
-                  data={{ userId }}
+                  data={category!== "11"? { userId } : { path: `feedback_store`}}
                   onPreview={this.handlePreview}
                 >
                   {fileList.length >= 4 ? null : uploadButton}

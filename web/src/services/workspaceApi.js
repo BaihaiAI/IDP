@@ -107,6 +107,12 @@ function globalKeywordSearch(keyword) {
   )
 }
 
+function convertFile(options) {
+  const { path, outputType } = options
+  const url = `${noteApiPath2}/workspace/file/convertTo?projectId=${projectId}&path=${path}&outputType=${outputType}`
+  return request.get(url)
+}
+
 const workspaceApi = {
   lazyLoadDirBrowse,
   dirBrowseForPipeline,
@@ -118,6 +124,7 @@ const workspaceApi = {
   moveFileOrDir,
   copyFileOrDir,
   globalKeywordSearch,
+  convertFile,
 }
 
 export default workspaceApi

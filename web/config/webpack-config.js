@@ -1,5 +1,7 @@
 let path = require('path');
 let { getThemeVariables } = require("antd/dist/theme");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const rescriptsrc = require('../config/rescriptsrc');
 
 module.exports = {
     /**
@@ -83,7 +85,12 @@ module.exports = {
         if (reset) {
             optRules = options;
         } else {
-            optRules = { test: /\.css$/, use: useOpt ? useOpt : ['style-loader', 'css-loader'] }
+            optRules = { test: /\.css$/, use: useOpt ? useOpt : [{
+                loader: MiniCssExtractPlugin.loader,
+                options: {
+                    publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : `/child/idpStudio-idp`,
+                }
+            }, 'css-loader'] }
         };
         return optRules;
     },
@@ -95,8 +102,8 @@ module.exports = {
             optRules = {
                 test: /\.less$/,
                 exclude: /\.module\.less$/,
-                use: [
-                    'style-loader',
+                use: useOpt ? useOpt : [
+                    MiniCssExtractPlugin.loader,
                     'css-loader',
                     {
                         loader: "less-loader",

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react"
 import { Collapse, Layout, List } from "antd"
 import intl from "react-intl-universal"
-import { updateCellPropFocus } from "../../../../../store/features/notebookSlice"
+import {selectNotebookList, updateCellPropFocus} from "../../../../../store/features/notebookSlice"
 import { selectActivePath } from "../../../../../store/features/filesTabSlice"
 import { marked } from "marked"
 import { useDispatch, useSelector } from "react-redux"
@@ -19,6 +19,8 @@ function MarkdownOutLine(props) {
     const path = useSelector(selectActivePath)
     const cells = useActiveCells(path)
     const dispatch = useDispatch()
+    // 为了能够刷新组件 不能删
+    const notebookList = useSelector(selectNotebookList)
 
 
     /*markdown面板相关逻辑 start*/

@@ -1,25 +1,13 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
     return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const anser_1 = __importDefault(require("anser"));
@@ -121,13 +109,13 @@ function convertBundleIntoReact(linkify, useClasses, clickHandle, errorConfig, b
     // 处理错误跳转
     let result;
     let config = errorConfig;
-    const errorLineRegex = /(-+)?>\s(\d+)/g;
+    const errorLineRegex = /-+>\s(\d+)/g;
     const syntaxErrorFlagType = /invalid syntax.+line.(\d+)/g;
     /* start type: namedErrorFlag*/
     if ((result = errorLineRegex.exec(bundle.content)) !== null && config['errorCounter'] == 0) {
         config.namedErrorFlag = true;
         config.info.content = []; //reset
-        config.info.errorLine = result[2];
+        config.info.errorLine = result[1];
         config.info.content.push(React.createElement("span", { style, key, className }, bundle.content));
         return React.createElement('span');
     }

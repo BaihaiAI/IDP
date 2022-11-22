@@ -6,7 +6,6 @@ import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
 const { SubMenu } = Menu;
 
 export const viewMenus = () => {
-
     return (
         <SubMenu key="view" title={intl.get("MENU_VIEW")}>
             {ToolImpl.lineNumbers ? (

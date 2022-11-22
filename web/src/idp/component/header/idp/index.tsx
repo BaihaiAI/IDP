@@ -9,6 +9,7 @@ import { toJS } from "mobx";
 import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
 import HeaderGlobal, { HeaderGlobal as HeaderGlobalBean } from '@/idp/global/header';
 import globalData from "@/idp/global";
+import useHeaderIdp from '@/components/header/useHeaderIdp';
 
 const { SubMenu } = Menu
 const { useForm } = Form
@@ -16,6 +17,7 @@ const { useForm } = Form
 const HeaderMenu = () => {
 
     const [visible, setVisible] = useState(false);
+    const headerIdp = useHeaderIdp();
 
     const update = useUpdate();
 
@@ -143,7 +145,8 @@ const HeaderMenu = () => {
             >
                 {
                     toJS(ToolImpl.idpToolMap).filter(it => it.nodeKey === 'idps').map(it => {
-                        return it.items();
+                        const flg = headerIdp.includes(it.key);
+                        if (flg) return it.items()
                     })
                 }
             </Menu>
@@ -152,8 +155,20 @@ const HeaderMenu = () => {
 
     useEffect(() => { }, [ToolImpl.headerGlobal.historyOpenFiles]);
 
+    const goHome = (e) => {
+        if ( process.env.REACT_APP_VERSION === 'MODEL' ) {
+            const openMenuDIv = document.getElementsByClassName('ant-dropdown-open');
+            if ( openMenuDIv.length > 0 ) {
+                const flg = openMenuDIv[0].contains(e.target);
+                if (flg) {
+                    window.location.href = '/sharePlatform'
+                }
+            }
+        }
+    };
+
     return (
-        <div className={"header-container"}>
+        <div className={"header-container"} onClick={(e) => goHome(e)}>
             <Dropdown overlayClassName={"logo-dropdown"} overlay={logoOverlayMenu} arrow>
                 <div className={"logo-dropdown-content-wrapper"}>
                     <div className="logo" style={{ backgroundImage: `url(${require('@/assets/logo/logo.png').default})` }} />

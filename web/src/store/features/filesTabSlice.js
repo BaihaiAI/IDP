@@ -17,6 +17,7 @@ export const findFileListIndex = function (fileList, path) {
   return fileList.findIndex((item) => item.path === path)
 }
 
+// 
 export const selectTabList = (state) => state.filesTab.fileList
 export const selectActivePath = (state) => state.filesTab.activePath
 

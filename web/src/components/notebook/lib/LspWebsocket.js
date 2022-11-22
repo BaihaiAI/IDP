@@ -53,8 +53,10 @@ class LspWebsocket {
   }
 
   constructor() {
+    let projectId = getProjectId()
+    if (!projectId) return null
     if (!LspWebsocket.instance && region) {
-      let endpoint = `${lspWsUrl}${teamId}_${getProjectId()}`
+      let endpoint = `${lspWsUrl}${teamId}_${projectId}`
       this.wsRootPath = "/tmp/halo-lsp/"
       this.endpoint = endpoint
       this.inited = false

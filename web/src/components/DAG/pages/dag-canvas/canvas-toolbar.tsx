@@ -61,7 +61,7 @@ export const CanvasToolbar: React.FC<Props> = (props) => {
   const expGraph = useExperimentGraph(experimentId)
 
   const [expId, setExpId] = useState(
-    experimentId === "0" ? expGraph.experimentId : experimentId
+    experimentId.startsWith("0_") ? expGraph.experimentId : experimentId
   )
 
   const [activeNodeInstance] = useObservableState(
@@ -153,7 +153,7 @@ export const CanvasToolbar: React.FC<Props> = (props) => {
           break
 
         case Operations.SETTING: {
-          if (expId === "0") {
+          if (expId.startsWith("0_")) {
             message.warning("请您先构建并保存工作流！")
             return
           }
@@ -201,7 +201,7 @@ export const CanvasToolbar: React.FC<Props> = (props) => {
   )
 
   const onSwicth = (checked: boolean, event: Event) => {
-    if (expId === "0") {
+    if (expId.startsWith('0_')) {
       message.warning("请您先构建并保存工作流！")
       return
     }

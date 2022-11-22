@@ -41,9 +41,25 @@ module.exports = {
         rules: [
             webpackConfig.loadJsxOrTsxRules(),
             webpackConfig.loadJsRules(),
-            webpackConfig.loadCssRules(),
             webpackConfig.loadUrlRules(),
-            webpackConfig.loadLessRules(),
+            webpackConfig.loadCssRules(null, false, ['style-loader', 'css-loader']),
+            webpackConfig.loadLessRules(null, false, [
+                'style-loader',
+                'css-loader',
+                {
+                    loader: "less-loader",
+                    options: {
+                        lessOptions: {
+                            modifyVars: {
+                                ...getThemeVariables({
+                                    compact: false,
+                                }),
+                            },
+                            javascriptEnabled: true,
+                        },
+                    },
+                }
+            ]),
             webpackConfig.loadModuleLessRules()
         ]
     },

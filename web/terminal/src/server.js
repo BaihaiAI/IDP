@@ -40,7 +40,7 @@ function nodeEnvBind(req) {
     }
   })
   termMap.set(term.pid, term); 
-  const cmd = `cd ${homePath}/.idp/store/12345/projects/6789/notebooks\n clear\n`;
+  const cmd = `cd ${homePath}/.idp/store/1/projects/1/notebooks\n clear\n`;
   term.write(cmd);
   console.log(term);
   return term;

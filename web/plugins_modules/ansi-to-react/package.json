@@ -1,6 +1,6 @@
 {
   "name": "ansi-to-react",
-  "version": "6.1.14",
+  "version": "6.1.16",
   "description": "ANSI to React Elements",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -10,7 +10,9 @@
     "test": "jest",
     "semantic-release": "semantic-release"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "repository": "https://github.com/nteract/ansi-to-react",
   "keywords": [
     "ansi",

@@ -15,6 +15,7 @@ import {
 } from "../../../../store/features/notebookSlice"
 import { NotebookComponentContext } from "../../Notebook"
 import Pubsub from 'pubsub-js'
+import { contentApi } from "@/services"
 
 const RightTopBar = (props) => {
   const { path, cellId, index, stopCell, runCurrentCellAndAbove, runCurrentCellAndBelow,outputs } = props
@@ -113,6 +114,14 @@ const RightTopBar = (props) => {
       resetKernel()
     }
     // 当中断接口调用完成后 执行删除操作
+    // 删除cell之前保存下快照
+    await contentApi.snapshot({
+      path,
+      label: intl.get("SAVE_VERSION_AUTO"),
+    }).catch((error) => {
+      console.log(error)
+    })
+
     dispatch(contentDelCell({ path, index, cellId, bol })).then(() => {
       dispatch(delCell({ path, index }))
     })
