@@ -196,7 +196,7 @@ impl CacheService {
         }
 
         if !has_change {
-            tracing::info!("cell_id={cell_id} no change, skip update to redis");
+            tracing::debug!("cell_id={cell_id} no change, skip update to redis");
             return Ok(());
         }
 
