@@ -34,6 +34,7 @@ pub struct Cell {
     pub execution_time: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execution_count: Option<usize>,
+    /// min index must >= 1, if first cell_index=0 can't insert cell below because new index is (0+0)/2
     pub metadata: serde_json::Map<String, serde_json::Value>,
 }
 
@@ -47,8 +48,10 @@ impl Default for Cell {
         let cell_id = Uuid::new_v4().to_string();
         let mut metadata = serde_json::Map::new();
         metadata.insert("id".to_string(), serde_json::to_value(cell_id).unwrap());
-        metadata.insert("index".to_string(), serde_json::to_value(1.0).unwrap());
-        // set default cell metadata property index 1.0;
+        metadata.insert(
+            "index".to_string(),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.0).unwrap()),
+        );
         Cell {
             cell_type: CellType::Code,
             outputs: Vec::new(),

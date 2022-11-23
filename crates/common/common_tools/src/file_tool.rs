@@ -138,10 +138,9 @@ pub async fn read_notebook_from_disk(abs_path: &str) -> Result<Notebook, ErrorTr
     }
 
     // add index/cell_id to all cells before fs->redis
-    let cells = notebook
-        .cells
-        .into_iter()
-        .enumerate()
+    // first cell index can't be 0
+    let cells = (1usize..)
+        .zip(notebook.cells.into_iter())
         .map(|(index, mut cell)| {
             if cell.id() == None {
                 let cell_id = common_model::entity::cell::Uuid::new_v4();
