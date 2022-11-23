@@ -47,6 +47,8 @@ impl Default for Cell {
         let cell_id = Uuid::new_v4().to_string();
         let mut metadata = serde_json::Map::new();
         metadata.insert("id".to_string(), serde_json::to_value(cell_id).unwrap());
+        metadata.insert("index".to_string(), serde_json::to_value(1.0).unwrap());
+        // set default cell metadata property index 1.0;
         Cell {
             cell_type: CellType::Code,
             outputs: Vec::new(),
