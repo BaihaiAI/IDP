@@ -425,50 +425,55 @@ function FileTreeCollapse(props) {
           style={{ height: 310, overflow: "auto" }}
           dataSource={kernelData}
           rowKey={'notebookPath'}
-          renderItem={(item, i) => (
-            <List.Item actions={kernelAction(item, i)}>
-              <List.Item.Meta
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  const strList = item.notebookPath.split("/")
-                  const fileName = strList[strList.length - 1]
-                  const newItem = { ...item, fileName }
-                  props.clickNotebookState(newItem)
-                }}
-                title={
-                  <span>
+          renderItem={(item, i) => {
+            const fileArr = item.notebookPath.split("/")
+            const fileName = fileArr[fileArr.length-1]
+
+            return (
+              <List.Item actions={kernelAction(item, i)}>
+                <List.Item.Meta
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    const strList = item.notebookPath.split("/")
+                    const fileName = strList[strList.length - 1]
+                    const newItem = { ...item, fileName }
+                    props.clickNotebookState(newItem)
+                  }}
+                  title={
+                    <span>
                     <i
                       className={
                         item.state === "idle"
                           ? "kernel-idle"
                           : item.state === "pause"
-                          ? "kernel-pause"
-                          : "kernel-busy"
+                            ? "kernel-pause"
+                            : "kernel-busy"
                       }
                     >
                       {item.state === "idle"
                         ? intl.get("IDLE")
                         : item.state === "pause"
-                        ? intl.get("SUSPENDKERNEL")
-                        : intl.get("BUSY")}
+                          ? intl.get("SUSPENDKERNEL")
+                          : intl.get("BUSY")}
                     </i>
                     <Tooltip
                       placement={"topLeft"}
                       title={item.notebookPath}
                       mouseEnterDelay={0.5}
                     >
-                      <span>{item.notebookPath}</span>
+                      <span>{fileName}</span>
                     </Tooltip>
                   </span>
-                }
-              />
-            </List.Item>
-          )}
+                  }
+                />
+              </List.Item>
+            )
+          }}
         ></List>
       </Panel>
     </Collapse>

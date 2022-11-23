@@ -27,8 +27,8 @@ use crate::handler::kernel_list::KernelListItem;
 
 // const DOCKER_ALL_IN_ONE_PORT: u16 = 3003;
 const REGION: &str = "a";
-const TEAM_ID: u64 = 12345;
-const PROJECT_ID: u64 = 6789;
+const TEAM_ID: u64 = 1;
+const PROJECT_ID: u64 = 1;
 const PATH: &str = "/demo.ipynb";
 
 #[derive(serde::Deserialize, Debug)]
@@ -138,8 +138,8 @@ fn temp() {
         std::env::var("HOST").unwrap(),
         80,
         "r",
-        12345,
-        6789,
+        1,
+        1,
         "demo/contact_us.idpnb",
     )] {
         let url = format!(

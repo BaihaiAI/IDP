@@ -57,7 +57,7 @@ const Document = observer((props: { node: any }) => {
               const info = {
                 node: node,
               }
-              workspaceRef.onSelect(null, info)
+              workspaceRef.onSelect([id], info)
             }}>编辑</Button>
           </div>
         </div>

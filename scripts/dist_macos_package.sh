@@ -4,11 +4,13 @@ set -exu
 script_dir=$(dirname -- $(readlink -f -- "$0"))
 repo_root=$(dirname $script_dir)
 cd $repo_root
+source ./scripts/release_version.sh
 
 arch=${1:-arm64}
 #arch=x64
 
-dir=IDPStudio-macOS-$arch-v$(date +'%y%m%d-%H%M%S')
+#dir=IDPStudio-macOS-$arch-v$(date +'%y%m%d-%H%M%S')
+dir=idp-studio-$release_version-darwin-arm64
 mkdir -p $dir/{bin,lib}
 
 cp -r docker_build/store $dir/store
@@ -16,7 +18,7 @@ cp docker_build/init.sh $dir/
 cp docker_build/start.sh $dir/
 # NOTE must run on conda base env to get CONDA_PREFIX without envs
 for py_minor_version in 8 9 10; do
-    #cp $CONDA_PREFIX/envs/py3$py_minor_version/lib/libpython3.$py_minor_version.dylib $dir/store/12345/miniconda3/envs/python38/lib/
+    #cp $CONDA_PREFIX/envs/py3$py_minor_version/lib/libpython3.$py_minor_version.dylib $dir/store/1/miniconda3/envs/python38/lib/
     cp $CONDA_PREFIX/envs/py3$py_minor_version/lib/libpython3.$py_minor_version.dylib $dir/lib/
 done
 cargo b --bin idp

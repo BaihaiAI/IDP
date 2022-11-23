@@ -1,4 +1,4 @@
-import React,{Fragment} from 'react'
+import React,{Fragment, useEffect, useState} from 'react'
 import {CaretDownOutlined} from "@ant-design/icons"
 import {Tooltip, Tree, Spin } from "antd"
 import classNames from "classnames"
@@ -11,7 +11,7 @@ import {useHotkeys} from "react-hotkeys-hook"
 
 const { DirectoryTree } = Tree
 
-
+let clickFileNode = "";
 
 function FileTreeList(props) {
   const {
@@ -61,7 +61,7 @@ function FileTreeList(props) {
           <div style={{position: 'relative'}}>
             <Tooltip title={item.key} mouseEnterDelay={1.5} visible={ overkeys === item.key } onVisibleChange={()=>onVisibleChange(item.key, overkeys == item.key)} placement="topLeft" >
                     <span className={"title-container"}>
-                    <span className={classNames("filename" + item.key, item.fileType)}>
+                    <span id={`class_${item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')}`} className={classNames("filename" + item.key, item.fileType)}>
                         {showTitle}
                         <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} style={{ position: 'absolute', zIndex: 3, right: 0, opacity: 0 }}><Spin size="small" /></span>
                     </span>
@@ -197,6 +197,18 @@ function FileTreeList(props) {
   useHotkeys('ctrl+v',handlerStickFileKey)
   useHotkeys('ctrl+c',handlerCopyFileKey)
 
+  useEffect(() => {
+        document.addEventListener('click', (e) => {
+            const bellOutlinedIcon = document.getElementById(clickFileNode);
+            if ( bellOutlinedIcon ) {
+              const flg = bellOutlinedIcon.contains(e.target);
+              if (!flg) {
+                bellOutlinedIcon.style.color = `rgba(0, 0, 0, 0.85)`;
+              }
+            }
+        })
+  }, [])
+
   return (
     <Fragment >
       <DirectoryTree
@@ -212,6 +224,12 @@ function FileTreeList(props) {
         switcherIcon={<CaretDownOutlined />}
         //onDoubleClick={dbClick}
         onRightClick={({ event, node }) => {
+          const nodeids = `class_${node.key.replace(/\s*/g, "").replace(new RegExp("/", "g"), '_')}`;
+          const nodeidsDom = document.getElementById(nodeids);
+          if (nodeidsDom) {
+            nodeidsDom.style.color = '#3793EF';
+          }
+          clickFileNode = nodeids;
           handleContextMenu(event, node)
         }}
         draggable={fileTreeDragAble}

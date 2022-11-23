@@ -56,12 +56,21 @@ function updateAudit({
     })
 }
 
+// 判断是否还有未读信息
+function isThreeAnyUnread({}){
+    const url = `${prefix}/message/status`;
+    return request.get(url, {params:{
+        role: 10
+    }})
+    }
+
 const auditApi = {
     getAuditList,
     getAuditDetail,
     updateAudit,
     notificationList,
-    changeStatusOrDetele
+    changeStatusOrDetele,
+    isThreeAnyUnread
 }
 
 export default auditApi

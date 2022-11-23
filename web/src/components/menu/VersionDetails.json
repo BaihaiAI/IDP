@@ -1,6 +1,28 @@
 {
   "version":[
     {
+      "time": "2022-11-19",
+      "versionnum": "V 1.18.0",
+      "characteristic": [
+        "[项目]: 新增数据标注功能",
+        "[工作区]: 运行notebook增加保存上下文设置，关闭后的kernel再次启动后会恢复内存中的数据",
+        "[团队管理]: 新增资源管理和费用管理"
+      ],
+      "repair": [],
+      "functionadjustment": []
+    },
+    {
+      "time": "2022-11-07",
+      "versionnum": "V 1.17.0",
+      "characteristic": [
+        "[模型管理]: 新增共享中心",
+        "[计算引擎]: 使用Volcano进行任务调度",
+        "[团队管理]: 新增角色、权限管理"
+      ],
+      "repair": [],
+      "functionadjustment": []
+    },
+    {
       "time": "2022-09-01",
       "versionnum": "V 1.16.0",
       "characteristic": [

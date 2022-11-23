@@ -52,6 +52,7 @@ import terminalApi from '../../services/terminalApi'
 import userExtensionConfig from '../../../config/user-extension-config';
 import terminal from "@/idp/lib/terminal"
 import { observer } from "mobx-react"
+import fileManager from "@/idp/global/fileManager";
 
 const { DirectoryTree } = Tree
 
@@ -143,7 +144,7 @@ const FileTree = (props, ref) => {
   const [preExpandedKeys, setPreExpandedKeys] = useState([]) //为根目录折叠展开缓存数据
 
   const [menuState, setMenuState] = useState(
-    /CUT_COPY_FILE|CUT_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|EXPORT_IDPNB|EXPORT_IPYNB|EXPORT_HTML|EXPORT_PDF|EXPORT_PYTHON|TENSORBOARD|COMPRESSED_TO_ZIP|PUBLISH_MODEL|UNZIP/
+    /CUT_COPY_FILE|CUT_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|SAVE_AS|SAVE_AS_PY|EXPORT|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|EXPORT_IDPNB|EXPORT_IPYNB|EXPORT_HTML|EXPORT_PDF|EXPORT_PYTHON|COMPRESSED_TO_ZIP|UNZIP/
   )
   const [filePath, setFilePath] = useState("")
   const [relativePathData, setRelativePathData] = useState("")
@@ -232,7 +233,24 @@ const FileTree = (props, ref) => {
               </Item>
             )
           }
-
+          if (item.key.startsWith('SAVE_AS') && menuState.test(item.key)) {
+            return <Submenu
+              key={item.key}
+              label={intl.get('SAVE_AS')}
+              arrow={<i className={"ant-menu-submenu-arrow"} />}
+            >
+              {item.children.map((childrenItem) => {
+                return (
+                  <Item
+                    key={childrenItem.key}
+                    onClick={childrenItem.handler}
+                  >
+                    {childrenItem.name}
+                  </Item>
+                )
+              })}
+            </Submenu>
+          }
           if (item.key.startsWith("EXPORT") && menuState.test(item.key)) {
             const fileName = findFileOrDirName(filePath)
             return (fileName.includes(".ipynb") || fileName.includes(".idpnb")) ? (
@@ -394,12 +412,18 @@ const FileTree = (props, ref) => {
         // DOWNLOAD_FOLDER
       } else {
         if (node.isLeaf) {
-          setMenuState(
-            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|TENSORBOARD|COMPRESSED_TO_ZIP|PUBLISH_MODEL|UNZIP/
-          )
+          if (node.key.endsWith('.idpnb') || node.key.endsWith('.ipynb')) {
+            setMenuState(
+              /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|SAVE_AS|EXPORT|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|COMPRESSED_TO_ZIP/
+            )
+          } else {
+            setMenuState(
+              /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|EXPORT|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|COMPRESSED_TO_ZIP|UNZIP/
+            )
+          }
         } else {
           setMenuState(
-            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|TENSORBOARD|COMPRESSED_TO_ZIP|UNZIP/
+            /CUT_FILE|CUT_COPY_FILE|STICK|ADD_FOLDER|ADD_FILE|RENAME|DOWNLOAD|DELETE|COPY_RELATIVE_PATH|COPY_ABSOLUTE_PATH|COMPRESSED_TO_ZIP|UNZIP/
           )
         }
       }
@@ -505,20 +529,20 @@ const FileTree = (props, ref) => {
 
       let title =
         searchValue !== "" && index > -1 ? (
-          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
+          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/", "g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
             {beforeStr}
             <span className="file-tree-search-value">{searchValue}</span>
             {afterStr}
           </span>
         ) : isObject ? (
-          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
+          <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/", "g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
             {showTitle}
           </span>
         ) : (
           <div>
             <Tooltip title={item.key} mouseEnterDelay={1.5} visible={overkeys === item.key} onVisibleChange={() => onVisibleChange(item.key, overkeys == item.key)} placement="topLeft" >
               <span className={"title-container"}>
-                <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
+                <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/", "g"), '_')} className={classNames("filename" + item.key, item.fileType)}>
                   {showTitle}
                 </span>
                 {

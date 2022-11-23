@@ -3,14 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-     <link rel="icon" href=<%=htmlWebpackPlugin.options.faviconUrl %> />
+    <link rel="icon" href=<%=htmlWebpackPlugin.options.faviconUrl %> />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="IDP是面向算法工程师一站式人工智能开发平台，提供易用的集成开发环境，支持高速大规模分布式训练和故障自动恢复等功能，使人工智能开发更简单、高效。" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>IDP Studio</title>
-    <script src="/static/lib/lets-plot.min.js"></script>
-    <script src="/static/lib/plotly-2.14.0.min.js"></script>
     <link rel="stylesheet/less" type="text/css" href=<%=htmlWebpackPlugin.options.colorLinkUrl %> />
     <script>
         window.less = { async: false, env: 'production' }
@@ -18,11 +16,37 @@
     <script>
         if (typeof Promise !== "function") { document.write('<script src="//f.alicdn.com/es6-shim/0.35.1/??es6-shim.min.js,es6-sham.min.js"><\/script>') }
     </script>
+    <script>
+        function getCookie(name) {
+            let cookies = document.cookie;
+            let list = cookies.split("; ");     // 解析出名/值对列表
+            for (let i = 0; i < list.length; i++) {
+                let arr = list[i].split("=");   // 解析出名和值
+                if (arr[0] == name)
+                    return decodeURIComponent(arr[1]);   // 对cookie值解码
+            }
+            return "";
+        }
+
+        function redirectPath() {
+            var userId = getCookie('userId');
+            var idToken = getCookie('id_token');
+            if (!idToken || !userId) {
+                window.location.href = '/login'
+            }
+        }
+        // redirectPath();
+    </script>
+    <style>
+        #root {
+            will-change: opacity;
+        }
+    </style>
 </head>
 
 <body>
     <div id="loading-gif" style="text-align: center;width: 100%;">
-      <img src=<%=htmlWebpackPlugin.options.loadingGifUrl %> />
+        <img src=<%=htmlWebpackPlugin.options.loadingGifUrl %> />
     </div>
     <div id="root"></div>
 </body>

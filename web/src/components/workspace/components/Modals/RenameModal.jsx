@@ -40,7 +40,9 @@ function RenameModal(props) {
       <Input
         placeholder={intl.get("ADD_FILE_PLACEHOLDER")}
         value={renameValue}
-        onChange={(e) => setInputValue(e, "rename")}
+        onChange={(e) => {
+          setInputValue(e, "rename")
+        }}
         onPressEnter={submitRename}
         disabled={renameInputDisabled}
         onFocus={(event) => event.target.select()}

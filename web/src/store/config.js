@@ -21,5 +21,4 @@ export const setCurrentEnv = (env) => {
   currentEnv = env
 }
 
-// ['HOST','SAAS']
 export const projectVersion = process.env.REACT_APP_VERSION

@@ -5,6 +5,7 @@ import { Button } from "antd"
 import { contentAddCell } from "../../../../store/features/notebookSlice"
 import "./cellTools.less"
 import {NotebookComponentContext} from "../../Notebook"
+import { contentApi } from "@/services"
 
 const ToolAddCell = (props) => {
   const { responsive, onAddCell, path, index } = props
@@ -28,6 +29,13 @@ const ToolAddCell = (props) => {
 
   const addCell = (cellType) => {
     console.log(cellType, '----=======-------')
+    // 增加cell之前保存下快照
+    contentApi.snapshot({
+      path,
+      label: intl.get("SAVE_VERSION_AUTO"),
+    }).catch((error) => {
+      console.log(error)
+    })
     dispatch(contentAddCell({ path, index, cellType,cells }))
       .unwrap()
       .then((res) => {

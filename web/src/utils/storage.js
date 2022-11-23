@@ -220,7 +220,7 @@ export function hasModulePermission(moduleName) {
   return !!findResult
 }
 
-export function isOverPermissionFromRoleList(options={
+/*export function isOverPermissionFromRoleList(options={
   onOk:()=>{},
   onCancel:()=>{}
 }, roleId=5
@@ -235,4 +235,4 @@ export function isOverPermissionFromRoleList(options={
     }
   }
   return result
-}
+}*/

@@ -8,12 +8,12 @@
 
 ## What is IDP?
 
-IDP is an open source web IDE with strong support for Python & SQL language, contains code assistance, file and environment management at the same time.
-IDP is designed for data scientists, algorithm engineers and big data engineers to maximize working efficiency all through the AI development process.
-It is Written in Rust to exhibits excellent performance and security. 
+IDP is an open source AI IDE, natively supporting Python & SQL - the two most commonly used language in the field of AI and data science. 
+
+IDP is designed to make data scientists and algorithm engineers more productive. Also, with the kernel written in Rust, IDP exhibits excellent execution performance.
 
 ## Key Features
-IDP aims to help data scientists and algorithm engineers focus more on their own work,  algorithm development by taking care of all the engineering work, from environment and file management to plug-in development and configuration, etc..
+With the help of IDP, data scientists and algorithm engineers can focus more on their core work- algorithm development. IDP will take care of all the engineering work, from environment and file management to plug-in development and configuration, etc..
 
 The core features of IDP are as follows:
 * Mixed language support: deeply support Python, SQL and Markdown language in the same notebook.
@@ -41,6 +41,15 @@ Then open http://localhost:3000 with your browser.
 - [Windows x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-win-x64.tar.gz)
 - [macOS macOS](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-arm64.tar.gz)
 - [Linux x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
+
+For example start IDP with pre-built binary in Linux
+
+```
+wget http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz
+tar zxf idp-studio-v1.0.0-linux-x64.tar.gz
+cd idp-studio-v1.0.0-linux-x64
+./idp
+```
 
 ### Start with IDP on Cloud:
 Quickly check out IDP SaaS with <https://www.baihai.co/invitation.html>

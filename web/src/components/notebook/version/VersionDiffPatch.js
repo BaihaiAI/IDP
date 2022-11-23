@@ -422,8 +422,8 @@ function VersionDiffPatch(props){
                                   prop.data.data_source[0] || prop.data.df_name[0]? "cell-sql new-cell" : "cell-sql"
                                 )}
                               >
-                              <p className="p1">数据源: {prop.data.data_source[1]}</p>
-                              <p className="p2">变量名: {prop.data.df_name[1]}</p>
+                              <p className="p1">{intl.get('NOTEBOOK_SQL_DATASOURCE')} {prop.data.data_source[1]}</p>
+                              <p className="p2">{intl.get('NOTEBOOK_SQL_VARIABLE')} {prop.data.df_name[1]}</p>
                             </div>
                             {prop.data.lines?.map((row, i) => (
                               <div className='cell-row' key={i}>
@@ -514,8 +514,8 @@ function VersionDiffPatch(props){
                                 prop.data.data_source[0] || prop.data.df_name[0]? "cell-sql new-cell" : "cell-sql"
                               )}
                             >
-                            <p className="p1">数据源: {prop.data.data_source[1]}</p>
-                            <p className="p2">变量名: {prop.data.df_name[1]}</p>
+                            <p className="p1">{intl.get('NOTEBOOK_SQL_DATASOURCE')} {prop.data.data_source[1]}</p>
+                            <p className="p2">{intl.get('NOTEBOOK_SQL_VARIABLE')} {prop.data.df_name[1]}</p>
                           </div>
                           {prop.data.lines?.map((row, i) => (
                             <div className='cell-row' key={i}>
@@ -570,7 +570,7 @@ function VersionDiffPatch(props){
         title={<div onClick={() =>{
           setShowVersionDrawer(false)
         }}>
-          <span>{'←'}&nbsp;&nbsp;&nbsp;&nbsp;</span>修订历史快照
+          <span>{'←'}&nbsp;&nbsp;&nbsp;&nbsp;</span>{intl.get('SNAPSHOT_REVISION')}
         </div>}
         visible={showVersionDrawer}
         className="VersionDiffPatch"
@@ -587,7 +587,7 @@ function VersionDiffPatch(props){
                     if(hideUnchanged)setHideUnchanged(0);
                     else setHideUnchanged(1);
                   }}
-                >隐藏未变更的内容</Radio>
+                >{intl.get('SNAPSHOT_HIDE_CONTENT')}</Radio>
               </Radio.Group>
             </div>
             <div className='diff-cells'>
@@ -599,7 +599,7 @@ function VersionDiffPatch(props){
           <div className='diff-patch no-diff'>
             <div>
               <img src={emptdiff} />
-              <p>没有可以对比的快照</p>
+                <p>{intl.get('SNAPSHOT_NO')}</p>
             </div>
           </div>
         )}

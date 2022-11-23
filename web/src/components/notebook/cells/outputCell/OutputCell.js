@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import intl from 'react-intl-universal';
 import Ansi from "ansi-to-react";
@@ -14,26 +14,22 @@ import { kernelWsSend } from '../../lib/kernelWs';
 
 const OutputCell = (props) => {
     const { path, cellId, cellProp,sendInputRequest } = props;
-
     const [visible, setVisible] = useState(!ToolImpl.collapseAllOutput);
 
     const [outputs, setOutputs] = useState(props.outputs);
-    const activePath = useSelector(selectActivePath);
+    // const activePath = useSelector(selectActivePath);
 
     useEffect(() => {
-        if (activePath === path) {
-            const notebookList = store.getState().notebook.notebookList
-            for (const notebook of notebookList) {
-                for (const cell of notebook.cells) {
-                    if (cell.metadata.id === cellId) {
-                        setOutputs(cell.outputs)
-                    }
-                }
-            }
-        } else {
-            setOutputs(props.outputs)
+      const notebookList = store.getState().notebook.notebookList
+      for (const notebook of notebookList) {
+        if (notebook.path !== path) continue
+        for (const cell of notebook.cells) {
+          if (cell.metadata.id === cellId) {
+            setOutputs(cell.outputs)
+          }
         }
-    }, [activePath, props.outputs])
+      }
+    }, [props.outputs])
 
     useEffect(() => {
         setVisible(!ToolImpl.collapseAllOutput);
@@ -371,4 +367,4 @@ const OutputCell = (props) => {
     );
 }
 
-export default observer(OutputCell);
+export default memo(OutputCell);

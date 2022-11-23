@@ -120,7 +120,7 @@ export const ScriptView: React.FC<Props> = observer(({ path, visible, onClose, e
             node: node,
           }
           handleClose()
-          workspaceRef.onSelect(null, info)
+          workspaceRef.onSelect([path], info)
         }}>编辑<EditOutlined /></a>
       </Space>
     )

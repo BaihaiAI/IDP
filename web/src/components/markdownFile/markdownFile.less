@@ -1,27 +1,39 @@
-.mdfile{
+.mdfile {
   overflow: auto;
-  .md-editor-content{
+
+  .md-editor-content {
     display: flex;
     justify-content: space-between;
-    .CodeMirror-scroll{
+
+    .CodeMirror-scroll {
       margin-right: -15px;
     }
   }
+
   .md-editor-toolbar {
     position: sticky;
     left: 0;
     top: 0;
     border-radius: 0;
     padding: 4px 2px 4px 5px;
+
     &:hover {
       background-color: #DFE5EA;
       border: 1px solid #DBDFE2;
     }
   }
-  .md-editor-toolbar-mode{
+
+  .md-editor-toolbar-mode {
     z-index: 101;
   }
-  .md-editor-toolbar-mode button:nth-child(2){
+
+  .md-editor-toolbar-mode button:nth-child(2) {
     display: none;
+  }
+}
+
+#wrokspace_file_md {
+  .md-editor-content-editor {
+    padding-top: 0px !important;
   }
 }

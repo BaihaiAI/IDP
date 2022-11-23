@@ -80,12 +80,12 @@ pub async fn get_package_map(project_info_map: ProjectInfoMap, saas_flag: bool) 
         let path = format!("{dir}/store",);
         let mut team_id_vec = get_env_path(&path);
         match saas_flag {
-            true => team_id_vec.retain(|id| id.len() == 19),
-            false => team_id_vec.retain(|id| id.as_str() == "12345"),
+            true => team_id_vec.retain(|id| id.len() == i64::MAX.to_string().len()),
+            false => team_id_vec.retain(|id| id.as_str() == "1"),
         }
         tracing::debug!("team_id_vec:{:#?}", team_id_vec);
 
-        'a: for team_id in team_id_vec {
+        'outer: for team_id in team_id_vec {
             let project_path = format!("{dir}/store/{team_id}/projects");
             let project_id_vec = get_env_path(&project_path);
             tracing::debug!("project_id_vec:{:#?}", project_id_vec);
@@ -115,7 +115,7 @@ pub async fn get_package_map(project_info_map: ProjectInfoMap, saas_flag: bool) 
                     Ok(some) => some,
                     Err(err) => {
                         tracing::error!("{:#?}", err);
-                        break 'a;
+                        break 'outer;
                     }
                 };
                 for pip_list in pip_list_vec {

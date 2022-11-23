@@ -7,7 +7,7 @@ import {
   contentUpdateCellSource,
   updateCellMetadata,
 } from "../../../../store/features/notebookSlice"
-import { useSetState, useUpdateEffect } from "ahooks"
+import {useDeepCompareEffect, useSetState} from "ahooks"
 import { VisualizationCellContext } from "./VisualizationCell"
 import variableManagerApi from "../../../../services/variableManagerApi"
 import { projectId } from "../../../../store/cookie"
@@ -63,15 +63,18 @@ const  VisualizationContent = (props) => {
     runCell(cellId)
   }, [showTableTab])*/
 
-  useUpdateEffect(() => {
-    if (metadata.df_name) {
-      runCell(cellId)
-      // 当runCell时 保存对应的数据
-      dispatch(contentUpdateCellSource({ path, cellId }))
+  useDeepCompareEffect(() => {
+    if(countRef.current>0){
+      if (metadata.df_name) {
+        runCell(cellId)
+        // 当runCell时 保存对应的数据
+        dispatch(contentUpdateCellSource({ path, cellId }))
+      }
     }
+    countRef.current++
   }, [
-    metadata.df_name,
-    metadata.chart,
+    // metadata.df_name,
+    // metadata.chart,
     metadata.show_table
   ])
 
@@ -168,7 +171,7 @@ const  VisualizationContent = (props) => {
       defaultFormObj.facet_col = ""
       defaultFormObj.facet_row = ""
       defaultFormObj.text = ""
-      
+
     }
 
     dataFrameRef.current.setFormValue({
@@ -243,7 +246,7 @@ const  VisualizationContent = (props) => {
               getPopupContainer={()=>selectParentRef.current}
               value={metaDataInfo.df_name}
               onSelect={dataFrameNameChange}
-              allowClear
+              // allowClear
               style={{ minWidth: "100px" }}
               bordered={false}
             >

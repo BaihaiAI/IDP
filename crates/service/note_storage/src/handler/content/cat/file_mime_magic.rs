@@ -50,7 +50,8 @@ if __name__ == "__main__":
 */
 pub fn get_mime_type<P: AsRef<Path>>(path: P) -> Result<String, ErrorTrace> {
     let path = path.as_ref();
-    let meta = std::fs::metadata(path)?;
+    let meta =
+        std::fs::metadata(path).map_err(|err| ErrorTrace::new(&format!("{path:?} {err}")))?;
     if meta.is_dir() {
         let err = format!("path: {:?} is dir, not a file", &path);
         error!("{err}");

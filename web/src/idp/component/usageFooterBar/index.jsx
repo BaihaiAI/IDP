@@ -51,7 +51,7 @@ function UsageFooterBar() {
     return (
         <div>
             CPU: <span id="footerbar-cpu">{cpuUsage}%</span>
-            GPU: <span id="footerbar-gpu">{gpuUsage}%</span>
+            GPU显存: <span id="footerbar-gpu">{gpuUsage}%</span>
             Mem: <span id="footerbar-mem">{memoryUsage}%</span>
             Storage: <span id="footerbar-storage">{storageUsage}%</span>
         </div>

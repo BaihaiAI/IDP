@@ -57,7 +57,7 @@ function ZipView(props) {
             if (reuslt.code == '21000000') {
                 openNotification('open', <span>解压ZIP文件完成，请到文件管理器{<span style={{ color: '#3793EF' }}>重新刷新</span>}查看</span>, 5);
             } else {
-                openNotification('error', `解压ZIP文件失败，错误信息：${reuslt.message}`);
+                openNotification('error', `解压ZIP文件失败`);
             }
         } catch (error) {
             openNotification('error', `解压ZIP文件失败，错误信息：${error}`);

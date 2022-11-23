@@ -70,10 +70,10 @@ pub async fn put_cell(
 fn test_put_cell() {
     let large_payload = "1".repeat(3 * 1024 * 1024);
     let rsp = reqwest::blocking::Client::new()
-        .put("http://127.0.0.1:8082/api/v2/idp-note-rs/content/cell?teamId=12345")
+        .put("http://127.0.0.1:8082/api/v2/idp-note-rs/content/cell?teamId=1")
         .json(&PartialUpdateCellReq {
             path: large_payload,
-            project_id: 6789,
+            project_id: 1,
             cells: Vec::new(),
         })
         .send()

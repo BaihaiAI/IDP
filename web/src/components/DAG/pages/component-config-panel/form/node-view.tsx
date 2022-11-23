@@ -57,7 +57,9 @@ export const NodeView: React.FC<Props> = ({
   const [loading, setLoading] = useState(true);
   const [scriptVisible, setScriptVisible] = useState(false)
   const [scriptContent, setScriptContent] = useState('')
-  const showScript = (path: string) => {
+  const [scriptTitle, setScriptTitle] = useState('脚本内容')
+  const showScript = (path: string, title?: string) => {
+    title && setScriptTitle(title)
     setScriptVisible(true);
     setLoading(true)
     const options = {
@@ -140,10 +142,10 @@ export const NodeView: React.FC<Props> = ({
       path: nodeStatus.defName
     }
     pipelineApi.taskLog(options).then((res: any) => {
-      const { content, total_line} = res.data
+      const { content, totalLine} = res.data
       setLoading(false)
       setLogContent([...logContent, ...content.split('\n')]);
-      if ((logStart + limit) > total_line) {
+      if ((logStart + limit) > totalLine) {
         setLogIsOver(true)
       }
       setLogStart(logStart + limit)
@@ -160,7 +162,7 @@ export const NodeView: React.FC<Props> = ({
         <Button
           style={{ padding: 0 }}
           type="link"
-          onClick={() => showScript(value)}
+          onClick={() => showScript(value, '脚本内容')}
         >{value.length > 30
           ? (<Tooltip title={value}>{value.slice(0, 30) + '...'}</Tooltip>)
           : value}
@@ -171,9 +173,14 @@ export const NodeView: React.FC<Props> = ({
       return (
         <div>
           <span>{value}</span>
-          {
+          {/* {
             suffix !== '.ipynb' && suffix !== '.idpnb' ?
               <Button type="link" style={{ fontSize: '12px' }} onClick={getLog}>更多日志...</Button> : null
+          } */}
+          {
+            <Button type="link" style={{ fontSize: '12px' }} onClick={
+              suffix !== '.ipynb' && suffix !== '.idpnb' ? getLog : () => showScript(nodeStatus.defName, '任务日志')
+            }>更多日志...</Button>
           }
         </div>
       )
@@ -204,7 +211,7 @@ export const NodeView: React.FC<Props> = ({
         })}
       </List>
       <Drawer
-        title="脚本内容"
+        title={scriptTitle}
         placement="right"
         visible={scriptVisible}
         maskClosable={false}

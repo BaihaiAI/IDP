@@ -22,6 +22,6 @@ export const toolMenus = () => {
 }
 
 IdpTools.registerIdpTool("idps", {
-    key: "idps_tools",
+    key: "idps_tool",
     items: toolMenus
 })
