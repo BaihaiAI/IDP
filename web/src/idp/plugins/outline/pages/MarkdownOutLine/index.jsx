@@ -54,7 +54,8 @@ function MarkdownOutLine(props) {
             const level = titleText[2] * 1
 
             const sliceText = titleText.slice(titleText.indexOf('id="') + 4)
-            const showText = sliceText.slice(0, sliceText.indexOf('"'))
+            const str1 = sliceText.slice(sliceText.indexOf('"')+1)
+            const showText = str1.slice(str1.indexOf(">")+1)
             if (showText.length) {
                 return {
                     level,

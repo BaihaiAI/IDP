@@ -105,7 +105,7 @@ class App extends React.Component {
       intlInit: false,
       theme: "dark-theme",
       isHealth: false,
-      initTips: this.showInitTips ? "正在为您配置计算资源..." : "",
+      initTips: this.showInitTips ? intl.get('LOADING_COMPUTING') : "",
       cover: 'none'
     }
     // 根据累加次数切换初始化信息
@@ -428,9 +428,9 @@ class App extends React.Component {
           })
         this.healthCheckCount += 1
         if (this.healthCheckCount > 30) {
-          this.showInitTips && this.setState({ initTips: "正在为您初始化环境..." })
+          this.showInitTips && this.setState({ initTips: intl.get('LOADING_ENV') })
         } else if (this.healthCheckCount > 15) {
-          this.showInitTips && this.setState({ initTips: "正在为您配置硬盘存储资源..." })
+          this.showInitTips && this.setState({ initTips: intl.get('LOADING_STORAGE') })
         }
       }
     }, 2000)

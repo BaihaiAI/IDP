@@ -475,5 +475,8 @@
   "RESOURCEBAR_CORE": "核",
   "RESOURCEBAR_MEMORY": "内存",
   "RESOURCEBAR_PRIORITY": "优先级",
-  "RESOURCEBAR_CHECKPOINT": "自动保存上下文"
+  "RESOURCEBAR_CHECKPOINT": "自动保存上下文",
+  "LOADING_COMPUTING": "正在为您配置计算资源...",
+  "LOADING_ENV": "正在为您初始化环境...",
+  "LOADING_STORAGE": "正在为您配置硬盘存储资源..."
 }

@@ -475,5 +475,8 @@
   "RESOURCEBAR_CORE": "Core",
   "RESOURCEBAR_MEMORY": "Memory",
   "RESOURCEBAR_PRIORITY": "Priority",
-  "RESOURCEBAR_CHECKPOINT": "Auto checkpoint"
+  "RESOURCEBAR_CHECKPOINT": "Auto checkpoint",
+  "LOADING_COMPUTING": "Configuring computing resources for you...",
+  "LOADING_ENV": "Initializing environment for you...",
+  "LOADING_STORAGE": "Configuring hard disk storage resources for you..."
 }
