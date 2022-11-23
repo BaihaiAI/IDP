@@ -99,6 +99,7 @@
   "PACKAGE_RECOMMEND": "Recommend",
   "PACKAGE_UNINSTALL": "Uninstall",
   "PACKAGE_UNINSTALL_FAILED": "Package uninstall failed!",
+  "PACKAGE_UPGRADE": "Upgrade",
   "CODE": "Python",
   "TEXT": "Text",
   "EXECUTION_TIME": "Execution time",

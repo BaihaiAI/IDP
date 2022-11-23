@@ -99,6 +99,7 @@
   "PACKAGE_RECOMMEND": "推荐",
   "PACKAGE_UNINSTALL": "卸载",
   "PACKAGE_UNINSTALL_FAILED": "卸载失败！",
+  "PACKAGE_UPGRADE": "升级",
   "CODE": "Python",
   "TEXT": "文本",
   "EXECUTION_TIME": "执行时长",
