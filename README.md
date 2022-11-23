@@ -43,7 +43,7 @@ Then open http://localhost:3000 with your browser.
 - [macOS x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-x64.tar.gz)
 - [Linux x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
 
-For example start IDP with pre-built binary in Linux
+For example start IDP with pre-built binary in Linux, require Python 3.7 and up (CPython and PyPy)
 
 ```
 wget http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz
