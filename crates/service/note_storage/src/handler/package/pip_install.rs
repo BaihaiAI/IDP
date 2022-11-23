@@ -52,41 +52,11 @@ pub async fn pip_install(
     let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
     let py_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
 
-    let install_dir = match business::pip_install::ensure_python2user_install_dir_exist(&py_path) {
-        Ok(install_dir) => install_dir,
-        Err(err) => {
-            tracing::error!("{err}");
-            // FIXME should return stream::once but got type error
-            "/usr/lib".to_string()
-            /*
-            return     StreamBody::new(futures::stream::unfold(
-                false,
-                |mut is_eof| async move {
-                    if is_eof {
-                        return None;
-                    }
-                    let rsp =
-                        serde_json::to_string(
-                            &Rsp::success(())
-                                .message(&err)
-                                .code(CODE_FAIL),
-                        )
-                        .unwrap();
-                    Some((Ok(rsp), true))
-                },
-            ));
-            */
-        }
-    };
-    if let Err(err) = business::pip_install::ensure_pth_file_exist(&py_path, &install_dir) {
-        tracing::error!("{err}");
-    }
-
     let mut cmd = tokio::process::Command::new(py_path);
     cmd.arg("-m").arg("pip").arg("install");
-    if business::kubernetes::is_k8s() {
-        cmd.arg("-U").arg("--target").arg(install_dir);
-    }
+    // if business::kubernetes::is_k8s() {
+    //     cmd.arg("-U").arg("--target").arg(install_dir);
+    // }
     cmd.arg(format!("{}=={}", package_name, version));
     tracing::info!("cmd = {cmd:?}");
     let (tx, rx) = tokio::sync::mpsc::channel(2);

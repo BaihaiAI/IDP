@@ -16,6 +16,7 @@
 pub mod business_term;
 pub mod kubernetes;
 pub mod path_tool;
+#[cfg(not)]
 #[cfg(feature = "pip_install")]
 pub mod pip_install;
 pub mod region;
