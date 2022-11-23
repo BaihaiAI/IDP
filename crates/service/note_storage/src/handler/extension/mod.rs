@@ -50,11 +50,10 @@ pub async fn get_extensions_config<P: AsRef<Path>>(
     };
 
     match serde_json::from_str::<Vec<ExtensionResp>>(&jdata) {
-        Ok(content) => {
-            let mut content = content
-                .into_iter()
-                .filter(|x| x.is_visible())
-                .collect::<Vec<ExtensionResp>>();
+        Ok(mut content) => {
+            for x in content.iter_mut() {
+                x.visible = Some(x.is_visible())
+            }
             content.sort();
             Ok(content)
         }

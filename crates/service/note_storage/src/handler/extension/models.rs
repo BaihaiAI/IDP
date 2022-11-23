@@ -69,6 +69,7 @@ pub struct ExtensionResp {
     pub icon: Option<String>,
     pub title: Option<String>,
     pub r#type: Option<String>,
+    pub visible: Option<bool>,
 }
 
 impl PartialEq for ExtensionResp {
@@ -116,6 +117,7 @@ pub struct InstalledExtensionResp {
     pub icon: Option<String>,
     pub title: Option<String>,
     pub r#type: Option<String>,
+    pub visible: Option<bool>,
 }
 
 impl PartialEq for InstalledExtensionResp {

@@ -61,9 +61,7 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
         .iter_mut()
         .filter(|content| INIT_EXTENSION.contains(content.name.as_str()))
     {
-        let extension_path = recommended_extensions_path
-            .join(&content.name)
-            .join(&content.version);
+        let extension_path = recommended_extensions_path.join(&content.name);
         common_tools::command_tools::copy(
             extension_path.to_str().unwrap(),
             &installed_extensions_path,
