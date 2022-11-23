@@ -10,7 +10,7 @@ default = ["tcp"]
 tcp = ["dep:reqwest", "kernel_common/tcp"]
 
 [dependencies]
-business = { path = "../../common/business", features = ["pip_install"] }
+business = { path = "../../common/business" }
 common_model = { path = "../../common/model", default-features = false }
 err = { path = "../../common/err", default-features = false }
 kernel_common = { path = "../../common/kernel_common", default-features = false }
