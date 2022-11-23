@@ -44,7 +44,7 @@ pub async fn datasource_new(
             // need to wait some time, otherwise the backend will not create the database file successfully
             // sleep(std::time::Duration::from_secs(1)).await;
 
-            // wait db_file create success,after that shutdown backend(need set timeout 3 sceonds)
+            // wait db_file create success,after that shutdown backend(need set timeout 3 seconds)
             let full_path = std::path::Path::new(&db_file_fullpath);
             let mut count = 0;
             loop {
