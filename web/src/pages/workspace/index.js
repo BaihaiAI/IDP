@@ -12,14 +12,13 @@ import { selectActivePath } from '@/store/features/filesTabSlice';
 import { useSelector } from "react-redux";
 import intl from "react-intl-universal";
 
-const iconTextArrays = {
-  0: intl.get('TERMINAL_CLOSE'),
-  1: intl.get('TERMINAL_OPEN'),
-  2: intl.get('TERMINAL_MAXIMIZE')
-}
-
 function Workspace(props) {
-
+  const iconTextArrays = {
+    0: intl.get('TERMINAL_CLOSE'),
+    1: intl.get('TERMINAL_OPEN'),
+    2: intl.get('TERMINAL_MAXIMIZE')
+  }
+  
     const { notebookTabRef } = globalData.appComponentData;
     const path = useSelector(selectActivePath);
     const openPathFile = Terminal.openFilePath;
