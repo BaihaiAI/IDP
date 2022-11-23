@@ -25,7 +25,7 @@ mod spawn_all_services;
 const BAIHAI_AID_FILENAME: &str = "baihai_aid-2.0-py3-none-any.whl";
 const BAIHAI_AID: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
-    "/../../../docker_build/store/1/projects/1/notebooks/baihai_aid-2.0-py3-none-any.whl"
+    "/../../../docker_build/baihai_aid-2.0-py3-none-any.whl"
 ));
 
 #[tokio::main]

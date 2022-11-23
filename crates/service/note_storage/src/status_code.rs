@@ -50,3 +50,9 @@ pub const PROJECT_NOT_FOUND_FAIL_MSG: &str = "project not found";
 
 pub const UPLOAD_MODEL_ERROR_CODE: u32 = 41_000_100;
 pub const UPLOAD_MODEL_ERROR_MSG: &str = "upload model file failed.";
+
+pub const HPOPT_CREATE_DB_EXISTS_CODE: u32 = 131500;
+pub const HPOPT_CREATE_DB_EXISTS_MSG: &str = "db file name already exist";
+
+pub const HPOPT_CREATE_DB_TIMEOUT_CODE: u32 = 131501;
+pub const HPOPT_CREATE_DB_TIMEOUT_MSG: &str = "db file create timeout";
