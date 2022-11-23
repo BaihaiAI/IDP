@@ -10,33 +10,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>IDP Studio</title>
     <link rel="stylesheet/less" type="text/css" href=<%=htmlWebpackPlugin.options.colorLinkUrl %> />
-    <script>
-        window.less = { async: false, env: 'production' }
-    </script>
-    <script>
-        if (typeof Promise !== "function") { document.write('<script src="//f.alicdn.com/es6-shim/0.35.1/??es6-shim.min.js,es6-sham.min.js"><\/script>') }
-    </script>
-    <script>
-        function getCookie(name) {
-            let cookies = document.cookie;
-            let list = cookies.split("; ");     // 解析出名/值对列表
-            for (let i = 0; i < list.length; i++) {
-                let arr = list[i].split("=");   // 解析出名和值
-                if (arr[0] == name)
-                    return decodeURIComponent(arr[1]);   // 对cookie值解码
-            }
-            return "";
-        }
-
-        function redirectPath() {
-            var userId = getCookie('userId');
-            var idToken = getCookie('id_token');
-            if (!idToken || !userId) {
-                window.location.href = '/login'
-            }
-        }
-        redirectPath();
-    </script>
     <style>
         #root {
             will-change: opacity;

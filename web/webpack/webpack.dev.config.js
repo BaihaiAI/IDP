@@ -14,7 +14,8 @@ const devConfig = {
                 colorLinkUrl: `//localhost:${rescriptsrc.devServer().port}/static/color.less`,
                 loadingGifUrl: `//localhost:${rescriptsrc.devServer().port}/static/loading.gif`,
             },
-            env: process.env.NODE_ENV
+            env: process.env.NODE_ENV,
+            template: 'open.ejs'
         }),
         new MiniCssExtractPlugin(),
         new webpack.HotModuleReplacementPlugin()

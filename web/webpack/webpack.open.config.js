@@ -34,7 +34,8 @@ const proConfig = {
             env: process.env.NODE_ENV,
             options: {
                 colorLinkUrl: `./static/color.less`,
-            }
+            },
+            template: 'open.ejs'
         })
     ]
 };

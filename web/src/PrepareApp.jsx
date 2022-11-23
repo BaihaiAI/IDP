@@ -61,9 +61,9 @@ const locales = {
 }
 
 const defaultOpenFile = {
-  path: "/玩转IDP/快速上手/helloworld.ipynb",
-  name: "helloworld.ipynb",
-  suffix: "ipynb",
+  path: "/baihai.idpnb",
+  name: "baihai.idpnb",
+  suffix: "idpnb",
 }
 
 const setDefaultLang = ()=>{

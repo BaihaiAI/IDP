@@ -2070,15 +2070,15 @@ class WorkspaceLeft extends React.Component {
           key: "COPY_ABSOLUTE_PATH",
           name: intl.get("COPY_ABSOLUTE_PATH"),
         },
-        { key: "SEPARATOR_4" },
-        {
-          key: "TENSORBOARD",
-          name: intl.get("TENSORBOARD"),
-          handler: ({ event, props }) => {
-            const tensor = props.info.isLeaf ? props.info.key.slice(0, props.info.key.lastIndexOf('/')) : props.info.key
-            this.props.history.push(`/tensorboard?projectId=${projectId}&tensor=${tensor}`)
-          },
-        },
+        // { key: "SEPARATOR_4" },
+        // {
+        //   key: "TENSORBOARD",
+        //   name: intl.get("TENSORBOARD"),
+        //   handler: ({ event, props }) => {
+        //     const tensor = props.info.isLeaf ? props.info.key.slice(0, props.info.key.lastIndexOf('/')) : props.info.key
+        //     this.props.history.push(`/tensorboard?projectId=${projectId}&tensor=${tensor}`)
+        //   },
+        // },
         { key: "SEPARATOR_5" },
         { key: "UNZIP", name: '解压ZIP', handler: this.unZipFolder },
         {
@@ -2107,57 +2107,57 @@ class WorkspaceLeft extends React.Component {
               })
           }
         },
-        { key: "SEPARATOR_6" },
-        {
-          key: "CREATE_MODEL",
-          name: '创建并发布模型',
-          handler: async (e) => {
-            // console.log(e, "--------e-------")
-            const { key, name, isLeaf } = e.props.info;
-            if(isLeaf && name.substring(name.length-3) !== "zip"){
-              message.warning("只有zip压缩包可以创建并发布模型")
-              return
-            }
-            // this.setState({
-            //   cover: 'block'
-            // })
-            let packageName
-            // 获取当前notebook环境
-            let currentEnv = null;
-            await environmentAPI.getEnvironmentName()
-              .then(res => {
-                const data = res.data
-                currentEnv = data
-              })
-              .catch(err => {
-                console.log(err)
-              })
+        // { key: "SEPARATOR_6" },
+        // {
+        //   key: "CREATE_MODEL",
+        //   name: '创建并发布模型',
+        //   handler: async (e) => {
+        //     // console.log(e, "--------e-------")
+        //     const { key, name, isLeaf } = e.props.info;
+        //     if(isLeaf && name.substring(name.length-3) !== "zip"){
+        //       message.warning("只有zip压缩包可以创建并发布模型")
+        //       return
+        //     }
+        //     // this.setState({
+        //     //   cover: 'block'
+        //     // })
+        //     let packageName
+        //     // 获取当前notebook环境
+        //     let currentEnv = null;
+        //     await environmentAPI.getEnvironmentName()
+        //       .then(res => {
+        //         const data = res.data
+        //         currentEnv = data
+        //       })
+        //       .catch(err => {
+        //         console.log(err)
+        //       })
 
-            const modelFileName = isLeaf ? key : `${key}/`
-            const modelEnv = isLeaf ? null : `IDP:${currentEnv}`
-            if(isLeaf){
-              packageName = await createOrAddAModelOrVersionApi.getSuccessString({path:key}).then(res => res.data.packageName)
-            }
+        //     const modelFileName = isLeaf ? key : `${key}/`
+        //     const modelEnv = isLeaf ? null : `IDP:${currentEnv}`
+        //     if(isLeaf){
+        //       packageName = await createOrAddAModelOrVersionApi.getSuccessString({path:key}).then(res => res.data.packageName)
+        //     }
 
-            let category = null
-            await createOrAddAModelOrVersionApi.getCategory({})
-              .then(res => {
-                const { data } = res;
-                category = data
-              })
+        //     let category = null
+        //     await createOrAddAModelOrVersionApi.getCategory({})
+        //       .then(res => {
+        //         const { data } = res;
+        //         category = data
+        //       })
 
-            this.setState({
-              modelFile: {
-                string: packageName? packageName : modelFileName,
-                name: modelFileName,
-                category: category
-              },
-              modelEnv: modelEnv
-            })
+        //     this.setState({
+        //       modelFile: {
+        //         string: packageName? packageName : modelFileName,
+        //         name: modelFileName,
+        //         category: category
+        //       },
+        //       modelEnv: modelEnv
+        //     })
 
-            this.changeCreateModelVisible(true)
-          }
-        }
+        //     this.changeCreateModelVisible(true)
+        //   }
+        // }
       ],
     }
   }
