@@ -3,6 +3,7 @@ import { notification, Tree, Spin } from "antd";
 import warenhouseApi from '@/services/warenhouseApi';
 import './zipview.less'
 import { observer } from "mobx-react";
+import intl from "react-intl-universal";
 
 const { DirectoryTree } = Tree;
 
@@ -55,18 +56,18 @@ function ZipView(props) {
         try {
             const reuslt = await warenhouseApi.decompressFile(key, nodePath);
             if (reuslt.code == '21000000') {
-                openNotification('open', <span>解压ZIP文件完成，请到文件管理器{<span style={{ color: '#3793EF' }}>重新刷新</span>}查看</span>, 5);
+              openNotification('open', <span>{intl.get('FILE_ZIP_DECOMPRESS_INFO_1')}{<span style={{ color: '#3793EF' }}>{intl.get('FILE_ZIP_DECOMPRESS_INFO_2')}</span>}{intl.get('FILE_ZIP_DECOMPRESS_INFO_3')}</span>, 5);
             } else {
-                openNotification('error', `解压ZIP文件失败`);
+                openNotification('error', intl.get('FILE_ZIP_DECOMPRESS_ERROR'));
             }
         } catch (error) {
-            openNotification('error', `解压ZIP文件失败，错误信息：${error}`);
+          openNotification('error', `${intl.get('FILE_ZIP_DECOMPRESS_ERROR') }: ${error}`);
         }
     }
 
     const openNotification = (type, description, duration = 3) => {
         notification[type]({
-            message: '解压ZIP',
+            message: intl.get('FILE_ZIP_DECOMPRESS'),
             description,
             duration,
             onClick: () => { console.log('Notification Clicked!') },
@@ -78,8 +79,8 @@ function ZipView(props) {
         <div className="zipview">
             <div className="zipview-header">
                 <div style={{ position: 'relative' }}>
-                    <span className="zh-span">预览 {name}</span>
-                    <span onClick={() => unZipFolder()} className="zh-zip" style={{ right: terminal.leftSideWidth === 0 ? 60 : 360 }}>解压ZIP</span>
+                    <span className="zh-span">{intl.get('PREVIEW')} {name}</span>
+                    <span onClick={() => unZipFolder()} className="zh-zip" style={{ right: terminal.leftSideWidth === 0 ? 60 : 360 }}>{intl.get('FILE_ZIP_DECOMPRESS')}</span>
                 </div>
             </div>
             <div className="zipview-content">

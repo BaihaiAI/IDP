@@ -80,7 +80,7 @@ const baseConfig = {
                         options: {
                             name: 'img/[name].[hash:7].[ext]',
                             limit: 1024,
-                            publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : `/child/idpStudio-idp`,
+                            publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : (Boolean(process.env.NODE_OPEN) ? '/' : '/child/idpStudio-idp'),
                         }
                     }]
             }

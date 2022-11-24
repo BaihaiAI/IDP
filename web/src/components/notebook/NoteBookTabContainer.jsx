@@ -56,7 +56,7 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
   const { item, workSpaceHeight, sourceVeiw } = props
   let detailItem
   detailItem = useNotebookItem(item.path)
-  if (item.contentType === 'notebook' || item.suffix === "ipynb" || item.suffix === 'idpnb') {
+  if (item.suffix === "ipynb" || item.suffix === 'idpnb') {
     return (
       <Notebook
         key={item.path}
@@ -146,6 +146,8 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
         sourceVeiw={sourceVeiw}
       />
     )
+  } else {
+    return (<div></div>)
   }
 })
 

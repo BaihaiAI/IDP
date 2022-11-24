@@ -50,16 +50,16 @@ pub async fn real_install(
     // business::team_id_tool::create_team_linux_user_if_not_exist(team_id);
     // let linux_username = business::team_id_tool::team_id_to_user_name(team_id);
 
-    let install_dir = business::pip_install::ensure_python2user_install_dir_exist(&py_path)
-        .map_or(Err(Error::new("make dir failed")), Ok)?;
-    business::pip_install::ensure_pth_file_exist(&py_path, &install_dir)
-        .map_or(Err(Error::new("check pth file failed")), Ok)?;
+    // let install_dir = business::pip_install::ensure_python2user_install_dir_exist(&py_path)
+    //     .map_or(Err(Error::new("make dir failed")), Ok)?;
+    // business::pip_install::ensure_pth_file_exist(&py_path, &install_dir)
+    //     .map_or(Err(Error::new("check pth file failed")), Ok)?;
 
     let mut cmd = tokio::process::Command::new(py_path);
     cmd.arg("-m").arg("pip").arg("install");
-    if business::kubernetes::is_k8s() {
-        cmd.arg("-U").arg("-t").arg(install_dir);
-    }
+    // if business::kubernetes::is_k8s() {
+    //     cmd.arg("-U").arg("-t").arg(install_dir);
+    // }
     cmd.arg(format!("{}=={}", package_name, version));
     tracing::info!("cmd = {cmd:?}");
     let output = cmd.output().await?;

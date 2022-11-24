@@ -4,7 +4,7 @@ import { connect } from "react-redux"
 import cookie from "react-cookies"
 import intl from "react-intl-universal"
 
-import {Layout, Modal, notification, Spin} from "antd"
+import { Layout, Modal, notification, Spin, message } from "antd"
 import { NotificationOutlined } from "@ant-design/icons"
 
 import "./App.less"
@@ -61,8 +61,8 @@ const locales = {
 }
 
 const defaultOpenFile = {
-  path: "/baihai.idpnb",
-  name: "baihai.idpnb",
+  path: "/demo.idpnb",
+  name: "demo.idpnb",
   suffix: "idpnb",
 }
 
@@ -105,7 +105,7 @@ class App extends React.Component {
       intlInit: false,
       theme: "dark-theme",
       isHealth: false,
-      initTips: this.showInitTips ? "正在为您配置计算资源..." : "",
+      initTips: this.showInitTips ? intl.get('LOADING_COMPUTING') : "",
       cover: 'none'
     }
     // 根据累加次数切换初始化信息
@@ -252,6 +252,17 @@ class App extends React.Component {
         if(!res.payload){
           // 打开失败的话 改变local中的状态
           handlerSaveHistoryOpenFile(openFile.path, openFile.name, "close")
+        } else {
+          if (res.payload.response.contentType === 'notebook') {
+            handlerSaveHistoryOpenFile(openFile.path, openFile.name, "close")
+            this.appComponentData.notebookTabRef.current &&
+              this.appComponentData.notebookTabRef.current.updateDeleteFlag(openFile.path).then(() => {
+                this.appComponentData.notebookTabRef.current
+                  .removeTab(openFile.path)
+                  .then((newTargetKey) => { })
+              })
+            message.warning(intl.get('NOTEBOOK_FILE_OPEN_ERROR_1'))
+          }
         }
       }).catch((err) => {
         console.log(err)
@@ -428,9 +439,9 @@ class App extends React.Component {
           })
         this.healthCheckCount += 1
         if (this.healthCheckCount > 30) {
-          this.showInitTips && this.setState({ initTips: "正在为您初始化环境..." })
+          this.showInitTips && this.setState({ initTips: intl.get('LOADING_ENV') })
         } else if (this.healthCheckCount > 15) {
-          this.showInitTips && this.setState({ initTips: "正在为您配置硬盘存储资源..." })
+          this.showInitTips && this.setState({ initTips: intl.get('LOADING_STORAGE') })
         }
       }
     }, 2000)

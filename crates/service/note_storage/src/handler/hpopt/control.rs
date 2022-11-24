@@ -19,9 +19,9 @@ use crate::common::error::IdpGlobalError;
 
 pub async fn stop_hpopt_backend(db_url: String) -> Result<(), IdpGlobalError> {
     let backend_pid = get_pid_by_name(&db_url).await?;
-    println!("backend_pid: {}", backend_pid);
+    tracing::info!("backend_pid: {}", backend_pid);
     if backend_pid > 0 {
-        println!("kill backend_pid: {}", backend_pid);
+        tracing::info!("kill backend_pid: {}", backend_pid);
         let _ = tokio::process::Command::new("kill")
             .arg("-9")
             .arg(backend_pid.to_string())
@@ -31,7 +31,7 @@ pub async fn stop_hpopt_backend(db_url: String) -> Result<(), IdpGlobalError> {
     Ok(())
 }
 
-async fn get_pid_by_name(db_url: &str) -> Result<u32, IdpGlobalError> {
+pub async fn get_pid_by_name(db_url: &str) -> Result<u32, IdpGlobalError> {
     let output = tokio::process::Command::new("ps")
         .arg("-ef")
         .output()
@@ -58,17 +58,14 @@ pub async fn start_hpopt_backend(
     _team_id: TeamId,
     _project_id: ProjectId,
 ) -> Result<u16, IdpGlobalError> {
-    // get python bin path from team_id,project_id
-    // let conda_env_name = business::path_tool::project_conda_env(team_id, project_id);
-    // let py_path = business::path_tool::get_conda_env_python_path(team_id, conda_env_name);
-    //dashboard bin path /Users/huangjin/miniconda3/bin/optuna-dashboard
     let dashboard_bin_path = business::path_tool::get_optuna_dashboard_bin_path();
-    println!("dashboard_bin_path: {}", dashboard_bin_path);
+    tracing::info!("dashboard_bin_path: {}", dashboard_bin_path);
+    tracing::info!("db_url: {}", db_url);
 
     // get a random unused TCP port.
     if let Some(port) = get_available_port() {
         // start optuna-dashboard
-        let start = std::time::Instant::now();
+        // let start = std::time::Instant::now();
         let child_opt = tokio::process::Command::new(dashboard_bin_path)
             .arg(db_url)
             .arg("--port")
@@ -78,10 +75,10 @@ pub async fn start_hpopt_backend(
         //     "--- start_hpopt_backend after optuna-dashboard command, time cost = {:?}",
         //     start.elapsed()
         // );
-        println!(
-            "--- start_hpopt_backend after optuna-dashboard command, time cost = {:?}",
-            start.elapsed()
-        );
+        // println!(
+        //     "--- start_hpopt_backend after optuna-dashboard command, time cost = {:?}",
+        //     start.elapsed()
+        // );
 
         if child_opt.is_err() {
             //print log on console

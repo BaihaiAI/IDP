@@ -12,7 +12,11 @@ export const runMenus = () => {
     }
 
     return (
-        <SubMenu style={{ borderBottom: '1px solid #ffffff52' }} className="idps-header-team" onTitleClick={(e) => goTeam(e)} key="team" title='返回团队空间'></SubMenu>
+        <>
+            {
+                (Boolean(process.env.NODE_OPEN)) ? "" : <SubMenu style={{ borderBottom: '1px solid #ffffff52' }} className="idps-header-team" onTitleClick={(e) => goTeam(e)} key="team" title='返回团队空间'></SubMenu>
+            }
+        </>
     )
 }
 

@@ -99,6 +99,7 @@
   "PACKAGE_RECOMMEND": "推荐",
   "PACKAGE_UNINSTALL": "卸载",
   "PACKAGE_UNINSTALL_FAILED": "卸载失败！",
+  "PACKAGE_UPGRADE": "升级",
   "CODE": "Python",
   "TEXT": "文本",
   "EXECUTION_TIME": "执行时长",
@@ -475,5 +476,16 @@
   "RESOURCEBAR_CORE": "核",
   "RESOURCEBAR_MEMORY": "内存",
   "RESOURCEBAR_PRIORITY": "优先级",
-  "RESOURCEBAR_CHECKPOINT": "自动保存上下文"
+  "RESOURCEBAR_CHECKPOINT": "自动保存上下文",
+  "LOADING_COMPUTING": "正在为您配置计算资源...",
+  "LOADING_ENV": "正在为您初始化环境...",
+  "LOADING_STORAGE": "正在为您配置硬盘存储资源...",
+  "FILE_ZIP_COMPRESS": "压缩为ZIP",
+  "FILE_ZIP_COMPRESS_SUCCEEDED": "压缩成功",
+  "FILE_ZIP_COMPRESS_INFO_1": "压缩目录不得为空！",
+  "FILE_ZIP_DECOMPRESS": "解压ZIP",
+  "FILE_ZIP_DECOMPRESS_INFO_1": "解压ZIP文件完成，请到文件管理器",
+  "FILE_ZIP_DECOMPRESS_INFO_2": "重新刷新",
+  "FILE_ZIP_DECOMPRESS_INFO_3": "查看",
+  "FILE_ZIP_DECOMPRESS_ERROR": "解压ZIP文件失败"
 }

@@ -65,22 +65,22 @@ class Package extends React.Component {
 
     compareVersion = (v1, v2)  => {
         if (v1 == v2) {
-            return "已安装";
+          return intl.get('PACKAGE_INSTALLED');
         }
         const vs1 = v1.split(".").map(a => parseInt(a));
         const vs2 = v2.split(".").map(a => parseInt(a));
         const length = Math.min(vs1.length, vs2.length);
         for (let i = 0; i < length; i++) {
             if (vs1[i] > vs2[i]) {
-                return "已安装";
+              return intl.get('PACKAGE_INSTALLED');
             } else if (vs1[i] < vs2[i]) {
-                return "升级";
+              return intl.get('PACKAGE_UPGRADE');
             }
         }
         if (length == vs1.length) {
-            return "升级";
+          return intl.get('PACKAGE_UPGRADE');
         } else {
-            return "已安装";
+          return intl.get('PACKAGE_INSTALLED');
         }
     }
 
@@ -101,7 +101,7 @@ class Package extends React.Component {
                 const records = response.data.records
                 let list = [];
                 for (let item of records) {
-                    item.istate = !item.installedVersion ? "安装" :
+                    item.istate = !item.installedVersion ? intl.get('PACKAGE_INSTALL') :
                         (_this.compareVersion(item.installedVersion, item.stableVersion))
                     list.push(item);
                 }
@@ -126,7 +126,7 @@ class Package extends React.Component {
                 if (packageName == item.packageName && version == item.stableVersion) {
                     item.istate = istate;
                     item.installed = intl.get('PACKAGE_INSTALLED')  == istate;
-                    if(item.istate === '安装失败'){
+                  if (item.istate === intl.get('PACKAGE_FAILED')){
                         item.error = error
                     }
                 }
@@ -201,7 +201,7 @@ class Package extends React.Component {
                         const res = JSON.parse(newD[newD.length - 1]);
                         if (res.code === 21000000) {
                             let newData = _this.dataClone(_this.state.installedList);
-                            _this.setSearchList(_this, packageName, version, "已安装");
+                            _this.setSearchList(_this, packageName, version, intl.get('PACKAGE_INSTALLED'));
                             newData.unshift(params);
                             _this.setState({installedList: newData});
                         } else {
@@ -209,7 +209,7 @@ class Package extends React.Component {
                         }
                     }
                 } else {
-                    _this.setSearchList(_this, packageName, version, intl.get('PACKAGE_FAILED'), '安装失败');
+                  _this.setSearchList(_this, packageName, version, intl.get('PACKAGE_FAILED'), intl.get('PACKAGE_FAILED'));
                 }
             }
         }).catch(function (error) {
@@ -219,14 +219,14 @@ class Package extends React.Component {
 
     installAction(props) {
         const item = props.item;
-        if (intl.get('PACKAGE_INSTALL')  == item.istate || intl.get('PACKAGE_FAILED')  == item.istate || "升级" === item.istate) {
+      if (intl.get('PACKAGE_INSTALL') == item.istate || intl.get('PACKAGE_FAILED') == item.istate || intl.get('PACKAGE_UPGRADE') === item.istate) {
             return (
                 <a key="search-install" onClick={() => props.onClick()}>
                     {item.istate}
                 </a>
             );
         } 
-        if("已安装" === item.istate){
+        if (intl.get('PACKAGE_INSTALLED') === item.istate){
             return (
                 <a key="search-install" disabled>
                     {item.istate}

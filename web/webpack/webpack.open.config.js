@@ -34,6 +34,7 @@ const proConfig = {
             env: process.env.NODE_ENV,
             options: {
                 colorLinkUrl: `./static/color.less`,
+                loadingGifUrl: `/static/loading.gif`,
             },
             template: 'open.ejs'
         })
