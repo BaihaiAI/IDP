@@ -31,7 +31,7 @@ pub async fn stop_hpopt_backend(db_url: String) -> Result<(), IdpGlobalError> {
     Ok(())
 }
 
-async fn get_pid_by_name(db_url: &str) -> Result<u32, IdpGlobalError> {
+pub async fn get_pid_by_name(db_url: &str) -> Result<u32, IdpGlobalError> {
     let output = tokio::process::Command::new("ps")
         .arg("-ef")
         .output()
