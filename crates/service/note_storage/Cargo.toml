@@ -9,7 +9,7 @@ default = ["redis"]
 redis = []
 
 [dependencies]
-business = { path = "../../common/business", features = ["pip_install"] }
+business = { path = "../../common/business" }
 cache_io = { path = "../../cache_io" }
 common_model = { path = "../../common/model" }
 common_tools = { path = "../../common/common_tools" }
