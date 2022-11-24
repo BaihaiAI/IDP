@@ -28,7 +28,14 @@ static STORE_PARENT_DIR: Lazy<PathBuf> = Lazy::new(|| {
     #[cfg(unix)]
     let home_dir = std::env::var("HOME").unwrap();
     #[cfg(windows)]
-    let home_dir = std::env::var("HOMEPATH").unwrap();
+    let home_drive_dir = std::env::var("HOMEDRIVE").unwrap();
+    #[cfg(windows)]
+    let home_path_dir = std::env::var("HOMEPATH").unwrap();
+    #[cfg(windows)]
+    let dir = std::path::Path::new(&home_drive_dir)
+        .join(home_path_dir)
+        .join(".idp");
+    #[cfg(unix)]
     let dir = std::path::Path::new(&home_dir).join(".idp");
     if !dir.exists() {
         tracing::warn!("{dir:?} not exists, creating");
@@ -138,9 +145,16 @@ pub fn get_hpopt_datasource_path(team_id: TeamId, project_id: ProjectId) -> Stri
 }
 // get_optimize_objective_example_path
 #[inline]
-#[cfg(unix)]
 pub fn get_optimize_objective_example_path() -> String {
-    "/store/objective_example".to_string()
+    #[cfg(windows)]
+    let path = STORE_PARENT_DIR
+        .join("store/objective_example")
+        .into_os_string()
+        .into_string()
+        .unwrap();
+    #[cfg(unix)]
+    let path = "/store/objective_example".to_string();
+    path
 }
 pub fn optimize_run_path(
     team_id: TeamId,
@@ -165,15 +179,6 @@ pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &
         filename
     )
 }
-#[cfg(windows)]
-pub fn get_hpopt_db_fullpath(team_id: TeamId, project_id: ProjectId, filename: &str) -> String {
-    format!(
-        "{}/{}",
-        get_hpopt_datasource_path(team_id, project_id),
-        filename
-    )
-}
-
 pub fn get_nbconvert_by_team_id(_team_id: String) -> String {
     // format!(
     //     "/store/{}/miniconda3/envs/python39/bin/jupyter-nbconvert",

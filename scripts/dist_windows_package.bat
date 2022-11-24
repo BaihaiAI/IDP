@@ -1,22 +1,23 @@
 @echo on
 
 set arch=x64
-set dir=IDPStudio-win-%arch%-v%DATE:~0,4%-%date:~5,2%-%date:~8,2%
+set release_version=v1.0.0
+set dir=idp-studio-%release_version%-win-%arch%
 
 mkdir %dir%\bin
 mkdir %dir%\store
 
 xcopy docker_build\store %dir%\store /s /e /y
 
-cargo b --bin idp
-copy target\debug\idp.exe %dir% /y
+cargo b --release --bin idp
+copy target\release\idp.exe %dir% /y
 
 call activate base
 
 for %%i in (py38 py39 py310) do (
   call conda activate %%i
-  cargo b --bin idp_kernel
-  copy target\debug\idp_kernel.exe %dir%\bin\kernel_%%i.exe
+  cargo b --release --bin idp_kernel
+  copy target\release\idp_kernel.exe %dir%\bin\kernel_%%i.exe
 )
 
 if not exist web\dist\index.html (
