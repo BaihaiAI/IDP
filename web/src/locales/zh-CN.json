@@ -479,5 +479,13 @@
   "RESOURCEBAR_CHECKPOINT": "自动保存上下文",
   "LOADING_COMPUTING": "正在为您配置计算资源...",
   "LOADING_ENV": "正在为您初始化环境...",
-  "LOADING_STORAGE": "正在为您配置硬盘存储资源..."
+  "LOADING_STORAGE": "正在为您配置硬盘存储资源...",
+  "FILE_ZIP_COMPRESS": "压缩为ZIP",
+  "FILE_ZIP_COMPRESS_SUCCEEDED": "压缩成功",
+  "FILE_ZIP_COMPRESS_INFO_1": "压缩目录不得为空！",
+  "FILE_ZIP_DECOMPRESS": "解压ZIP",
+  "FILE_ZIP_DECOMPRESS_INFO_1": "解压ZIP文件完成，请到文件管理器",
+  "FILE_ZIP_DECOMPRESS_INFO_2": "重新刷新",
+  "FILE_ZIP_DECOMPRESS_INFO_3": "查看",
+  "FILE_ZIP_DECOMPRESS_ERROR": "解压ZIP文件失败"
 }

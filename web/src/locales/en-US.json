@@ -479,5 +479,13 @@
   "RESOURCEBAR_CHECKPOINT": "Auto checkpoint",
   "LOADING_COMPUTING": "Configuring computing resources for you...",
   "LOADING_ENV": "Initializing environment for you...",
-  "LOADING_STORAGE": "Configuring hard disk storage resources for you..."
+  "LOADING_STORAGE": "Configuring hard disk storage resources for you...",
+  "FILE_ZIP_COMPRESS": "Compress to ZIP file",
+  "FILE_ZIP_COMPRESS_SUCCEEDED": "Compression succeeded",
+  "FILE_ZIP_COMPRESS_INFO_1": "Compressed directory cannot be empty!",
+  "FILE_ZIP_DECOMPRESS": "Decompress the ZIP file",
+  "FILE_ZIP_DECOMPRESS_INFO_1": "Successfully decompressed the ZIP file. Please go to the file manager",
+  "FILE_ZIP_DECOMPRESS_INFO_2": "refresh",
+  "FILE_ZIP_DECOMPRESS_INFO_3": "watch",
+  "FILE_ZIP_DECOMPRESS_ERROR": "Failed to decompress the ZIP file"
 }

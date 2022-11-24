@@ -128,7 +128,7 @@ try {
     }
   }
   app.listen(port, "0.0.0.0");
-  console.log(`terminal start at: http://0.0.0.0:${port}/`)
+  console.log(`${new Date().toISOString()}     INFO terminal start at: http://0.0.0.0:${port}/`)
 } catch(err) {
   console.log(err)
 }
