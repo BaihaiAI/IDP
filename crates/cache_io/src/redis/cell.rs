@@ -151,7 +151,7 @@ impl CacheService {
         let lock_guard = lock.lock().await;
 
         let mut cell = self.read_cell(&path, &cell_update.id, project_id).await?;
-        tracing::info!(
+        tracing::debug!(
             "partial_update_cell: read_cell_before_write cell_id={}, output.len()={}",
             cell_update.id,
             cell.outputs.len()

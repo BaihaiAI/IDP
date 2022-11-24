@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use axum::extract::Query;
-use axum::response::Redirect;
 use axum::Extension;
 use axum::Json;
 use common_model::Rsp;
@@ -23,6 +22,7 @@ use serde_json::Value;
 
 use crate::api_model::hpopt::DatasourceListReq;
 use crate::api_model::hpopt::DatasourceNewReq;
+use crate::api_model::hpopt::DatasourceResp;
 use crate::api_model::hpopt::EditStudyCodeReq;
 use crate::api_model::hpopt::OptRunReq;
 use crate::api_model::hpopt::OptStateReq;
@@ -45,12 +45,12 @@ pub type Cookies = axum::headers::Cookie;
 pub async fn datasource_list(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Query(datasource_list): Query<DatasourceListReq>,
-) -> Result<Rsp<Vec<String>>, IdpGlobalError> {
+) -> Result<Rsp<Vec<DatasourceResp>>, IdpGlobalError> {
     let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
 
     //TODO need change code, msg
     Ok(Rsp::success(
-        hpopt::datasource::get_datasource_list(team_id, datasource_list.project_id).await?,
+        hpopt::datasource::get_datasource_status_list(team_id, datasource_list.project_id).await?,
     ))
 }
 
@@ -150,6 +150,20 @@ pub async fn stop_hpopt_backend(
     Ok(Rsp::success_without_data())
 }
 
+pub async fn backend_state(
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+) -> Result<Rsp<String>, IdpGlobalError> {
+    let port = get_hpopt_port_by_cookie(&cookies);
+
+    let ip_addr = format!("http://127.0.0.1:{}", port);
+    let url = format!("{}/api/studies", &ip_addr);
+
+    if let Err(_e) = reqwest::get(&url).await {
+        return Ok(Rsp::success("unready".to_string()));
+    }
+    Ok(Rsp::success("ready".to_string()))
+}
+
 ///
 /// about study
 ///
@@ -158,12 +172,15 @@ pub async fn list_study(
     // project_id: ProjectId,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     // datasource_name: String,
-) -> Redirect {
+) -> Result<Json<Value>, IdpGlobalError> {
     let port = get_hpopt_port_by_cookie(&cookies);
 
     let ip_addr = format!("http://127.0.0.1:{}", port);
     let url = format!("{}/api/studies", &ip_addr);
-    Redirect::temporary(&url)
+
+    let resp = reqwest::get(&url).await?.json::<Value>().await?;
+
+    Ok(Json(resp))
 }
 fn get_hpopt_port_by_cookie(cookies: &Cookies) -> u16 {
     let hpopt_port_str = cookies_tools::get_cookie_value_by_key(cookies, "hpoptPort");
@@ -178,12 +195,19 @@ fn get_hpopt_port_by_cookie(cookies: &Cookies) -> u16 {
 pub async fn study_detail(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Query(study_detail_req): Query<StudyDetailReq>,
-) -> Redirect {
+) -> Result<Json<Value>, IdpGlobalError> {
     tracing::debug!("study_detail_req:{:?}", study_detail_req);
     let port = get_hpopt_port_by_cookie(&cookies);
     let ip_addr = format!("http://127.0.0.1:{}", port);
     let url = format!("{}/api/studies/{}", &ip_addr, study_detail_req.study_id);
-    Redirect::temporary(&url)
+
+    let resp = reqwest::get(&url)
+        .await
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    Ok(Json(resp))
 }
 
 pub async fn study_objective_code(
@@ -233,11 +257,9 @@ pub async fn study_new(
         .post(&url)
         .json(&new_study_req_json)
         .send()
-        .await
-        .unwrap()
+        .await?
         .json::<Value>()
-        .await
-        .unwrap();
+        .await?;
     tracing::debug!("study_new resp:{:?}", resp);
     // 2. get study_id from response.
     let study_id = match resp["study_summary"]["study_id"].as_i64() {

@@ -82,7 +82,15 @@ fn handle_connection(stream: std::net::TcpStream, ctx: &Ctx) -> Result<(), Error
     loop {
         let mut req_args = {
             // try reading from tcp stream
-            let req = decoder.decode()?;
+            let req = match decoder.decode() {
+                Ok(req) => req,
+                Err(err) => {
+                    if matches!(err.kind(), std::io::ErrorKind::UnexpectedEof) {
+                        continue;
+                    }
+                    return Err(err.into());
+                }
+            };
 
             // must be an array
             let req = match req {
