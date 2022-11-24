@@ -61,8 +61,8 @@ const locales = {
 }
 
 const defaultOpenFile = {
-  path: "/baihai.idpnb",
-  name: "baihai.idpnb",
+  path: "/demo.idpnb",
+  name: "demo.idpnb",
   suffix: "idpnb",
 }
 
