@@ -1994,7 +1994,7 @@ class WorkspaceLeft extends React.Component {
           this.onLoadData({ key: nodePath.length === 0 ? '/' : nodePath });
         } else {
           nodeClass.style.opacity = 0;
-          message.error(`解压ZIP失败${reuslt.message}`)
+          message.error(`${intl.get('FILE_ZIP_DECOMPRESS_ERROR')}: ${reuslt.message}`)
         }
       } catch (error) {
         nodeClass.style.opacity = 0;
@@ -2080,21 +2080,21 @@ class WorkspaceLeft extends React.Component {
         //   },
         // },
         { key: "SEPARATOR_5" },
-        { key: "UNZIP", name: '解压ZIP', handler: this.unZipFolder },
+        { key: "UNZIP", name: intl.get('FILE_ZIP_DECOMPRESS'), handler: this.unZipFolder },
         {
           key: "COMPRESSED_TO_ZIP",
-          name: "压缩为ZIP",
+          name: intl.get('FILE_ZIP_COMPRESS'),
           handler: (e, prop) => {
             const { key } = e.props.info;
             warenhouseApi.compression({ path: key })
               .then(res => {
                 const { code, message: msg } = res.data
                 if (code > 20000000 && code < 30000000) {
-                  message.success('压缩成功')
+                  message.success(intl.get('FILE_ZIP_COMPRESS_SUCCEEDED'))
                   this.loadTree({ forceLoad: true })
                 }else{
                   if(code === 51040000){
-                    message.warning("压缩目录不得为空！")
+                    message.warning(intl.get('FILE_ZIP_COMPRESS_INFO_1'))
                   }else{
                     message.error(
                       `${
