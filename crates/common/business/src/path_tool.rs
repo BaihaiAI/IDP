@@ -199,7 +199,7 @@ pub fn get_conda_path(team_id: TeamId) -> String {
 }
 #[inline]
 pub fn get_optuna_dashboard_bin_path() -> String {
-    "/home/ray/anaconda3/bin/optuna-dashboard".to_string()
+    "optuna-dashboard".to_string()
     // "/Users/huangjin/miniconda3/bin/optuna-dashboard".to_string()
 }
 
