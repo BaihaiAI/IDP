@@ -43,17 +43,21 @@ pub async fn pip_list_(py_path: String) -> std::io::Result<Vec<PackageInfo>> {
     let py_path = if business::kubernetes::is_k8s() {
         py_path
     } else {
-        "python3".to_string()
+        #[cfg(unix)]
+        let a = "python3".to_string();
+        #[cfg(windows)]
+        let a = "python".to_string();
+        a
     };
     let start = std::time::Instant::now();
-    let output = tokio::process::Command::new(py_path)
-        .arg("-m")
+    let mut cmd = tokio::process::Command::new(py_path);
+    cmd.arg("-m")
         .arg("pip")
         .arg("list")
         .arg("--format")
-        .arg("freeze")
-        .output()
-        .await?;
+        .arg("freeze");
+    tracing::info!("cmd = {cmd:?}");
+    let output = cmd.output().await?;
     tracing::debug!(
         "--- pip_list after pip list command, time cost = {:?}",
         start.elapsed()
