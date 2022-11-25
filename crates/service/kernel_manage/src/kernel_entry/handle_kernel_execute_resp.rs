@@ -181,8 +181,9 @@ impl super::KernelCtx {
                 .cells
                 .iter()
                 // first cell index can't be 0
-                .zip(1..)
-                .filter_map(|(cell, index)| cell.id().map(|id| (id, index)))
+                // .zip(1..)
+                .enumerate()
+                .filter_map(|(index, cell)| cell.id().map(|id| (id, index)))
                 .collect::<std::collections::HashMap<_, _>>();
             tracing::debug!("cell_id_index_map = {cell_id_index_map:#?}");
             for cell_update in req.cells {

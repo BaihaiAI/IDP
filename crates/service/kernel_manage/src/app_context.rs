@@ -183,7 +183,7 @@ async fn kernel_entry_ops_handler(
                 .values()
                 .filter(|x| {
                     if let Some(ref pipeline) = x.header.pipeline_opt {
-                        tracing::info!(
+                        tracing::debug!(
                             "kernel_list skip pipeline task_instance_id={}",
                             pipeline.job_instance_id
                         );
