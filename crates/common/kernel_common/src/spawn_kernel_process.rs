@@ -273,45 +273,38 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
     }
     // let hostname = kernel_common::cluster_header_hostname(header.team_id);
     let url = format!("http://127.0.0.1:{}/start_kernel", 9240);
+    let timeout_secs = 75;
     let client = reqwest::ClientBuilder::new()
-        .timeout(std::time::Duration::from_secs(40))
+        .timeout(std::time::Duration::from_secs(timeout_secs))
         .build()?;
-    let mut retry = 0;
-    loop {
-        let resp = match client.post(&url).json(&arg).send().await {
-            Ok(resp) => resp,
-            Err(err) => {
-                if err.is_timeout() {
-                    return Err(ErrorTrace::new("request to submitter timeout(>40s)"));
-                }
-                return Err(ErrorTrace::new(&err.to_string()));
+    let resp = match client.post(&url).json(&arg).send().await {
+        Ok(resp) => resp,
+        Err(err) => {
+            if err.is_timeout() {
+                return Err(ErrorTrace::new("request to submitter timeout"));
             }
-        };
-
-        let http_status_code = resp.status();
-        if http_status_code.is_success() {
-            // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
-            return Ok(());
+            return Err(ErrorTrace::new(&err.to_string()));
         }
+    };
 
-        let status = resp.status();
-        tracing::warn!("submitter resp status = {status}, retry = {retry}");
-        if status.as_u16() != reqwest::StatusCode::TOO_MANY_REQUESTS {
-            // if server response please retry
-            let err_msg = if status.as_u16() == 500 {
-                "submitter raise Exception".to_string()
-            } else {
-                resp.text().await?
-            };
-            return Err(ErrorTrace::new(&format!("kernel start fail {err_msg}")));
-        }
-
-        // tokio::time::sleep
-        retry += 1;
-        if retry > 1 {
-            break;
-        }
+    let http_status_code = resp.status();
+    if http_status_code.is_success() {
+        // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
+        return Ok(());
     }
+
+    let status = resp.status();
+    tracing::warn!("submitter resp status = {status}");
+    if status.as_u16() != reqwest::StatusCode::TOO_MANY_REQUESTS {
+        // if server response please retry
+        let err_msg = if status.as_u16() == 500 {
+            "submitter raise Exception".to_string()
+        } else {
+            resp.text().await?
+        };
+        return Err(ErrorTrace::new(&format!("kernel start fail {err_msg}")));
+    }
+
     Err(ErrorTrace::new("kernel start max retry exceed"))
 }
 
