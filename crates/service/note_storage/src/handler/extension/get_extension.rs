@@ -13,9 +13,7 @@
 // limitations under the License.
 
 use super::get_extensions_config;
-const EXTENSION_HTTP_URL: &str = "http://baihai.cn-bj.ufileos.com/docker-build/extension-store/";
 const US3CLI_DEST: &str = "/home/ray/us3cli-linux64";
-const US3_URL: &str = "us3://baihai/docker-build/extension-store/";
 
 pub async fn get_extension() {
     loop {
@@ -30,9 +28,10 @@ pub async fn get_extension() {
         };
 
         let dest_path = store_path.join("extension_temp.json");
-        let origin_url = format!("{EXTENSION_HTTP_URL}extensions_config.json");
-        let mut cmd = tokio::process::Command::new("curl");
-        cmd.arg("-L").arg("-o").arg(&dest_path).arg(&origin_url);
+        let extension_url = get_extension_url().await;
+        let origin_url = format!("{extension_url}/extensions_config.json");
+        let mut cmd = tokio::process::Command::new(US3CLI_DEST);
+        cmd.arg("cp").arg(&origin_url).arg(&dest_path);
         let extension_resp_new = match cmd
             .spawn()
             .expect("can't get current extension_config")
@@ -97,7 +96,8 @@ pub async fn get_extension() {
 pub async fn get_remote_extension(name: &str) {
     let store_path = business::path_tool::recommended_extensions();
     let dest_path = store_path.join(name);
-    let origin_url = format!("{}{}", US3_URL, name);
+    let extension_url = get_extension_url().await;
+    let origin_url = format!("{}/{}", extension_url, name);
     if dest_path.exists() {
         match tokio::fs::remove_dir_all(&dest_path).await {
             Ok(_) => tracing::debug!("successful overwrite extension: {:#?}", dest_path),
@@ -126,4 +126,24 @@ pub async fn get_remote_extension(name: &str) {
             dest_path
         ),
     }
+}
+
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "PascalCase")]
+pub struct DbConfig {
+    pub extension_url: String,
+}
+pub async fn get_extension_url() -> String {
+    let database_info = std::fs::read_to_string("/opt/config/config.toml");
+    let database_info_tmp = if database_info.is_err() {
+        std::fs::read_to_string("/etc/db_config.toml").unwrap()
+    } else {
+        database_info.unwrap()
+    };
+
+    let toml_str = database_info_tmp.as_str();
+    let db_config: DbConfig = toml::from_str(toml_str).unwrap();
+    db_config.extension_url
 }
