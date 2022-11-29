@@ -140,7 +140,7 @@ pub fn get_env_path(path: &str) -> Vec<String> {
     let dir_iter = match fs::read_dir(path) {
         Ok(x) => x,
         Err(err) => {
-            tracing::error!("panicked {path:?} {err}");
+            tracing::error!("team missing projects {path:?} {err}");
             return Vec::new();
         }
     };

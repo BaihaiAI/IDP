@@ -81,14 +81,13 @@ RUN --mount=type=cache,target=/root/.npm \
     npm config set registry https://registry.npm.taobao.org/ && \
     npm install
 # build web
-#RUN --mount=type=cache,target=/root/.npm \
-# npm registry network blocked in china when docker build
-# RUN set -x && \
-#     source /root/.bashrc && \
-#     cd web && \
-#     npm config set registry https://registry.npm.taobao.org/ && \
-#     yarn install && \
-#     yarn build:open
+RUN --mount=type=cache,target=/root/.npm \
+    set -x && \
+    source /root/.bashrc && \
+    cd web && \
+    npm config set registry https://registry.npm.taobao.org/ && \
+    yarn install && \
+    yarn build:open
 
 COPY rust-toolchain.toml .
 COPY Cargo.toml .
