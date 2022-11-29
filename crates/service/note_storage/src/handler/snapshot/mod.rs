@@ -16,7 +16,7 @@ pub mod diff;
 pub mod diff_models;
 pub mod handlers;
 pub mod models;
-use axum::extract::Extension;
+use axum::extract::State;
 use axum::Json;
 use business::path_tool;
 use common_model::service::rsp::Rsp;
@@ -27,7 +27,7 @@ use crate::common::error::IdpGlobalError;
 
 pub async fn post_snapshot(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
     Json(req): Json<models::SnapshotReq>,
 ) -> Result<Rsp<models::SnapshotRes>, IdpGlobalError> {
     // let team_id = 0u64; //todo
@@ -46,7 +46,7 @@ pub async fn post_snapshot(
 
 pub async fn post_snapshot_list(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
     Json(req): Json<models::SnapshotListReq>,
 ) -> Result<Rsp<models::SnapshotListRes>, IdpGlobalError> {
     let team_id = get_cookie_value_by_team_id(cookies);
@@ -61,7 +61,7 @@ pub async fn post_snapshot_list(
 }
 
 pub async fn post_snapshot_restore(
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(req): Json<models::SnapshotRestoreReq>,
 ) -> Result<Rsp<models::SnapshotRestoreRes>, IdpGlobalError> {
@@ -77,7 +77,7 @@ pub async fn post_snapshot_restore(
 // api: snapshot/diff
 pub async fn post_snapshot_diff(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
     Json(req): Json<models::SnapshotDiffReq>,
 ) -> Result<Rsp<models::SnapshotDiffRes>, IdpGlobalError> {
     // let team_id = 0u64; //todo

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use axum::extract::Query;
-use axum::Extension;
+use axum::extract::State;
 use cache_io::CacheService;
 use common_model::entity::notebook::Notebook;
 use common_model::service::rsp::Rsp;
@@ -33,7 +33,7 @@ use std::sync::Mutex;
 
 pub async fn cat(
     Query(cat_req): Query<CatReq>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> Result<Rsp<CatRsp>, ErrorTrace> {
     let now = std::time::Instant::now();
     let ret = cat_(

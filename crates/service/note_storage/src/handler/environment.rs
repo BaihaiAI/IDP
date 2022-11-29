@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::extract::Extension;
 use axum::extract::Query;
+use axum::extract::State;
 use axum::Json;
 use cache_io::CacheService;
 use cache_io::CloneState;
@@ -33,7 +33,7 @@ use crate::handler;
 /// return process_id of `conda create`
 pub async fn clone(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
     Json(payload): Json<EnvClone>,
 ) -> Result<Rsp<String>, ErrorTrace> {
     info!("access conda env clone api.");
@@ -58,7 +58,7 @@ pub struct CloneStateReq {
 }
 pub async fn clone_state(
     Query(clone_state_req): Query<CloneStateReq>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> Result<Rsp<Option<String>>, IdpGlobalError> {
     //get clone state form redis
     Ok(Rsp::success(

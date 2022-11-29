@@ -55,7 +55,7 @@ fn path_exists(path: String) -> bool {
 #[cfg(not)]
 pub async fn task_state(
     Query(qs): Query<HashMap<String, String>>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> Result<Rsp<PipelineStatusDto>, IdpGlobalError> {
     let empty = String::from("1000000000000000000-00-00-000000");
     let account_id = qs.get("accountId").unwrap_or(&empty).to_string();

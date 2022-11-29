@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use axum::extract::Query;
-use axum::Extension;
+use axum::extract::State;
 use common_model::Rsp;
 
 use crate::api_model::workspace::FullFileTreeNode;
@@ -32,7 +32,7 @@ pub struct DeleteFileOrDirReq {
 
 pub async fn delete_file_or_dir(
     Query(req): Query<DeleteFileOrDirReq>,
-    Extension(ctx): Extension<AppContext>,
+    State(ctx): State<AppContext>,
 ) -> Result<Rsp<FullFileTreeNode>, IdpGlobalError> {
     tracing::info!("--> delete_file_or_dir_ {req:?}");
 

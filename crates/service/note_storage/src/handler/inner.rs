@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::extract::Extension;
 use axum::extract::Query;
+use axum::extract::State;
 use common_model::service::rsp::Rsp;
 
 pub async fn version() -> Rsp<GitVersionRep> {
@@ -36,7 +36,7 @@ pub struct QueryString {
 // GET /idp-note-rs/inner/change_log?level=info,sqlx=warn,note_storage=debug,cache_io=debug
 pub async fn change_log_level(
     Query(qs): Query<QueryString>,
-    Extension(reload_handle): Extension<logger::ReloadLogLevelHandle>,
+    State(reload_handle): State<logger::ReloadLogLevelHandle>,
 ) -> String {
     tracing::info!("qs.level = {}", qs.level);
     match qs.level.parse::<logger::EnvFilter>() {

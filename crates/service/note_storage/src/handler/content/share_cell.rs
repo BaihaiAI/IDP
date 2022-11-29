@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use axum::extract::Query;
-use axum::Extension;
+use axum::extract::State;
 use business::path_tool::session_file_path;
 use business::path_tool::{self};
 use cache_io::CacheService;
@@ -36,7 +36,7 @@ pub struct ShareCellReq {
 
 pub async fn share_cell(
     Query(req): Query<ShareCellReq>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> Result<Rsp<String>, ErrorTrace> {
     let team_id = req.team_id;
     let browser_path = req.path;

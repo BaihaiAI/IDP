@@ -17,8 +17,8 @@ use std::fs::create_dir_all;
 use std::fs::File;
 use std::io::Write;
 
-use axum::extract::Extension;
 use axum::extract::Query;
+use axum::extract::State;
 use axum::Json;
 use business::path_tool;
 use business::path_tool::get_nbconvert_by_team_id;
@@ -81,7 +81,7 @@ pub struct InsertCellReq {
 /// insert a new cell.
 #[axum_macros::debug_handler]
 pub async fn insert_cell(
-    Extension(mut app_context): Extension<AppContext>,
+    State(mut app_context): State<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(insert_cell_req): Json<InsertCellReq>,
 ) -> Result<Rsp<Cell>, IdpGlobalError> {
@@ -119,7 +119,7 @@ pub struct AddCellReq {
 
 /// add_cell using the specific cell structure
 pub async fn add_cell(
-    Extension(mut app_context): Extension<AppContext>,
+    State(mut app_context): State<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(add_cell_req): Json<AddCellReq>,
 ) -> Result<Rsp<Cell>, IdpGlobalError> {
@@ -145,7 +145,7 @@ pub async fn add_cell(
 }
 
 pub async fn move_cell(
-    Extension(mut app_context): Extension<AppContext>,
+    State(mut app_context): State<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(move_cell_req): Json<MoveCellReq>,
 ) -> Result<Rsp<()>, IdpGlobalError> {
@@ -171,7 +171,7 @@ pub async fn move_cell(
 pub async fn delete_cell(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Query(delete_cell_req): Query<DeleteCellReq>,
-    Extension(mut app_context): Extension<AppContext>,
+    State(mut app_context): State<AppContext>,
 ) -> Result<Rsp<()>, IdpGlobalError> {
     tracing::info!("access delete_cell cell_id:{}", delete_cell_req.id);
 

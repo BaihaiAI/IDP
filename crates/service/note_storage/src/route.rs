@@ -211,7 +211,7 @@ pub async fn init_router(
                     Router::new()
                         .route("/new", on(MethodFilter::POST, project::new))
                         .route("/delete", on(MethodFilter::POST, project::delete))
-                        .route_layer(axum::extract::Extension(file_writer.clone()))
+                        .with_state(file_writer.clone())
                 })
                 .nest(
                     "/pipeline",
@@ -228,7 +228,7 @@ pub async fn init_router(
                     "/note",
                     Router::new()
                         .route("/uploadbigfile", on(MethodFilter::POST, note::upload_file))
-                        .route_layer(axum::extract::Extension(file_writer)),
+                        .with_state(file_writer),
                 )
                 .nest(
                     "/team",
@@ -273,7 +273,7 @@ pub async fn init_router(
                             "/change_log",
                             on(MethodFilter::GET, inner::change_log_level),
                         )
-                        .route_layer(axum::extract::Extension(reload_handle)),
+                        .with_state(reload_handle),
                 )
                 .nest("/snapshot", {
                     // snapshot::sqlite_io::migrate_sqlite_to_redis(ctx.redis_cache.clone()).await;
@@ -333,10 +333,9 @@ pub async fn init_router(
                         .route(
                             "/install",
                             on(MethodFilter::POST, package::pip_install::pip_install),
-                        ),
+                        )
+                        .with_state((pg_option, project_info_map)),
                 )
-                .route_layer(axum::extract::Extension(project_info_map))
-                .route_layer(axum::extract::Extension(pg_option))
                 .nest("/tensorboard", {
                     use std::collections::BTreeMap;
 
@@ -360,12 +359,9 @@ pub async fn init_router(
                             "/info",
                             on(MethodFilter::POST, tensorboard::tensorboard_info),
                         )
-                        .route_layer(axum::extract::Extension(
-                            project_id_tensorboard_port_mapping,
-                        ))
+                        .with_state(project_id_tensorboard_port_mapping)
                 }),
         )
-        .layer(axum::extract::Extension(ctx))
+        .with_state(ctx)
         .layer(axum::extract::DefaultBodyLimit::max(MAX_UPLOAD_SIZE))
-    // .layer(axum::extract::DefaultBodyLimit::disable())
 }

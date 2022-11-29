@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use axum::extract::Query;
-use axum::Extension;
+use axum::extract::State;
 use axum::Json;
 use common_model::Rsp;
 use common_tools::cookies_tools;
@@ -326,7 +326,7 @@ pub async fn edit_study_objective_code(
 
 pub async fn study_optimize_run(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
     Json(opt_run_req): Json<OptRunReq>,
 ) -> Result<Rsp<String>, IdpGlobalError> {
     let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
@@ -353,7 +353,7 @@ pub async fn study_optimize_run(
 // }
 pub async fn optimize_state(
     Query(opt_state_req): Query<OptStateReq>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> Result<Rsp<Option<String>>, IdpGlobalError> {
     tracing::info!("query opt state...");
     //get clone state form redis
