@@ -10,7 +10,7 @@ default = ["axum"]
 
 [dependencies]
 #serde_helper = { path = "../serde_helper" }
-axum = { version = "0.5", default-features = false, features = [
+axum = { version = "0.6", default-features = false, features = [
     "json",
 ], optional = true }
 reqwest = { version = "0.11", default-features = false, features = [

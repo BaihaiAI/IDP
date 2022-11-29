@@ -33,8 +33,8 @@ use crate::handler;
 /// return process_id of `conda create`
 pub async fn clone(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Json(payload): Json<EnvClone>,
     Extension(app_context): Extension<AppContext>,
+    Json(payload): Json<EnvClone>,
 ) -> Result<Rsp<String>, ErrorTrace> {
     info!("access conda env clone api.");
     let team_id = get_cookie_value_by_team_id(cookies);

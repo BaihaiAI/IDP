@@ -79,10 +79,11 @@ pub struct InsertCellReq {
 }
 
 /// insert a new cell.
+#[axum_macros::debug_handler]
 pub async fn insert_cell(
+    Extension(mut app_context): Extension<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(insert_cell_req): Json<InsertCellReq>,
-    Extension(mut app_context): Extension<AppContext>,
 ) -> Result<Rsp<Cell>, IdpGlobalError> {
     tracing::info!("access insert_cell api.");
 
@@ -118,9 +119,9 @@ pub struct AddCellReq {
 
 /// add_cell using the specific cell structure
 pub async fn add_cell(
+    Extension(mut app_context): Extension<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(add_cell_req): Json<AddCellReq>,
-    Extension(mut app_context): Extension<AppContext>,
 ) -> Result<Rsp<Cell>, IdpGlobalError> {
     tracing::info!("access add_cell api.cell_id:{:?}", add_cell_req.cell.id());
 
@@ -144,9 +145,9 @@ pub async fn add_cell(
 }
 
 pub async fn move_cell(
+    Extension(mut app_context): Extension<AppContext>,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(move_cell_req): Json<MoveCellReq>,
-    Extension(mut app_context): Extension<AppContext>,
 ) -> Result<Rsp<()>, IdpGlobalError> {
     tracing::info!(
         "access move_cell api. id:{},another_id:{}",

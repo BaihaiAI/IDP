@@ -23,13 +23,13 @@ use crate::api_model::TeamIdQueryString;
 use crate::app_context::AppContext;
 
 pub async fn put_cell(
+    Extension(app_context): Extension<AppContext>,
+    Query(TeamIdQueryString { team_id }): Query<TeamIdQueryString>,
     Json(PartialUpdateCellReq {
         path,
         project_id,
         cells,
     }): Json<PartialUpdateCellReq>,
-    Query(TeamIdQueryString { team_id }): Query<TeamIdQueryString>,
-    Extension(app_context): Extension<AppContext>,
 ) -> Result<Rsp<()>, ErrorTrace> {
     if cells.is_empty() {
         return Err(ErrorTrace::new("cells is empty"));

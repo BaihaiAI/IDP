@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::extract::ContentLengthLimit;
 use axum::extract::Multipart;
 use common_model::service::rsp::Rsp;
 use common_tools::io_tool::file_writer::FileState;
 
 use crate::handler::note_handler;
 
-const MAX_UPLOAD_SIZE: u64 = 1024 * 1024 * 10; // 10MB
-
+#[axum_macros::debug_handler]
 pub async fn upload_file(
-    ContentLengthLimit(multipart): ContentLengthLimit<Multipart, { MAX_UPLOAD_SIZE }>,
     file_state: axum::extract::Extension<FileState>,
+    multipart: Multipart,
 ) -> Result<Rsp<String>, err::ErrorTrace> {
     let writer = file_state.writer.clone();
 

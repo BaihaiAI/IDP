@@ -40,6 +40,8 @@ use crate::handler::state;
 use crate::handler::team_handler;
 use crate::handler::workspace as workspace_handler;
 
+const MAX_UPLOAD_SIZE: usize = 1024 * 1024 * 1024 * 10; // 10GB
+
 pub async fn init_router(
     project_info_map: Arc<Mutex<HashMap<String, HashMap<String, String>>>>,
     pg_option: Option<Pool<Postgres>>,
@@ -317,9 +319,7 @@ pub async fn init_router(
                             "/ipynbPreview",
                             on(MethodFilter::GET, content::ipynb_preview),
                         )
-                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell))
-                        // prevent 413 Payload Too Large
-                        .layer(axum::extract::DefaultBodyLimit::disable()),
+                        .route("/cell/move", on(MethodFilter::PUT, content::move_cell)), // prevent 413 Payload Too Large
                 )
                 .nest(
                     "/state",
@@ -366,4 +366,6 @@ pub async fn init_router(
                 }),
         )
         .layer(axum::extract::Extension(ctx))
+        .layer(axum::extract::DefaultBodyLimit::max(MAX_UPLOAD_SIZE))
+    // .layer(axum::extract::DefaultBodyLimit::disable())
 }

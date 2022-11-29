@@ -326,8 +326,8 @@ pub async fn edit_study_objective_code(
 
 pub async fn study_optimize_run(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Json(opt_run_req): Json<OptRunReq>,
     Extension(app_context): Extension<AppContext>,
+    Json(opt_run_req): Json<OptRunReq>,
 ) -> Result<Rsp<String>, IdpGlobalError> {
     let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
 

@@ -116,8 +116,8 @@ pub async fn file_rename(
 
 pub async fn file_dir_move(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
-    Json(workspace_move_req): Json<WorkspaceMove>,
     Extension(mut app_context): Extension<AppContext>,
+    Json(workspace_move_req): Json<WorkspaceMove>,
 ) -> Result<Rsp<()>, IdpGlobalError> {
     info!("access file_dir_move api");
     let team_id = get_cookie_value_by_team_id(cookies);
