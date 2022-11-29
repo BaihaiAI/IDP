@@ -91,7 +91,13 @@ async fn main() {
 
     let listen_addr = match args.listen_addr {
         Some(addr) => addr,
-        None => std::net::Ipv4Addr::LOCALHOST,
+        None => {
+            if cfg!(target_os = "linux") {
+                std::net::Ipv4Addr::UNSPECIFIED
+            } else {
+                std::net::Ipv4Addr::LOCALHOST
+            }
+        }
     };
     let addr = std::net::SocketAddr::from((listen_addr, gateway_port));
     let static_ = hyper_staticfile::Static::new(web_dir);

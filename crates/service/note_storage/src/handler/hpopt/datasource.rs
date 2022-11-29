@@ -126,13 +126,16 @@ pub async fn get_datasource_status_list(
             .map(|db_file_name| async move {
                 let db_url = get_dburl_by_db_file_name(team_id, project_id, db_file_name);
                 let pid = get_pid_by_name(&db_url).await;
-
-                DatasourceResp {
-                    name: db_file_name.to_string(),
-                    status: if pid.is_ok() {
-                        "running".to_string()
-                    } else {
-                        "stop".to_string()
+                match pid {
+                    Ok(pid) => DatasourceResp {
+                        name: db_file_name.clone(),
+                        status: "running".to_string(),
+                        port: get_backend_port_by_pid(pid).await,
+                    },
+                    Err(_e) => DatasourceResp {
+                        name: db_file_name.clone(),
+                        status: "stopped".to_string(),
+                        port: None,
                     },
                 }
             })
@@ -142,7 +145,27 @@ pub async fn get_datasource_status_list(
 
     Ok(resp)
 }
+async fn get_backend_port_by_pid(pid: u32) -> Option<u16> {
+    let output = tokio::process::Command::new("ps").arg("-ef").output().await;
+    if let Err(e) = output {
+        tracing::error!("get backend port by pid error: {}", e);
+        return None;
+    };
 
+    let output_str = String::from_utf8(output.unwrap().stdout).unwrap();
+    let lines = output_str.lines();
+    for line in lines {
+        if line.contains(pid.to_string().as_str()) {
+            let split = line.split_whitespace();
+            //port is last nth element
+            let port = split.last().unwrap();
+
+            return Some(port.parse::<u16>().unwrap());
+        }
+    }
+
+    None
+}
 #[cfg(not)]
 #[tokio::test]
 async fn test_datasource_list() {

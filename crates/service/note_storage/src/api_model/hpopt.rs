@@ -103,6 +103,7 @@ pub struct OptStateReq {
 pub struct DatasourceResp {
     pub name: String,
     pub status: String,
+    pub port: Option<u16>,
 }
 
 #[derive(Debug, Serialize)]
