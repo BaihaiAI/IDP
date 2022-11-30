@@ -79,8 +79,7 @@ async fn get_installed_extensions_config(
             content.sort();
             Ok(content)
         }
-        Err(err) => {
-            tracing::error!("{err}");
+        Err(_) => {
             let empty: Vec<InstalledExtensionResp> = Vec::new();
             Ok(empty)
         }
