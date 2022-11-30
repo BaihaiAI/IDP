@@ -177,6 +177,7 @@ pub async fn init_router(
                             "/backend/state",
                             on(MethodFilter::GET, hpopt::backend_state),
                         )
+                        .route("/study", on(MethodFilter::DELETE, hpopt::delete_study))
                         .route("/study/list", on(MethodFilter::GET, hpopt::list_study))
                         .route("/study/detail", on(MethodFilter::GET, hpopt::study_detail))
                         .route("/study/new", on(MethodFilter::POST, hpopt::study_new))
@@ -204,6 +205,7 @@ pub async fn init_router(
                             "/optimize/state",
                             on(MethodFilter::GET, hpopt::optimize_state),
                         )
+                        .route("/optimize/log", on(MethodFilter::GET, hpopt::optimize_log))
                 })
                 .nest("/project", {
                     Router::new()

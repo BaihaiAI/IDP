@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::process::Stdio;
-
 use business::business_term::ProjectId;
 use business::business_term::TeamId;
 use cache_io::CacheService;
 use cache_io::OptimizeState;
+use common_model::Rsp;
 use tokio::process::Child;
 use tokio::process::Command;
 use tracing::error;
@@ -101,12 +100,16 @@ pub async fn study_optimize_run(
     // get env python path
     let python_path = business::path_tool::get_conda_python_path(team_id, project_id);
 
-    let mut cmd = Command::new(python_path);
-    cmd.arg(opt_run_path)
-        .arg(n_trials.to_string())
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit());
+    let mut cmd = Command::new("bash");
+    //get log path
+    let log_path = format!("{}.out", opt_run_path,);
+    //redirect stdout and stderror to log file.
+    let command = format!(
+        "{} {} {} 1>{} 2>&1",
+        python_path, opt_run_path, n_trials, log_path
+    );
+    cmd.arg("-c").arg(command);
+
     tracing::info!("cmd: {:?}", cmd);
     let child = cmd.spawn()?;
     let timestamp = chrono::Local::now().timestamp();
@@ -198,4 +201,36 @@ async fn opt_state_monitor(mut child: Child, cache_service: CacheService, opt_st
             }
         }
     }
+}
+
+pub async fn optimize_log(
+    team_id: TeamId,
+    project_id: ProjectId,
+    study_id: i64,
+    db_name: String,
+) -> Result<Rsp<String>, IdpGlobalError> {
+    let opt_run_path =
+        business::path_tool::optimize_run_path(team_id, project_id, db_name, study_id);
+    let log_path = format!("{}.out", opt_run_path,);
+    let log_content = tokio::fs::read_to_string(log_path).await?;
+    Ok(Rsp::success(log_content))
+}
+
+#[tokio::test]
+async fn test_optimize_run_redirect() {
+    let python_path = "/Users/huangjin/miniconda3/envs/python39/bin/python";
+    let opt_run_path = "/store/19980923/projects/1001/hpopt/run/111.db/8.py";
+    let mut cmd = Command::new("bash");
+    //get log path
+    let log_path = format!("{}.out", opt_run_path,);
+    //redirect stdout and stderror to log file.
+    let command = format!(
+        "{} {} {} 1>{} 2>&1",
+        python_path, opt_run_path, "10", log_path
+    );
+    cmd.arg("-c").arg(command);
+    println!("cmd: {:?}", cmd);
+    let mut child = cmd.spawn().unwrap();
+    let status = child.wait().await.unwrap();
+    println!("status: {:?}", status);
 }
