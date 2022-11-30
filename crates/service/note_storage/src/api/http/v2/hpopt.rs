@@ -20,9 +20,11 @@ use common_tools::cookies_tools;
 use serde_json::json;
 use serde_json::Value;
 
+use crate::api_model::hpopt::CatLogReq;
 use crate::api_model::hpopt::DatasourceListReq;
 use crate::api_model::hpopt::DatasourceNewReq;
 use crate::api_model::hpopt::DatasourceResp;
+use crate::api_model::hpopt::DeleteStudyReq;
 use crate::api_model::hpopt::EditStudyCodeReq;
 use crate::api_model::hpopt::OptRunReq;
 use crate::api_model::hpopt::OptStateReq;
@@ -291,14 +293,27 @@ pub async fn study_new(
     // Ok(Rsp::success_without_data())
 }
 
-// pub async fn delete_study(
-//     team_id: TeamId,
-//     project_id: ProjectId,
-//     datasource_name: String,
-// ) -> Result<String, IdpGlobalError> {
+pub async fn delete_study(
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Query(delete_study_req): Query<DeleteStudyReq>,
+) -> Result<Json<Value>, IdpGlobalError> {
+    let port = get_hpopt_port_by_cookie(&cookies);
+    let ip_addr = format!("http://127.0.0.1:{}", port);
+    let url = format!("{}/api/studies/{}", &ip_addr, delete_study_req.study_id);
 
-//     //todo!
-// }
+    let resp = reqwest::Client::new()
+        .delete(&url)
+        .send()
+        .await?
+        .json::<Value>()
+        .await;
+    match resp {
+        Ok(resp) => Ok(Json(resp)),
+        Err(_e) => Ok(Json(json!({
+            "msg": "success",
+        }))),
+    }
+}
 
 // ///
 // /// about optimize
@@ -363,6 +378,21 @@ pub async fn optimize_state(
             .get_optimize_state(&opt_state_req.opt_state_key)
             .await?,
     ))
+}
+pub async fn optimize_log(
+    Query(cat_log_req): Query<CatLogReq>,
+    axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+) -> Result<Rsp<String>, IdpGlobalError> {
+    let team_id = cookies_tools::get_cookie_value_by_team_id(cookies);
+
+    //todo!
+    hpopt::optimize::optimize_log(
+        team_id,
+        cat_log_req.project_id,
+        cat_log_req.study_id,
+        cat_log_req.db_name,
+    )
+    .await
 }
 
 // backend-status

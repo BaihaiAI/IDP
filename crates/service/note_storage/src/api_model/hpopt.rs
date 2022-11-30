@@ -53,6 +53,12 @@ pub struct StudyDetailReq {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DeleteStudyReq {
+    pub study_id: StudyId,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StudyObjectiveCodeReq {
     pub study_id: StudyId,
     pub project_id: ProjectId,
@@ -96,6 +102,13 @@ pub struct OptRunReq {
 #[serde(rename_all = "camelCase")]
 pub struct OptStateReq {
     pub opt_state_key: String,
+}
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CatLogReq {
+    pub project_id: ProjectId,
+    pub db_name: String,
+    pub study_id: StudyId,
 }
 
 #[derive(Debug, Serialize)]
