@@ -19,7 +19,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use axum::extract::Query;
-use axum::Extension;
+use axum::extract::State;
 use common_model::service::rsp::Rsp;
 use err::ErrorTrace;
 use sqlx::FromRow;
@@ -56,11 +56,10 @@ pub struct PackageSearchRspItem {
     pub installed_version: Option<String>,
 }
 
-#[allow(clippy::unused_async)]
+#[axum_macros::debug_handler]
 pub async fn search(
     Query(package_search_req): Query<PackageSearchReq>,
-    Extension(pg_option): Extension<Option<sqlx::PgPool>>,
-    Extension(project_info_map): axum::extract::Extension<ProjectInfoMap>,
+    State((pg_option, project_info_map)): State<(Option<sqlx::PgPool>, ProjectInfoMap)>,
 ) -> Result<Rsp<PackageSearchRsp>, err::ErrorTrace> {
     tracing::info!("enter package_search function");
 
@@ -140,7 +139,7 @@ pub fn get_env_path(path: &str) -> Vec<String> {
     let dir_iter = match fs::read_dir(path) {
         Ok(x) => x,
         Err(err) => {
-            tracing::error!("panicked {path:?} {err}");
+            tracing::error!("team missing projects {path:?} {err}");
             return Vec::new();
         }
     };

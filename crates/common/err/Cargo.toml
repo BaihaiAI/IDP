@@ -9,7 +9,7 @@ axum = ["dep:axum", "dep:serde_json", "dep:tracing"]
 default = ["axum"]
 
 [dependencies]
-axum = { version = "0.5", default-features = false, features = [
+axum = { version = "0.6", default-features = false, features = [
     "json",
 ], optional = true }
 backtrace = "0.3"

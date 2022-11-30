@@ -88,11 +88,11 @@ pub struct StartTensorboardResp {
 }
 
 pub async fn start_tensorboard(
-    Json(req): Json<StartTensorboardReq>,
     axum::TypedHeader(cookies): axum::TypedHeader<Cookies>,
     project_id_tensorboard_port_mapping: axum::extract::Extension<
         Arc<Mutex<BTreeMap<ProjectId, TensorboardEntry>>>,
     >,
+    Json(req): Json<StartTensorboardReq>,
 ) -> Result<Rsp<StartTensorboardResp>, ErrorTrace> {
     let team_id = get_cookie_value_by_team_id(cookies);
     info!("--> start_tensorboard: team_id={team_id}, req={req:?}");
@@ -152,11 +152,11 @@ pub struct TensorboardReq {
 }
 
 pub async fn stop_tensorboard(
-    Json(req): Json<TensorboardReq>,
     project_id_tensorboard_port_mapping: axum::extract::Extension<
         Arc<Mutex<BTreeMap<ProjectId, TensorboardEntry>>>,
     >,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Json(req): Json<TensorboardReq>,
 ) -> Result<Rsp<()>, ErrorTrace> {
     let team_id = get_cookie_value_by_team_id(cookies);
     let region = business::region::REGION.clone();
@@ -177,11 +177,11 @@ pub async fn stop_tensorboard(
 }
 
 pub async fn tensorboard_info(
-    Json(req): Json<TensorboardReq>,
     project_id_tensorboard_port_mapping: axum::extract::Extension<
         Arc<Mutex<BTreeMap<ProjectId, TensorboardEntry>>>,
     >,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    Json(req): Json<TensorboardReq>,
 ) -> Result<Rsp<Option<StartTensorboardResp>>, IdpGlobalError> {
     let team_id = get_cookie_value_by_team_id(cookies.clone());
     let region = business::region::REGION.clone();

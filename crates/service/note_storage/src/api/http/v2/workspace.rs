@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::extract::Extension;
 use axum::extract::Query;
+use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::Json;
 use business::path_tool;
@@ -116,8 +116,8 @@ pub async fn file_rename(
 
 pub async fn file_dir_move(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
+    State(mut app_context): State<AppContext>,
     Json(workspace_move_req): Json<WorkspaceMove>,
-    Extension(mut app_context): Extension<AppContext>,
 ) -> Result<Rsp<()>, IdpGlobalError> {
     info!("access file_dir_move api");
     let team_id = get_cookie_value_by_team_id(cookies);
@@ -307,7 +307,7 @@ pub async fn dir_new(
 pub async fn export_as(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Query(payload): Query<WorkspaceFile>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> impl IntoResponse {
     info!("access export_as api");
     let (path, output_type_op, project_id) =
@@ -329,7 +329,7 @@ pub async fn export_as(
 pub async fn convert_to(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Query(payload): Query<WorkspaceFile>,
-    Extension(app_context): Extension<AppContext>,
+    State(app_context): State<AppContext>,
 ) -> impl IntoResponse {
     info!("access export_as api");
     let (path, output_type_op, project_id) =

@@ -9,7 +9,7 @@ source ./scripts/release_version.sh
 toolchain=$(rustup show active-toolchain)
 
 # since some npm package require proxy, must run with proxy in host machine `cd web && npm install` before docker build
-img=idp.baihai.ai/idp-note
+img=baihaiopensource/idp-studio
 if [[ $toolchain == *"aarch64-apple"* ]]; then 
 # mac M1 would error when compile vender C/C++ code
 docker build -t $img -f Dockerfile --target release --progress plain --platform linux/x86_64 .

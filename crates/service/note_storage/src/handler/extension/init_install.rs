@@ -49,6 +49,9 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
 
     if !extension_config_path.exists() {
         std::fs::create_dir_all(&installed_extensions_path)?;
+    } else {
+        std::fs::remove_dir_all(&installed_extensions_path)?;
+        std::fs::create_dir_all(&installed_extensions_path)?;
     }
 
     let recommended_extensions_path = business::path_tool::recommended_extensions();

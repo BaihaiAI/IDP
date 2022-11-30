@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use axum::extract::Query;
-use axum::Extension;
+use axum::extract::State;
 use axum::Json;
 use common_model::api_model::PartialUpdateCellReq;
 use common_model::service::rsp::Rsp;
@@ -23,13 +23,13 @@ use crate::api_model::TeamIdQueryString;
 use crate::app_context::AppContext;
 
 pub async fn put_cell(
+    State(app_context): State<AppContext>,
+    Query(TeamIdQueryString { team_id }): Query<TeamIdQueryString>,
     Json(PartialUpdateCellReq {
         path,
         project_id,
         cells,
     }): Json<PartialUpdateCellReq>,
-    Query(TeamIdQueryString { team_id }): Query<TeamIdQueryString>,
-    Extension(app_context): Extension<AppContext>,
 ) -> Result<Rsp<()>, ErrorTrace> {
     if cells.is_empty() {
         return Err(ErrorTrace::new("cells is empty"));
