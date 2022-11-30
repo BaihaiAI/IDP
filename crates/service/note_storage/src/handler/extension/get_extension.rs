@@ -32,6 +32,7 @@ pub async fn get_extension() {
         let origin_url = format!("{extension_url}/extensions_config.json");
         let mut cmd = tokio::process::Command::new(US3CLI_DEST);
         cmd.arg("cp").arg(&origin_url).arg(&dest_path);
+        tracing::info!("{:?}", cmd);
         let extension_resp_new = match cmd
             .spawn()
             .expect("can't get current extension_config")
@@ -109,6 +110,7 @@ pub async fn get_remote_extension(name: &str) {
     }
     let mut cmd = tokio::process::Command::new(US3CLI_DEST);
     cmd.arg("cp").arg("-r").arg(&origin_url).arg(&dest_path);
+    tracing::info!("{:?}", cmd);
     match cmd
         .spawn()
         .expect("can't get current extension_config")
