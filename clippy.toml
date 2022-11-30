@@ -7,7 +7,7 @@ await-holding-invalid-types = [
 ]
 disallowed-methods = [
     { path = "axum::extract::Extension", reason = "We recommend migrating from Extension to State for sharing application state since that is more type safe and faster." },
-    { path = "axum::Extension", reason = "We recommend migrating from Extension to State for sharing application state since that is more type safe and faster." }
+    { path = "axum::Extension", reason = "We recommend migrating from Extension to State for sharing application state since that is more type safe and faster." },
     # { path = "std::iter::Iterator::zip", reason = "if a.len() > b.len(), a.zip(b) would lost some elements in a" },
 ]
 too-many-arguments-threshold = 12
