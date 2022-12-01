@@ -24,7 +24,7 @@ use crate::handler::project_handler;
 
 // #[axum_macros::debug_handler]
 pub async fn new(
-    file_state: axum::extract::Extension<FileState>,
+    file_state: axum::extract::State<FileState>,
     multipart: Multipart,
 ) -> Result<Rsp<String>, err::ErrorTrace> {
     let writer = file_state.writer.clone();

@@ -89,7 +89,7 @@ pub struct StartTensorboardResp {
 
 pub async fn start_tensorboard(
     axum::TypedHeader(cookies): axum::TypedHeader<Cookies>,
-    project_id_tensorboard_port_mapping: axum::extract::Extension<
+    project_id_tensorboard_port_mapping: axum::extract::State<
         Arc<Mutex<BTreeMap<ProjectId, TensorboardEntry>>>,
     >,
     Json(req): Json<StartTensorboardReq>,
@@ -152,7 +152,7 @@ pub struct TensorboardReq {
 }
 
 pub async fn stop_tensorboard(
-    project_id_tensorboard_port_mapping: axum::extract::Extension<
+    project_id_tensorboard_port_mapping: axum::extract::State<
         Arc<Mutex<BTreeMap<ProjectId, TensorboardEntry>>>,
     >,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
@@ -177,7 +177,7 @@ pub async fn stop_tensorboard(
 }
 
 pub async fn tensorboard_info(
-    project_id_tensorboard_port_mapping: axum::extract::Extension<
+    project_id_tensorboard_port_mapping: axum::extract::State<
         Arc<Mutex<BTreeMap<ProjectId, TensorboardEntry>>>,
     >,
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
