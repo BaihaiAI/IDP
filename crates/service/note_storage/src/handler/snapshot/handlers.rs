@@ -154,14 +154,11 @@ pub async fn snapshot_diff(
         }
     };
     let notebook2 = serde_json::from_str::<Notebook>(&snap2.content)?;
-    let handle = tokio::task::spawn_blocking(|| diff_notebook1_notebook2(notebook1, notebook2));
-
-    match handle.await {
-        Ok(res) => Ok(res?),
+    match diff_notebook1_notebook2(notebook1, notebook2).await {
+        Ok(res) => Ok(res),
         Err(_) => {
             tracing::warn!("snapshot {key}");
             Err(ErrorTrace::new("diff err"))
         }
     }
-    // Ok(diff_notebook1_notebook2(notebook1, notebook2)?)
 }

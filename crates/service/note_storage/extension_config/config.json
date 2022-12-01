@@ -13,7 +13,8 @@
         "tensorboard",
         "monitor",
         "feedback",
-        "contact"
+        "contact",
+        "optuna"
     ],
     "invisible":[
         "teams",

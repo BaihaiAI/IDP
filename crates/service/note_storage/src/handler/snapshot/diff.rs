@@ -361,7 +361,7 @@ impl SnapshotDiffRes {
     }
 }
 
-pub fn diff_notebook1_notebook2(
+pub async fn diff_notebook1_notebook2(
     notebook1: Notebook,
     notebook2: Notebook,
 ) -> Result<SnapshotDiffRes, std::num::ParseIntError> {

@@ -17,6 +17,7 @@ const US3CLI_DEST: &str = "/home/ray/us3cli-linux64";
 
 pub async fn get_extension() {
     loop {
+        tracing::info!("run get_extension");
         let store_path = business::path_tool::recommended_extensions();
         let extension_path = store_path.join("extensions_config.json");
         let extension_resp = match get_extensions_config(&extension_path).await {
@@ -31,7 +32,7 @@ pub async fn get_extension() {
         let extension_url = get_extension_url().await;
         let origin_url = format!("{extension_url}/extensions_config.json");
         let mut cmd = tokio::process::Command::new(US3CLI_DEST);
-        cmd.arg("cp").arg(&origin_url).arg(&dest_path);
+        cmd.arg("cp").arg("-f").arg(&origin_url).arg(&dest_path);
         tracing::info!("{:?}", cmd);
         let extension_resp_new = match cmd
             .spawn()
@@ -109,7 +110,7 @@ pub async fn get_remote_extension(name: &str) {
         };
     }
     let mut cmd = tokio::process::Command::new(US3CLI_DEST);
-    cmd.arg("cp").arg("-r").arg(&origin_url).arg(&dest_path);
+    cmd.arg("cp").arg("-r").arg("-f").arg(&origin_url).arg(&dest_path);
     tracing::info!("{:?}", cmd);
     match cmd
         .spawn()
