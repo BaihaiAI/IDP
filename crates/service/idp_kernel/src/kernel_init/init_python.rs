@@ -77,7 +77,7 @@ pub fn init_python(
         .unwrap();
     sys_path.insert(0, "").unwrap();
     #[cfg(unix)]
-    let home_dir = std::env::var("HOME").unwrap();
+    let home_dir = std::env::var("HOME").unwrap_or_else(|_| "/root".to_string());
     #[cfg(windows)]
     let home_dir = std::env::var("HOMEPATH").unwrap();
     let custom_packages_dir = format!("{home_dir}/.idp/custom_python_packages");

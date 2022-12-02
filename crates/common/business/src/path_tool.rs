@@ -26,7 +26,7 @@ use crate::business_term::UserId;
 
 static STORE_PARENT_DIR: Lazy<PathBuf> = Lazy::new(|| {
     #[cfg(unix)]
-    let home_dir = std::env::var("HOME").unwrap();
+    let home_dir = std::env::var("HOME").unwrap_or_else(|_| "/root".to_string());
     #[cfg(windows)]
     let home_drive_dir = std::env::var("HOMEDRIVE").unwrap();
     #[cfg(windows)]

@@ -121,10 +121,10 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         let output = std::process::Command::new("which")
             .arg("python3")
             .output()
-            .unwrap();
+            .expect("which python3");
         assert!(output.status.success(), "which python3 err");
-        let python3_real_path = String::from_utf8_lossy(&output.stdout);
-        let python3_real_path = python3_real_path.trim_end();
+        let which_python_output = String::from_utf8_lossy(&output.stdout);
+        let python3_real_path = which_python_output.trim_end();
         // let mut realpath_output = [0u8; libc::PATH_MAX];
         let mut realpath_output = [0u8; 4096];
         tracing::debug!("{python3_real_path}");
@@ -142,6 +142,7 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         let ret = String::from_utf8(realpath_output.to_vec()).unwrap();
         ret.trim_end_matches('0').to_string()
     };
+    tracing::info!("python3_real_path = {python3_real_path}");
     #[cfg(unix)]
     let conda_env_name_root = business::path_tool::get_conda_env_name_root(
         header.team_id,
@@ -162,10 +163,15 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         let package_lib_path = exe_parent_dir.join("lib");
         let package_lib_path = package_lib_path.to_str().unwrap();
 
-        let ld_library_path = format!(
-            "{conda_env_name_root}/lib:{python_lib_path}:{package_lib_path}:{}",
-            std::env::var("LD_LIBRARY_PATH").unwrap_or_default()
-        );
+        let default_ld_lib_path = std::env::var("LD_LIBRARY_PATH").unwrap_or_default();
+        let ld_library_path = if default_ld_lib_path.is_empty() {
+            format!("{conda_env_name_root}/lib:{python_lib_path}:{package_lib_path}",)
+        } else {
+            format!(
+                "{conda_env_name_root}/lib:{python_lib_path}:{package_lib_path}:{}",
+                default_ld_lib_path
+            )
+        };
 
         tracing::debug!(
             "which python3 = {python3_real_path}\nLD_LIBRARY_PATH = {ld_library_path:?}"
@@ -222,17 +228,19 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         ),
     );
     #[cfg(unix)]
-    env.insert(
-        "PYTHONHOME",
-        std::path::Path::new(&python3_real_path)
-            .parent()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string(),
-    );
+    if !python3_real_path.starts_with("/usr/bin") {
+        env.insert(
+            "PYTHONHOME",
+            std::path::Path::new(&python3_real_path)
+                .parent()
+                .unwrap()
+                .parent()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string(),
+        );
+    }
 
     tracing::info!("{command:#?}\nenv={env:#?}");
     for (k, v) in env {
