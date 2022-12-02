@@ -5,8 +5,9 @@ name = "err"
 version.workspace = true
 
 [features]
-axum = ["dep:axum", "dep:serde_json", "dep:tracing"]
 default = ["axum"]
+
+axum = ["dep:axum", "dep:serde_json", "dep:tracing"]
 
 [dependencies]
 axum = { version = "0.6", default-features = false, features = [

@@ -5,8 +5,9 @@ name = "common_model"
 version.workspace = true
 
 [features]
-axum = ["dep:axum"]
 default = ["axum"]
+
+axum = ["dep:axum"]
 
 [dependencies]
 #serde_helper = { path = "../serde_helper" }

@@ -60,8 +60,8 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
     let python_minor_version = get_python_minor_version("python3");
     #[cfg(windows)]
     let python_minor_version = get_python_minor_version("python");
-    if python_minor_version < 8 {
-        return Err(ErrorTrace::new("only support python version >= 3.8"));
+    if python_minor_version < 7 {
+        return Err(ErrorTrace::new("only support python version >= 3.7"));
     }
 
     // tokio::fs::File has no into_raw_fd

@@ -99,20 +99,3 @@ pub async fn pip_uninstall(req: Request<Body>) -> Result<Resp<()>, Error> {
     }
     Ok(Resp::success(()))
 }
-
-/*
-#[test]
-fn test_ensure_py_installed_dir() {
-    let py_bin = String::from("/tmp/aa/bb/bin/python");
-    ensure_python2user_install_dir_exist(&py_bin);
-    assert!(Path::new("/tmp/aa/bb/pm_installed").exists())
-}
-
-#[tokio::test]
-async fn test_install_bs4() {
-    let py_bin = String::from("/home/miniconda3/envs/lz_ray/bin/python");
-    let package = String::from("pandas");
-    let version = String::from("1.4.0");
-    let m = real_install(py_bin, package, version).await;
-}
-*/

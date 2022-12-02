@@ -5,9 +5,10 @@ name = "common_tools"
 version.workspace = true
 
 [features]
-cookie = ["axum"]
 default = ["io", "cookie"]
-io = ["chrono"]
+
+cookie = ["dep:axum"]
+io = ["dep:chrono"]
 
 [dependencies]
 business = { path = "../business" }
