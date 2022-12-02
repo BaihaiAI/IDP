@@ -217,7 +217,7 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         } else {
             unreachable!()
         },
-        ld_library_path.to_string(),
+        ld_library_path,
     );
     #[cfg(unix)]
     env.insert(
