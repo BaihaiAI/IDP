@@ -128,9 +128,22 @@ async fn main() {
     let url = format!("http://{addr}");
     #[cfg(feature = "license")]
     let url = format!("http://{addr}?token={}", gateway::TOKEN.get().unwrap());
+    #[cfg(not(target_os = "linux"))]
     if let Err(err) = cmd.arg(&url).spawn() {
         tracing::warn!("open browser err: {open_cmd} {err}");
     }
+    #[cfg(target_os = "linux")]
+    {
+        let xdg_session_type = std::env::var("XDG_SESSION_TYPE").unwrap_or_default();
+        tracing::info!("xdg_session_type = {xdg_session_type}");
+        if !xdg_session_type.is_empty() && xdg_session_type != "tty" {
+            // if display server is x11 or wayland
+            if let Err(err) = cmd.arg(&url).spawn() {
+                tracing::warn!("open browser err: {open_cmd} {err}");
+            }
+        }
+    }
+
     tracing::info!("{url}");
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);
