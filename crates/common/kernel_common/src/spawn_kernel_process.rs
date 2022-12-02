@@ -197,41 +197,47 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         .arg(base64::encode(serde_json::to_string(&header).unwrap()))
         .arg(pod_id.to_string())
         .current_dir(working_directory);
+    let mut env = std::collections::HashMap::new();
+    env.insert(
+        "MPLBACKEND",
+        "module://baihai_matplotlib_backend".to_string(),
+    );
     #[cfg(unix)]
-    command
-        .env(
-            if cfg!(target_os = "linux") {
-                "LD_LIBRARY_PATH"
-            } else if cfg!(target_os = "macos") {
-                "DYLD_LIBRARY_PATH"
-            } else {
-                unreachable!()
-            },
-            ld_library_path,
-        )
-        .env(
-            "PATH",
-            format!(
-                "{conda_env_name_root}/bin:/usr/bin:/usr/sbin:{}",
-                std::env::var("PATH").unwrap_or_default()
-            ),
-        );
-    command
-        .env("MPLBACKEND", "module://baihai_matplotlib_backend")
-        .env("RUST_BACKTRACE", "1");
-    #[cfg(target_os = "macos")]
-    if python3_real_path.contains("conda") {
-        command.env(
-            "PYTHONHOME",
-            std::path::Path::new(&python3_real_path)
-                .parent()
-                .unwrap()
-                .parent()
-                .unwrap(),
-        );
-    }
+    env.insert(
+        if cfg!(target_os = "linux") {
+            "LD_LIBRARY_PATH"
+        } else if cfg!(target_os = "macos") {
+            "DYLD_LIBRARY_PATH"
+        } else {
+            unreachable!()
+        },
+        ld_library_path.to_string(),
+    );
+    #[cfg(unix)]
+    env.insert(
+        "PATH",
+        format!(
+            "{conda_env_name_root}/bin:/usr/bin:/usr/sbin:{}",
+            std::env::var("PATH").unwrap_or_default()
+        ),
+    );
+    #[cfg(unix)]
+    env.insert(
+        "PYTHONHOME",
+        std::path::Path::new(&python3_real_path)
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string(),
+    );
 
-    tracing::info!("{command:?}");
+    tracing::info!("{command:#?}\nenv={env:#?}");
+    for (k, v) in env {
+        command.env(k, v);
+    }
     let mut child = command.spawn()?;
     std::thread::Builder::new().name("wait_kernel".to_string()).spawn(move || {
         /*
