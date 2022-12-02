@@ -110,7 +110,11 @@ pub async fn get_remote_extension(name: &str) {
         };
     }
     let mut cmd = tokio::process::Command::new(US3CLI_DEST);
-    cmd.arg("cp").arg("-r").arg("-f").arg(&origin_url).arg(&dest_path);
+    cmd.arg("cp")
+        .arg("-r")
+        .arg("-f")
+        .arg(&origin_url)
+        .arg(&dest_path);
     tracing::info!("{:?}", cmd);
     match cmd
         .spawn()

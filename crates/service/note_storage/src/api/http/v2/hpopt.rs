@@ -34,6 +34,7 @@ use crate::api_model::hpopt::StudyDetailReq;
 use crate::api_model::hpopt::StudyNewReq;
 use crate::api_model::hpopt::StudyObjectiveCodeReq;
 use crate::api_model::hpopt::StudyObjectiveCodeResp;
+use crate::api_model::hpopt::StudyOptimizeRunListReq;
 use crate::app_context::AppContext;
 use crate::common::error::IdpGlobalError;
 use crate::handler::hpopt;
@@ -337,6 +338,32 @@ pub async fn edit_study_objective_code(
     hpopt::study::edit_study_objective_code(edit_study_code_req.path, edit_study_code_req.content)
         .await?;
     Ok(Rsp::success_without_data())
+}
+pub async fn study_optimize_run_list(
+    Query(study_optimize_run_list_req): Query<StudyOptimizeRunListReq>,
+    State(app_context): State<AppContext>,
+) -> Result<Rsp<Vec<cache_io::OptimizeStatus>>, IdpGlobalError> {
+    match app_context
+        .redis_cache
+        .get_optimize_list(
+            study_optimize_run_list_req.project_id,
+            study_optimize_run_list_req.db_name,
+        )
+        .await
+    {
+        Ok(list) => {
+            //filter: reserve optstatus that running state.
+            let list = list
+                .into_iter()
+                .filter(|optstatus| {
+                    // just reserve running state.
+                    matches!(optstatus.state, cache_io::OptimizeState::Running)
+                })
+                .collect::<Vec<cache_io::OptimizeStatus>>();
+            Ok(Rsp::success(list))
+        }
+        Err(err) => Err(IdpGlobalError::from(err)),
+    }
 }
 
 pub async fn study_optimize_run(
