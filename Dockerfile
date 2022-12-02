@@ -149,6 +149,8 @@ COPY --from=builder /idp-note/dist/kernel_py39 /root/IDPStudio/bin/
 COPY --from=builder /idp-note/dist/kernel_py310 /root/IDPStudio/bin/
 COPY --from=builder /idp-note/dist/license_generator /root/IDPStudio/bin/
 COPY --from=builder /idp-note/dist/README.md /root/IDPStudio/
+COPY docker_build/baihai_aid-2.0-py3-none-any.whl /root/IDPStudio/
+RUN pip install /root/IDPStudio/baihai_aid-2.0-py3-none-any.whl
 
 FROM base as debug
 # copy files to /root/IDPStudio

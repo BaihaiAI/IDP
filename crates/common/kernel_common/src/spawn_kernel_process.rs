@@ -27,11 +27,13 @@ pub struct SpawnKernel {
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Resource {
-    /// unit GB
+    /// memory GB
+    /// current setting memory limit is 1/3 of memory request (spec.containers[].resources.requests.cpu)
     pub memory: f64,
     /// core count of cpu, 0.25 means 25% of one core
     pub num_cpu: f64,
-    /// device count of gpu
+    /// saas version   :
+    /// private version: device count of gpu
     pub num_gpu: f64,
     /// 1-100
     pub priority: u8,
