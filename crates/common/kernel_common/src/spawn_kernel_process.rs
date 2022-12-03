@@ -35,7 +35,7 @@ pub struct Resource {
     pub num_cpu: f64,
     /// saas version   :
     /// private version: device count of gpu
-    pub num_gpu: f64,
+    pub num_gpu: u16,
     /// 1-100
     pub priority: u8,
     pub pod_id: Option<String>,
@@ -47,7 +47,7 @@ impl Default for Resource {
         Self {
             memory: 0.9,
             num_cpu: 0.9,
-            num_gpu: 0.0,
+            num_gpu: 0,
             priority: 3,
             pod_id: None,
         }
@@ -289,41 +289,58 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
         spawn_kernel_process(arg.header)?;
         return Ok(());
     }
-    // let hostname = kernel_common::cluster_header_hostname(header.team_id);
-    let url = format!("http://127.0.0.1:{}/start_kernel", 9240);
-    let timeout_secs = 75;
     let client = reqwest::ClientBuilder::new()
-        .timeout(std::time::Duration::from_secs(timeout_secs))
+        .timeout(std::time::Duration::from_secs(75))
         .build()?;
-    let resp = match client.post(&url).json(&arg).send().await {
-        Ok(resp) => resp,
-        Err(err) => {
-            if err.is_timeout() {
-                return Err(ErrorTrace::new("request to submitter timeout"));
+    let project_id = arg.header.project_id;
+    if !business::kubernetes::runtime_pod_is_running(project_id) {
+        let url = format!("http://127.0.0.1:9240/cluster/runtime/start");
+        let resp = match client
+            .post(&url)
+            .json(&serde_json::json!({
+                "projectId": arg.header.project_id,
+                "resource": arg.resource
+            }))
+            .header(
+                reqwest::header::COOKIE,
+                format!("teamId={}", arg.header.team_id),
+            )
+            .send()
+            .await
+        {
+            Ok(resp) => resp,
+            Err(err) => {
+                if err.is_timeout() {
+                    return Err(ErrorTrace::new("request to submitter timeout"));
+                }
+                return Err(ErrorTrace::new(&err.to_string()));
             }
-            return Err(ErrorTrace::new(&err.to_string()));
-        }
-    };
-
-    let http_status_code = resp.status();
-    if http_status_code.is_success() {
-        // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
-        return Ok(());
-    }
-
-    let status = resp.status();
-    tracing::warn!("submitter resp status = {status}");
-    if status.as_u16() != reqwest::StatusCode::TOO_MANY_REQUESTS {
-        // if server response please retry
-        let err_msg = if status.as_u16() == 500 {
-            "submitter raise Exception".to_string()
-        } else {
-            resp.text().await?
         };
-        return Err(ErrorTrace::new(&format!("kernel start fail {err_msg}")));
+        let http_status_code = resp.status();
+        if !http_status_code.is_success() {
+            // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
+            return Err(ErrorTrace::new("submitter rsp fail"));
+        }
+    }
+    if !business::kubernetes::runtime_pod_is_running(project_id) {
+        return Err(ErrorTrace::new("start runtime pod fail"));
     }
 
-    Err(ErrorTrace::new("kernel start max retry exceed"))
+    let start_kernel_url = format!(
+        "http://{}:{}/start_kernel",
+        business::kubernetes::runtime_pod_svc(project_id),
+        business::spawner_port()
+    );
+    let rsp = client
+        .post(start_kernel_url)
+        .json(&arg.header)
+        .send()
+        .await?;
+    if !rsp.status().is_success() {
+        return Err(ErrorTrace::new("spawner rsp fail"));
+    }
+
+    Ok(())
 }
 
 fn get_python_minor_version(python_path: &str) -> u8 {

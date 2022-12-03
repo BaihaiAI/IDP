@@ -37,13 +37,16 @@ pub static ACCOUNT: Lazy<String> = Lazy::new(|| {
     account.to_string()
 });
 
-pub fn runtime_pod_is_running() -> bool {
+pub fn runtime_pod_svc(project_id: u64) -> String {
     let region = &*REGION;
     let account = &*ACCOUNT;
-    let pod_id = format!("{account}-runtime");
+    let pod_id = format!("{account}-{project_id}-runtime");
     let platform = "idp-kernel";
-    let svc = format!("{platform}-{region}-{pod_id}-svc");
-    std::net::TcpStream::connect(format!("{svc}:8089")).is_ok()
+    format!("{platform}-{region}-{pod_id}-svc")
+}
+
+pub fn runtime_pod_is_running(project_id: u64) -> bool {
+    std::net::TcpStream::connect(format!("{}:8089", runtime_pod_svc(project_id))).is_ok()
 }
 
 #[allow(unreachable_code)]

@@ -43,12 +43,14 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
                 req.resource.priority
             )));
         }
+        /*
         if req.resource.num_gpu < 0.0 {
             return Err(Error::new(&format!(
                 "gpu must greater than 0, your setting is {}",
                 req.resource.num_gpu
             )));
         }
+        */
     }
 
     let header = req.header.clone();

@@ -12,13 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
 
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectId {
+    project_id: u64,
+}
+
 #[allow(clippy::unused_async)]
-pub async fn runtime_pod_status() -> Result<Rsp<bool>, ErrorTrace> {
+pub async fn runtime_pod_status(
+    Query(ProjectId { project_id }): Query<ProjectId>,
+) -> Result<Rsp<bool>, ErrorTrace> {
     if !business::kubernetes::is_k8s() {
         return Ok(Rsp::success(true));
     }
-    Ok(Rsp::success(business::kubernetes::runtime_pod_is_running()))
+    Ok(Rsp::success(business::kubernetes::runtime_pod_is_running(
+        project_id,
+    )))
 }
