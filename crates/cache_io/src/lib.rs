@@ -22,6 +22,7 @@ pub use common_model::entity::cell::Updates;
 use common_model::entity::notebook::Notebook;
 use err::ErrorTrace;
 pub use keys::snapshot_key;
+use serde::Serialize;
 
 pub use crate::redis::CacheService;
 pub(crate) const IPYNB_CACHE_TTL: usize = 12 * 60;
@@ -59,10 +60,18 @@ impl std::fmt::Display for CloneState {
         }
     }
 }
+#[derive(Serialize)]
 pub enum OptimizeState {
     Running,
     Success,
     Failed,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OptimizeStatus {
+    pub state: OptimizeState,
+    pub opt_run_key: String,
+    pub study_id: u32,
 }
 impl std::fmt::Display for OptimizeState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

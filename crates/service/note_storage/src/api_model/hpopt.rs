@@ -87,6 +87,12 @@ pub struct EditStudyCodeReq {
     pub content: String,
     pub path: String,
 }
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StudyOptimizeRunListReq {
+    pub project_id: ProjectId,
+    pub db_name: String,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
