@@ -2,11 +2,10 @@
 set -exu
 
 remote=ucloud
-namespace=idp #kubectl config set-context --current --namespace=$namespace
+namespace=nightly
 binary=note_storage
-region=a
-team_id=executor
-#node_name=ray-idp-raycluster-a-executor-head
+region=b
+team_id=$(ssh $remote "kubectl -n $namespace exec svc/postgres-inner -- psql -U postgres -d idp_prod_saas -c \"select team_id from user_info where username='hr@baihai.ai'\" --no-align  --tuples-only")
 pod=$(ssh ucloud "kubectl -n $namespace get pod -l app=idp-develop-$region-$team_id -o custom-columns=:metadata.name --no-headers")
 if [ -z "${pod}" ]; then
     echo "pod not found" && exit 1
