@@ -7,8 +7,9 @@ version.workspace = true
 [dependencies]
 business = { path = "../../common/business" }
 common_model = { path = "../../common/model" }
-kernel_common = { path = "../../common/kernel_common" }
 err = { path = "../../common/err" }
+kernel_common = { path = "../../common/kernel_common" }
+logger = { path = "../../common/logger" }
 
 axum = { version = "0.6" }
 tracing = "0.1"
