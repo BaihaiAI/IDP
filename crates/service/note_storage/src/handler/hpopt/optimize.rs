@@ -241,6 +241,7 @@ pub async fn optimize_log(
     Ok(Rsp::success(log_content))
 }
 
+#[cfg(not)]
 #[tokio::test]
 async fn test_optimize_run_redirect() {
     let python_path = "/Users/huangjin/miniconda3/envs/python39/bin/python";

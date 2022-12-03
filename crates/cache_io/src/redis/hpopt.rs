@@ -37,8 +37,8 @@ impl CacheService {
         &self,
         opt_key: &str,
     ) -> core::result::Result<Option<String>, ErrorTrace> {
-        let key = format!("{}{}", crate::keys::OPTIMIZE_STATE_PREFIX, opt_key);
-        match self.pool.get().await?.get(key).await {
+        // let key = format!("{}{}", crate::keys::OPTIMIZE_STATE_PREFIX, opt_key);
+        match self.pool.get().await?.get(opt_key).await {
             Ok(opt_state) => Ok(opt_state),
             Err(err) => {
                 tracing::error!("failed to get opt_state:{}", err);
