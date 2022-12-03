@@ -210,6 +210,10 @@ pub async fn init_router(
                             on(MethodFilter::GET, hpopt::optimize_state),
                         )
                         .route("/optimize/log", on(MethodFilter::GET, hpopt::optimize_log))
+                        .route(
+                            "/optimize/list",
+                            on(MethodFilter::GET, hpopt::study_optimize_run_list),
+                        )
                 })
                 .nest("/project", {
                     Router::new()

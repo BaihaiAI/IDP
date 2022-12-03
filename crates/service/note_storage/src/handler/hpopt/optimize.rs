@@ -23,6 +23,7 @@ use tracing::error;
 use tracing::info;
 
 use crate::common::error::IdpGlobalError;
+use crate::status_code;
 
 pub async fn get_optimize_objective_example_names() -> Result<Vec<String>, std::io::Error> {
     // get datasource dir path
@@ -93,7 +94,13 @@ pub async fn study_optimize_run(
     // get db_url
     let db_url = super::control::get_dburl_by_db_file_name(team_id, project_id, &db_name);
     let opt_run_path = create_opt_python_file(
-        content, db_name, db_url, study_name, study_id, team_id, project_id,
+        content,
+        db_name.clone(),
+        db_url,
+        study_name,
+        study_id,
+        team_id,
+        project_id,
     )
     .await?;
 
@@ -112,17 +119,35 @@ pub async fn study_optimize_run(
 
     tracing::info!("cmd: {:?}", cmd);
     let child = cmd.spawn()?;
-    let timestamp = chrono::Local::now().timestamp();
-    let opt_state_key = format!("{}_{}", timestamp, child.id().unwrap_or(923));
 
+    if child.id().is_none() {
+        return Err(IdpGlobalError::ErrorCodeMsg(
+            status_code::HPOPT_RUN_START_FAIL_CODE,
+            status_code::HPOPT_RUN_START_FAIL_MSG.to_string(),
+        ));
+    }
+    let opt_run_key = opt_run_key(project_id, db_name, study_id, child.id().unwrap());
     tokio::spawn(opt_state_monitor(
         child,
         redis_cache.clone(),
-        opt_state_key.clone(),
+        opt_run_key.clone(),
     ));
     //
 
-    Ok(opt_state_key)
+    Ok(opt_run_key)
+}
+
+#[inline]
+fn opt_run_key(project_id: ProjectId, db_name: String, study_id: i64, pid: u32) -> String {
+    // format : project_id:db_name:study_id:pid
+    format!(
+        "{}{}:{}:{}:{}",
+        cache_io::keys::OPTIMIZE_STATE_PREFIX,
+        project_id,
+        db_name,
+        study_id,
+        pid
+    )
 }
 async fn create_opt_python_file(
     fun_content: String,
@@ -216,6 +241,7 @@ pub async fn optimize_log(
     Ok(Rsp::success(log_content))
 }
 
+#[cfg(not)]
 #[tokio::test]
 async fn test_optimize_run_redirect() {
     let python_path = "/Users/huangjin/miniconda3/envs/python39/bin/python";

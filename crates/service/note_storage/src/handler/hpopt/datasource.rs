@@ -27,10 +27,10 @@ pub async fn datasource_new(
     project_id: ProjectId,
     datasource_name: String,
 ) -> Result<String, IdpGlobalError> {
-    let db_file_name = format!("idp_{}.db", datasource_name);
+    // let db_file_name = format!("idp_{}.db", datasource_name);
     let datasource_list = get_datasource_list(team_id, project_id)?;
     // if exists the same name, return error
-    if datasource_list.contains(&db_file_name) {
+    if datasource_list.contains(&datasource_name) {
         //TODO change status code
         return Err(IdpGlobalError::ErrorCodeMsg(
             status_code::HPOPT_CREATE_DB_EXISTS_CODE,
@@ -38,8 +38,8 @@ pub async fn datasource_new(
         ));
     }
     let db_file_fullpath =
-        business::path_tool::get_hpopt_db_fullpath(team_id, project_id, &db_file_name);
-    let db_url = control::get_dburl_by_db_file_name(team_id, project_id, &db_file_name);
+        business::path_tool::get_hpopt_db_fullpath(team_id, project_id, &datasource_name);
+    let db_url = control::get_dburl_by_db_file_name(team_id, project_id, &datasource_name);
 
     match control::start_hpopt_backend(db_url.clone(), team_id, project_id).await {
         Ok(_) => {
@@ -65,7 +65,7 @@ pub async fn datasource_new(
             }
             control::stop_hpopt_backend(db_url).await?;
 
-            Ok(db_file_name)
+            Ok(datasource_name)
         }
         Err(e) => Err(e),
     }
@@ -86,7 +86,10 @@ pub fn get_datasource_list(
                 if let Ok(file_type) = entry.file_type() {
                     if file_type.is_file() {
                         if let Some(file_name) = entry.file_name().to_str() {
-                            datasource_list.push(file_name.to_string());
+                            //filter : tmp file.
+                            if !file_name.ends_with("-journal") {
+                                datasource_list.push(file_name.to_string());
+                            }
                         }
                     }
                 }
