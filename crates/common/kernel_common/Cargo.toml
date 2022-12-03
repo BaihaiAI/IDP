@@ -4,11 +4,10 @@ license.workspace = true
 name = "kernel_common"
 version.workspace = true
 
-[features]
-default = []
+#[features]
+#default = []
 # fifo = ["dep:libc"]
-# spawn = ["dep:err"]
-tcp = []
+# tcp = []
 
 [dependencies]
 business = { path = "../business" }

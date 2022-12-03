@@ -39,8 +39,11 @@ impl ErrorTrace {
         self.err_code = code;
         self
     }
-    pub const fn http_status_code(&self) -> u16 {
-        200
+    pub fn http_status_code(&self) -> u16 {
+        match u16::try_from(self.err_code) {
+            Ok(code) => code,
+            Err(_) => 200,
+        }
     }
     #[cfg(not)]
     pub fn http_status_code(&self) -> u16 {

@@ -15,6 +15,7 @@
 use std::path::Path;
 
 use err::ErrorTrace;
+use tracing::error;
 
 use crate::Header;
 
@@ -53,7 +54,7 @@ impl Default for Resource {
     }
 }
 
-fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
+pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
     tracing::info!("--> spawn_kernel_process");
     let ipynb_abs_path = header.ipynb_abs_path();
 
@@ -269,12 +270,13 @@ fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
             dbg!(rsp.status());
             return;
         }
+        // TODO report OOM
         #[cfg(unix)]
         if std::os::unix::process::ExitStatusExt::core_dumped(&exit_status) {
-            panic!("kernel core dumped! please check log in coredumpctl");
+            error!("kernel core dumped! please check log in coredumpctl");
         }
         if !exit_status.success() {
-            panic!("kernel exit code {:?}", exit_status.code());
+            error!("kernel exit code {:?}", exit_status.code());
         }
     }).unwrap();
 
