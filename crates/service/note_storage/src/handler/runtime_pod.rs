@@ -44,7 +44,6 @@ pub async fn runtime_pod_status(
             resource: Resource::default(),
         }));
     }
-    let team_id = 1;
     let is_running = business::kubernetes::runtime_pod_is_running(project_id);
     let path = format!("/store/{team_id}/projects/{project_id}/last_resource_setting.json");
     let resource = match std::fs::read_to_string(&path) {
