@@ -42,10 +42,17 @@ pub async fn uninstall_handler(
     let uninstall_extension_path = std::path::Path::new(&extensions_path).join(name);
     tracing::info!("run extensions uninstall api, path:{uninstall_extension_path:?}");
 
-    if let Err(err) = std::fs::remove_dir_all(uninstall_extension_path) {
-        tracing::error!("{:?}", err);
-        return Err(ErrorTrace::new("uninstall extension failed"));
-    };
+    let mut cmd = tokio::process::Command::new("rm");
+    cmd.arg("-rf").arg(&uninstall_extension_path);
+    tracing::info!("cmd = {cmd:?}");
+    let output = cmd.output().await.unwrap();
+    if !output.status.success() {
+        tracing::error!(
+            "fail to unistall: {:#?},err: {}",
+            uninstall_extension_path,
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
 
     let extensions_config_path =
         std::path::Path::new(&extensions_path).join("extensions_config.json");

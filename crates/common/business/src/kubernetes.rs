@@ -29,7 +29,7 @@ pub static ACCOUNT: Lazy<String> = Lazy::new(|| {
         return "1".to_string();
     }
     let hostname = os_utils::get_hostname();
-    let mut hostname_parts = hostname.split("-").skip(2).take(2);
+    let mut hostname_parts = hostname.split('-').skip(2).take(2);
     let _region = hostname_parts.next().expect("not found region in hostname");
     let account = hostname_parts
         .next()
