@@ -37,6 +37,15 @@ pub static ACCOUNT: Lazy<String> = Lazy::new(|| {
     account.to_string()
 });
 
+pub fn runtime_pod_is_running() -> bool {
+    let region = &*REGION;
+    let account = &*ACCOUNT;
+    let pod_id = format!("{account}-runtime");
+    let platform = "idp-kernel";
+    let svc = format!("{platform}-{region}-{pod_id}-svc");
+    std::net::TcpStream::connect(format!("{svc}:8089")).is_ok()
+}
+
 #[allow(unreachable_code)]
 pub fn cluster_header_k8s_svc() -> String {
     if !is_k8s() {

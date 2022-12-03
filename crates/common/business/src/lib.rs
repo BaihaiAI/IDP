@@ -50,3 +50,7 @@ pub fn kernel_manage_port() -> u16 {
 pub fn idp_redis_port() -> u16 {
     env_or_default("IDP_REDIS_PORT", 16379)
 }
+
+pub fn spawner_port() -> u16 {
+    env_or_default("SPAWNER_PORT", 9008)
+}

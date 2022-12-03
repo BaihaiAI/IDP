@@ -15,16 +15,10 @@
 use common_model::Rsp;
 use err::ErrorTrace;
 
+#[allow(clippy::unused_async)]
 pub async fn runtime_pod_status() -> Result<Rsp<bool>, ErrorTrace> {
     if !business::kubernetes::is_k8s() {
         return Ok(Rsp::success(true));
     }
-    let region = &*business::kubernetes::REGION;
-    let account = &*business::kubernetes::ACCOUNT;
-    let platform = "idp-kernel";
-    let svc = format!("{platform}-{region}-{account}-svc");
-    let pod_is_running = tokio::net::TcpStream::connect(format!("{svc}:8089"))
-        .await
-        .is_ok();
-    Ok(Rsp::success(pod_is_running))
+    Ok(Rsp::success(business::kubernetes::runtime_pod_is_running()))
 }
