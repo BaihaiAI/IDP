@@ -15,24 +15,12 @@
 use common_model::Rsp;
 use err::ErrorTrace;
 
-/*
-def resource_account() -> str:
-    """
-    public  user: idp-develop-a-executor-job-0 -> executor
-    private user:
-    """
-    return socket.gethostname().split("-")[3]
-*/
 pub async fn runtime_pod_status() -> Result<Rsp<bool>, ErrorTrace> {
     if !business::kubernetes::is_k8s() {
         return Ok(Rsp::success(true));
     }
-    let hostname = os_utils::get_hostname();
-    let mut hostname_parts = hostname.split("-").skip(2).take(2);
-    let region = hostname_parts.next().expect("not found region in hostname");
-    let account = hostname_parts
-        .next()
-        .expect("not found team_id/executor in hostname");
+    let region = &*business::kubernetes::REGION;
+    let account = &*business::kubernetes::ACCOUNT;
     let platform = "idp-kernel";
     let svc = format!("{platform}-{region}-{account}-svc");
     let pod_is_running = tokio::net::TcpStream::connect(format!("{svc}:8089"))

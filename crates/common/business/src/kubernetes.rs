@@ -12,13 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use once_cell::sync::Lazy;
+
+pub use crate::region::REGION;
+
+/*
+def resource_account() -> str:
+    """
+    public  user: idp-develop-a-executor-job-0 -> executor
+    private user:
+    """
+    return socket.gethostname().split("-")[3]
+*/
+pub static ACCOUNT: Lazy<String> = Lazy::new(|| {
+    if !is_k8s() {
+        return "1".to_string();
+    }
+    let hostname = os_utils::get_hostname();
+    let mut hostname_parts = hostname.split("-").skip(2).take(2);
+    let _region = hostname_parts.next().expect("not found region in hostname");
+    let account = hostname_parts
+        .next()
+        .expect("not found team_id/executor in hostname");
+    account.to_string()
+});
+
 #[allow(unreachable_code)]
 pub fn cluster_header_k8s_svc() -> String {
     if !is_k8s() {
         return "127.0.0.1".to_string();
     }
     let hostname = os_utils::get_hostname();
-    let (region, team_id) = get_region_team_id_from_hostname(&hostname);
+    let region = &*REGION;
+    let team_id = &*ACCOUNT;
     if hostname.contains("raycluster") {
         format!("idp-raycluster-{region}-{team_id}-ray-head")
     } else {
@@ -26,6 +52,7 @@ pub fn cluster_header_k8s_svc() -> String {
     }
 }
 
+#[cfg(test)]
 fn get_region_team_id_from_hostname(hostname: &str) -> (String, String) {
     let mut parts = hostname.split('-').skip(2);
     let region = parts.next().unwrap();
