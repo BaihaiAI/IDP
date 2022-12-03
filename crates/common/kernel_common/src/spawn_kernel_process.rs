@@ -58,9 +58,19 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
     tracing::info!("--> spawn_kernel_process");
     let ipynb_abs_path = header.ipynb_abs_path();
 
+    let saas_version_py_path = business::path_tool::get_conda_env_python_path(
+        header.team_id,
+        business::path_tool::project_conda_env(header.team_id, header.project_id),
+    );
+    let is_saas_version = business::kubernetes::is_k8s();
+
     let working_directory = ipynb_abs_path.parent().unwrap().to_path_buf();
     #[cfg(unix)]
-    let python_minor_version = get_python_minor_version("python3");
+    let python_minor_version = get_python_minor_version(if is_saas_version {
+        &saas_version_py_path
+    } else {
+        "python3"
+    });
     #[cfg(windows)]
     let python_minor_version = get_python_minor_version("python");
     if python_minor_version < 7 {
@@ -106,16 +116,21 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
     let idp_kernel_path = match kernel_path {
         Some(path) => path,
         None => {
-            return Err(ErrorTrace::new(&format!(
-                "kernel binary {kernel_name} or idp_kernel not found"
-            )));
+            if !is_saas_version {
+                return Err(ErrorTrace::new(&format!(
+                    "kernel binary {kernel_name} or idp_kernel not found"
+                )));
+            }
+            std::path::Path::new(&kernel_name).to_path_buf()
         }
     };
     // use tokio process to prevent process become defunct(zombie) when criu dump
     // use shell process invoke kernel prevent defunct after criu dump(ptrace then kill kernel)
 
     #[cfg(unix)]
-    let python3_real_path = {
+    let python3_real_path = if is_saas_version {
+        saas_version_py_path
+    } else {
         extern "C" {
             // char *realpath(const char *restrict path, char *restrict resolved_path);
             fn realpath(path: *const i8, output: *mut i8) -> *mut i8;
@@ -181,6 +196,8 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         );
         ld_library_path
     };
+
+    /*
     #[cfg(target_os = "linux")]
     {
         let ldd_output = std::process::Command::new("ldd")
@@ -197,6 +214,8 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
             )));
         }
     }
+    */
+
     let pod_id = header.inode();
     let mut command = std::process::Command::new(idp_kernel_path);
     command

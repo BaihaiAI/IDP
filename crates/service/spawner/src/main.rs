@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod handler;
-mod route;
-
-pub async fn main() {
-    logger::init_logger();
-    tracing::info!("--> spawner::main");
-    let app = route::init_router();
-    let address =
-        std::net::SocketAddr::from((std::net::Ipv4Addr::UNSPECIFIED, business::spawner_port()));
-    axum::Server::bind(&address)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+#[tokio::main]
+async fn main() {
+    spawner::main().await;
 }

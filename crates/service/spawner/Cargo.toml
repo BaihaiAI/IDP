@@ -13,3 +13,4 @@ logger = { path = "../../common/logger" }
 
 axum = { version = "0.6" }
 tracing = "0.1"
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
