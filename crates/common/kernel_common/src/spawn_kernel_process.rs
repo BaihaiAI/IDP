@@ -313,7 +313,7 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
         .build()?;
     let project_id = arg.header.project_id;
     if !business::kubernetes::runtime_pod_is_running(project_id) {
-        let url = format!("http://127.0.0.1:9240/cluster/runtime/start");
+        let url = "http://127.0.0.1:9240/cluster/runtime/start".to_string();
         let resp = match client
             .post(&url)
             .json(&serde_json::json!({

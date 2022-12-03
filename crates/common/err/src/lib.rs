@@ -40,10 +40,7 @@ impl ErrorTrace {
         self
     }
     pub fn http_status_code(&self) -> u16 {
-        match u16::try_from(self.err_code) {
-            Ok(code) => code,
-            Err(_) => 200,
-        }
+        u16::try_from(self.err_code).unwrap_or(200)
     }
     #[cfg(not)]
     pub fn http_status_code(&self) -> u16 {
