@@ -24,6 +24,7 @@ pub mod note_handler;
 pub mod package;
 pub mod pipeline_handler;
 pub mod project_handler;
+pub mod runtime_pod;
 pub mod snapshot;
 pub mod state;
 pub mod team_handler;

@@ -15,7 +15,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use axum::routing::get;
 use axum::routing::on;
+use axum::routing::post;
 use axum::routing::MethodFilter;
 use axum::Router;
 use common_tools::io_tool::file_writer;
@@ -244,10 +246,7 @@ pub async fn init_router(
                             axum::routing::get(extension_handler::load)
                                 .layer(tower_http::compression::CompressionLayer::new()),
                         )
-                        .route(
-                            "/recommendedList",
-                            on(MethodFilter::GET, extension_handler::recommended_list),
-                        )
+                        .route("/recommendedList", get(extension_handler::recommended_list))
                         .route(
                             "/installedList",
                             on(MethodFilter::GET, extension_handler::installed_list),
@@ -270,12 +269,16 @@ pub async fn init_router(
                 .nest(
                     "/inner",
                     Router::new()
-                        .route("/version", on(MethodFilter::GET, inner::version))
-                        .route(
-                            "/change_log",
-                            on(MethodFilter::GET, inner::change_log_level),
-                        )
+                        .route("/version", get(inner::version))
+                        .route("/change_log", get(inner::change_log_level))
                         .with_state(reload_handle),
+                )
+                .nest(
+                    "/runtime",
+                    Router::new().route(
+                        "/status",
+                        get(crate::handler::runtime_pod::runtime_pod_status),
+                    ),
                 )
                 .nest("/snapshot", {
                     // snapshot::sqlite_io::migrate_sqlite_to_redis(ctx.redis_cache.clone()).await;
@@ -349,14 +352,8 @@ pub async fn init_router(
                     >::new(
                     )));
                     Router::new()
-                        .route(
-                            "/start",
-                            on(MethodFilter::POST, tensorboard::start_tensorboard),
-                        )
-                        .route(
-                            "/stop",
-                            on(MethodFilter::POST, tensorboard::stop_tensorboard),
-                        )
+                        .route("/start", post(tensorboard::start_tensorboard))
+                        .route("/stop", post(tensorboard::stop_tensorboard))
                         .route(
                             "/info",
                             on(MethodFilter::POST, tensorboard::tensorboard_info),
