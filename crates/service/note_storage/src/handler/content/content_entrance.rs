@@ -85,8 +85,6 @@ pub async fn insert_cell(
     axum::TypedHeader(cookies): axum::TypedHeader<common_tools::cookies_tools::Cookies>,
     Json(insert_cell_req): Json<InsertCellReq>,
 ) -> Result<Rsp<Cell>, IdpGlobalError> {
-    tracing::info!("access insert_cell api.");
-
     if !(insert_cell_req.path.ends_with(".ipynb") || insert_cell_req.path.ends_with(".idpnb")) {
         return Err(IdpGlobalError::ErrorCodeMsg(
             crate::status_code::INVALID_FILETYPE_ERROR_CODE,

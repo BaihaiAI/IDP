@@ -15,6 +15,7 @@
 use axum::extract::Query;
 use axum::extract::State;
 use common_model::Rsp;
+use err::ErrorTrace;
 
 use crate::api_model::workspace::FullFileTreeNode;
 use crate::app_context::AppContext;
@@ -73,7 +74,9 @@ pub async fn delete_file_or_dir(
                 .await?;
         }
     } else {
-        tokio::fs::remove_dir_all(abs_path).await?;
+        tokio::fs::remove_dir_all(&abs_path)
+            .await
+            .map_err(|err| ErrorTrace::new(&format!("remove_dir_all {abs_path:?} {err}")))?;
     }
     res
 }

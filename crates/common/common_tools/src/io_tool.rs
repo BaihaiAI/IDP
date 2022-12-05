@@ -18,6 +18,7 @@ pub mod file_writer {
     use std::collections::VecDeque;
     use std::path::PathBuf;
 
+    use err::ErrorTrace;
     use tokio::io::AsyncWriteExt;
     use tokio::sync::mpsc;
     use tokio::sync::oneshot;
@@ -66,16 +67,17 @@ pub mod file_writer {
         let mut keys = VecDeque::new();
 
         while let Some((file_chunk, responder)) = file_chunks.recv().await {
+            let file_dir = file_chunk.file_dir.clone();
             match file_writer_handler(&mut chunks_map, &mut keys, file_chunk).await {
                 Ok(idx) => {
                     if responder.send(idx as i64).is_err() {
-                        tracing::error!("file_writer_thread send back fail");
+                        tracing::error!("{file_dir} file_writer_thread send back fail");
                     }
                 }
                 Err(err) => {
-                    tracing::error!("{err:#?}");
+                    tracing::error!("{file_dir} {err:#?}");
                     if responder.send(-1).is_err() {
-                        tracing::error!("file_writer_thread send back fail");
+                        tracing::error!("{file_dir} file_writer_thread send back fail");
                     }
                 }
             }
@@ -132,7 +134,9 @@ pub mod file_writer {
 
         let file_path = std::path::Path::new(&file_chunk.file_dir);
         if let Some(parent_dir) = file_path.parent() {
-            tokio::fs::create_dir_all(parent_dir).await?;
+            tokio::fs::create_dir_all(parent_dir)
+                .await
+                .map_err(|err| ErrorTrace::new(&format!("{:?} {err}", parent_dir)))?;
         }
 
         let mut file = tokio::fs::OpenOptions::new()

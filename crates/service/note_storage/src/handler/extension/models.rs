@@ -207,7 +207,7 @@ impl Version {
 fn test_version_cmp() {
     let a = "1.0.9".to_owned();
     let b = "1.0".to_owned();
-    let a_verison = Version::get_version(&a);
-    let b_verison = Version::get_version(&b);
-    println!("{:?}", a_verison.cmp(&b_verison))
+    let version_a = Version::get_version(&a);
+    let version_b = Version::get_version(&b);
+    println!("{:?}", version_a.cmp(&version_b))
 }

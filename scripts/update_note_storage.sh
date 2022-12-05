@@ -25,7 +25,7 @@ cp target/debug/$binary target/$binary
 fi
 local_binary_md5=$(md5sum target/$binary | cut -f 1 -d " ")
 remote_binary_md5=$(ssh $remote md5sum /$binary | cut -f 1 -d " ")
-if [ $local_binary_md5 != $remote_binary_md5 ]; then
+if [ "$local_binary_md5" != "$remote_binary_md5" ]; then
     scp -C target/$binary $remote:/$binary
 fi
 

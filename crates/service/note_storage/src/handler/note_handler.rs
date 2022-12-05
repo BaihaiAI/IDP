@@ -43,7 +43,7 @@ pub async fn upload_file_handler(
         if file.file_name().is_some() {
             _filename = file.file_name().unwrap().to_string();
             _ext = _filename.rsplit('.').next().unwrap();
-            tracing::info!("ext= {:?}", _ext);
+            tracing::info!("ext = {:?}", _ext);
         }
 
         if name == "datafile" {
