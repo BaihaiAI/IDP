@@ -15,6 +15,7 @@
 use std::collections::HashSet;
 
 use lazy_static::lazy_static;
+use regex::Regex;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -94,7 +95,9 @@ impl Ord for ExtensionResp {
             std::cmp::Ordering::Equal => {}
             ord => return ord,
         }
-        self.version.cmp(&other.version)
+        let self_version = Version::get_version(&self.version);
+        let other_version = Version::get_version(&other.version);
+        self_version.cmp(&other_version)
     }
 }
 
@@ -136,13 +139,16 @@ impl PartialOrd for InstalledExtensionResp {
         self.version.partial_cmp(&other.version)
     }
 }
+
 impl Ord for InstalledExtensionResp {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match self.name.cmp(&other.name) {
             std::cmp::Ordering::Equal => {}
             ord => return ord,
         }
-        self.version.cmp(&other.version)
+        let self_version = Version::get_version(&self.version);
+        let other_version = Version::get_version(&other.version);
+        self_version.cmp(&other_version)
     }
 }
 
@@ -150,4 +156,58 @@ impl InstalledExtensionResp {
     pub fn is_visible(&self) -> bool {
         !INVISABLE_EXTENSION.contains(self.name.as_str())
     }
+}
+
+pub struct Version {
+    pub version: String,
+}
+
+impl Version {
+    pub fn get_version(version: &str) -> Self {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"[0-9]+(\.[0-9]+)*").unwrap();
+        }
+        if !RE.is_match(version) {
+            tracing::error!("Invalid version format,version:{}", version);
+            return Version {
+                version: "".to_owned(),
+            };
+        }
+        Version {
+            version: version.to_owned(),
+        }
+    }
+    pub fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let self_parts: Vec<u32> = self
+            .version
+            .split('.')
+            .map(|x| x.parse::<u32>().unwrap())
+            .collect();
+        let other_parts: Vec<u32> = other
+            .version
+            .split('.')
+            .map(|x| x.parse::<u32>().unwrap())
+            .collect();
+        let self_len = self_parts.len();
+        let other_len = other_parts.len();
+        let length = self_len.max(other_len);
+        for i in 0..=length - 1 {
+            let self_part = if i < self_len { self_parts[i] } else { 0 };
+            let other_part = if i < other_len { other_parts[i] } else { 0 };
+            match self_part.cmp(&other_part) {
+                std::cmp::Ordering::Equal => {}
+                order => return order,
+            }
+        }
+        std::cmp::Ordering::Equal
+    }
+}
+
+#[test]
+fn test_version_cmp() {
+    let a = "1.0.9".to_owned();
+    let b = "1.0".to_owned();
+    let a_verison = Version::get_version(&a);
+    let b_verison = Version::get_version(&b);
+    println!("{:?}", a_verison.cmp(&b_verison))
 }
