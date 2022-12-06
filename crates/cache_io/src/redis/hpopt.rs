@@ -24,11 +24,10 @@ use crate::OptimizeState;
 
 impl CacheService {
     pub async fn set_optimize_state(&self, opt_key: &str, opt_state: OptimizeState) -> Result<()> {
-        let key = format!("{}{}", crate::keys::OPTIMIZE_STATE_PREFIX, opt_key);
         self.pool
             .get()
             .await?
-            .set_ex::<_, _, ()>(key, opt_state, 60 * 60 * 24)
+            .set_ex::<_, _, ()>(opt_key, opt_state, 60 * 60 * 24)
             .await?;
         Ok(())
     }
