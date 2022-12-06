@@ -285,7 +285,7 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
                 let err_msg = if signal == 9 {
                     // /sys/fs/cgroup/user.slice/user-1000.slice/memory.current
                     // dbg!(std::fs::read_to_string("/sys/fs/cgroup/memory/memory.limit_in_bytes").unwrap());
-                    format!("kernel was Out Of Memory")
+                    "kernel was Out Of Memory".to_string()
                 } else {
                     format!("kernel was kill by signal {signal}")
                 };
@@ -378,9 +378,9 @@ async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
             return Err(ErrorTrace::new("submitter rsp fail"));
         }
     }
-    if !business::kubernetes::runtime_pod_is_running(project_id) {
-        return Err(ErrorTrace::new("start runtime pod fail"));
-    }
+    // if !business::kubernetes::runtime_pod_is_running(project_id) {
+    //     return Err(ErrorTrace::new("start runtime pod fail"));
+    // }
 
     let start_kernel_url = format!(
         "http://{}:{}/start_kernel",
