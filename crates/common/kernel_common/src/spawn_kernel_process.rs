@@ -308,6 +308,15 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
         spawn_kernel_process(arg.header)?;
         return Ok(());
     }
+
+    if arg.header.pipeline_opt.is_some() {
+        spawn_pipeline_kernel(arg).await
+    } else {
+        spawn_non_pipeline_kernel(arg).await
+    }
+}
+
+async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
     let client = reqwest::ClientBuilder::new()
         .timeout(std::time::Duration::from_secs(75))
         .build()?;
@@ -360,6 +369,43 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
     }
 
     Ok(())
+}
+
+async fn spawn_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
+    let url = format!("http://127.0.0.1:{}/start_kernel", 9240);
+    let timeout_secs = 75;
+    let client = reqwest::ClientBuilder::new()
+        .timeout(std::time::Duration::from_secs(timeout_secs))
+        .build()?;
+    let resp = match client.post(&url).json(&arg).send().await {
+        Ok(resp) => resp,
+        Err(err) => {
+            if err.is_timeout() {
+                return Err(ErrorTrace::new("request to submitter timeout"));
+            }
+            return Err(ErrorTrace::new(&err.to_string()));
+        }
+    };
+
+    let http_status_code = resp.status();
+    if http_status_code.is_success() {
+        // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
+        return Ok(());
+    }
+
+    let status = resp.status();
+    tracing::warn!("submitter resp status = {status}");
+    if status.as_u16() != reqwest::StatusCode::TOO_MANY_REQUESTS {
+        // if server response please retry
+        let err_msg = if status.as_u16() == 500 {
+            "submitter raise Exception".to_string()
+        } else {
+            resp.text().await?
+        };
+        return Err(ErrorTrace::new(&format!("kernel start fail {err_msg}")));
+    }
+
+    Err(ErrorTrace::new("kernel start max retry exceed"))
 }
 
 fn get_python_minor_version(python_path: &str) -> u8 {
