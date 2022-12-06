@@ -76,6 +76,13 @@ pub fn main() {
 const REDIS_NIL_RESP: &str = "$-1\r\n";
 // const REDIS_EMPTY_ARR_RESP: &str = "$-1\r\n";
 
+#[test]
+fn test_parse_redis_req() {
+    let input = b"*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n";
+    let mut decoder = Decoder::new(BufReader::new(input.as_slice()));
+    assert!(!decoder.decode().unwrap().is_error());
+}
+
 fn handle_connection(stream: std::net::TcpStream, ctx: &Ctx) -> Result<(), ErrorTrace> {
     let mut write_stream = stream.try_clone()?;
     let mut decoder = Decoder::new(BufReader::new(stream));

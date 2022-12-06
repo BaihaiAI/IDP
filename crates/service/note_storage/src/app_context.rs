@@ -26,7 +26,11 @@ pub struct Config {
 
 impl AppContext {
     pub async fn new(_config: Config) -> Self {
-        let cache_service = CacheService::new().await.unwrap();
+        let cache_service =
+            tokio::time::timeout(std::time::Duration::from_secs(50), CacheService::new())
+                .await
+                .expect("redis pool init timeout")
+                .expect("CacheService::new");
         Self {
             redis_cache: cache_service,
             // pg_pool: todo!(),

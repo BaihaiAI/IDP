@@ -132,7 +132,7 @@ async fn proxy_pass(
     {
         Ok(response) => response,
         Err(err) => {
-            dbg!(err);
+            dbg!(err, proxy_pass_port);
             Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::empty())
