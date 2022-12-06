@@ -31,9 +31,9 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
                 req.resource.num_cpu
             )));
         }
-        if req.resource.memory < 0.3 || req.resource.memory > 1000.0 {
+        if req.resource.memory < 0.1 || req.resource.memory > 1000.0 {
             return Err(Error::new(&format!(
-                "memory must greater than 0.3G, your setting is {}G",
+                "memory must greater than 0.1G, your setting is {}G",
                 req.resource.memory
             )));
         }
