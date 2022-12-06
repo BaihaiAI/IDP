@@ -256,7 +256,7 @@ pub async fn file_dir_copy(
     let from_path_str = from_path.to_str().unwrap();
     let to_path_str = to_path.to_str().unwrap();
 
-    common_tools::command_tools::copy(from_path_str, to_path_str)?;
+    common_tools::command_tools::copy(from_path_str, to_path_str).await?;
 
     Ok(Rsp::success(()))
 }

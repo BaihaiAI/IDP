@@ -75,18 +75,11 @@ pub async fn get_extension() {
                 };
                 let remove_path = store_path.join(origin_name);
 
-                let mut cmd = tokio::process::Command::new("rm");
-                cmd.arg("-rf").arg(&remove_path);
-                tracing::info!("cmd = {cmd:?}");
-                let output = cmd.output().await.unwrap();
-                if !output.status.success() {
-                    tracing::error!(
-                        "fail to cp folder: {:#?},err: {}",
-                        remove_path,
-                        String::from_utf8_lossy(&output.stderr)
-                    );
-                } else {
-                    tracing::info!("successful remove extension: {:#?}", remove_path);
+                match tokio::fs::remove_dir_all(&remove_path).await {
+                    Ok(_) => tracing::info!("successful remove extension: {:#?}", remove_path),
+                    Err(err) => {
+                        tracing::error!("fail to cp folder: {:#?},err:{:#?}", remove_path, err)
+                    }
                 };
 
                 resp = resp_iter.next();
@@ -110,18 +103,13 @@ pub async fn get_remote_extension(name: &str) {
     let extension_url = get_extension_url().await;
     let origin_url = format!("{}/{}", extension_url, name);
     if dest_path.exists() {
-        let mut cmd = tokio::process::Command::new("rm");
-        cmd.arg("-rf").arg(&dest_path);
-        tracing::info!("cmd = {cmd:?}");
-        let output = cmd.output().await.unwrap();
-        if !output.status.success() {
-            tracing::error!(
-                "fail to cp folder: {:#?},err:{}",
-                dest_path,
-                String::from_utf8_lossy(&output.stderr)
-            );
-            return;
-        }
+        match tokio::fs::remove_dir_all(&dest_path).await {
+            Ok(_) => tracing::debug!("successful overwrite extension: {:#?}", dest_path),
+            Err(err) => {
+                tracing::error!("fail to cp folder: {:#?},err:{:#?}", dest_path, err);
+                return;
+            }
+        };
     }
     let mut cmd = tokio::process::Command::new(US3CLI_DEST);
     cmd.arg("cp")

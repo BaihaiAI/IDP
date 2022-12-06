@@ -15,11 +15,11 @@
 use err::ErrorTrace;
 
 #[cfg(unix)]
-pub fn copy(from_path_str: &str, to_path_str: &str) -> Result<(), ErrorTrace> {
-    let mut cmd = std::process::Command::new("cp");
+pub async fn copy(from_path_str: &str, to_path_str: &str) -> Result<(), ErrorTrace> {
+    let mut cmd = tokio::process::Command::new("cp");
     cmd.arg("-r").arg(from_path_str).arg(to_path_str);
     tracing::info!("cmd = {cmd:?}");
-    let output = cmd.output().unwrap();
+    let output = cmd.output().await?;
     if !output.status.success() {
         return Err(ErrorTrace::new(&String::from_utf8_lossy(&output.stderr)));
     }

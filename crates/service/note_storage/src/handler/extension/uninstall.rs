@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Write;
-
 use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,16 +41,16 @@ pub async fn uninstall_handler(
     let uninstall_extension_path = std::path::Path::new(&extensions_path).join(name);
     tracing::info!("run extensions uninstall api, path:{uninstall_extension_path:?}");
 
-    let mut cmd = tokio::process::Command::new("rm");
-    cmd.arg("-rf").arg(&uninstall_extension_path);
-    tracing::info!("cmd = {cmd:?}");
-    let output = cmd.output().await.unwrap();
-    if !output.status.success() {
-        tracing::error!(
-            "fail to unistall: {:#?},err: {}",
-            uninstall_extension_path,
-            String::from_utf8_lossy(&output.stderr)
-        );
+    'a: for _ in 0..3 {
+        if let Err(err) = tokio::fs::remove_dir_all(&uninstall_extension_path).await {
+            tracing::error!(
+                "fail to unistall: {:#?},err: {}",
+                uninstall_extension_path,
+                err
+            );
+            continue 'a;
+        };
+        break;
     }
 
     let extensions_config_path =
@@ -61,8 +60,8 @@ pub async fn uninstall_handler(
     content.retain(|extension| extension.name != name);
 
     let data = serde_json::to_string(&content)?;
-    let mut f = std::fs::File::create(extensions_config_path)?;
-    f.write_all(data.as_bytes())?;
+    let mut f = tokio::fs::File::create(extensions_config_path).await?;
+    f.write_all(data.as_bytes()).await?;
 
     Ok(Rsp::success_without_data())
 }

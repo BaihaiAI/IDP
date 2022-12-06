@@ -23,12 +23,11 @@ use err::ErrorTrace;
 pub async fn load(Path(path): Path<String>) -> Result<impl IntoResponse, ErrorTrace> {
     let start = std::time::Instant::now();
     let path = format!("/{}", path);
-    tracing::info!("{path}");
     let mime_type = mime_guess::from_path(&path).first_or_text_plain();
     let mime_type_str = mime_type.to_string();
     let f = tokio::fs::File::open(&path).await?;
     let stream = tokio_util::io::ReaderStream::new(f);
-    tracing::info!(
+    tracing::debug!(
         "extension/load: {path} load time cost {:?}",
         start.elapsed()
     );

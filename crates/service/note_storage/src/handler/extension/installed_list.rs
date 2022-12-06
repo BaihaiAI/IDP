@@ -36,8 +36,8 @@ pub async fn installed_list_handler(
         std::path::Path::new(&extensions_path).join("extensions_config.json");
 
     if !extension_config_path.exists() {
-        std::fs::create_dir_all(&extensions_path)?;
-        std::fs::File::create(&extension_config_path)?;
+        tokio::fs::create_dir_all(&extensions_path).await?;
+        tokio::fs::File::create(&extension_config_path).await?;
     }
 
     let mut installed_content = get_installed_extensions_config(extension_config_path).await?;
@@ -63,7 +63,7 @@ pub async fn installed_list_handler(
 async fn get_installed_extensions_config(
     extension_config_path: std::path::PathBuf,
 ) -> Result<Vec<InstalledExtensionResp>, ErrorTrace> {
-    let jdata = match std::fs::read_to_string(&extension_config_path) {
+    let jdata = match tokio::fs::read_to_string(&extension_config_path).await {
         Ok(jdata) => jdata,
         Err(err) => {
             let path = extension_config_path;

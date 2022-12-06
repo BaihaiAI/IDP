@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Write;
-
 use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
+use tokio::io::AsyncWriteExt;
 
 use super::models::ExtensionReq;
 use crate::handler::extension::models::ExtensionResp;
@@ -40,14 +39,15 @@ pub async fn install_handler(
         business::path_tool::recommended_extensions().join(&extension_name);
 
     let extension_path = format!("{}/{}", &installed_extensions_path, name);
-    std::fs::create_dir_all(&extension_path)?;
+    tokio::fs::create_dir_all(&extension_path).await?;
 
-    common_tools::command_tools::copy(
+    tokio::fs::copy(
         recommended_extension_path.to_str().unwrap(),
         &extension_path,
-    )?;
+    )
+    .await?;
 
-    let jdata = std::fs::read_to_string(recommended_extension_path.join("config.json"))?;
+    let jdata = tokio::fs::read_to_string(recommended_extension_path.join("config.json")).await?;
     let mut new_extension_config = serde_json::from_str::<ExtensionResp>(&jdata)?;
 
     let url = format!("{installed_extensions_path}/{extension_name}/");
@@ -61,8 +61,8 @@ pub async fn install_handler(
     contents.push(new_extension_config);
 
     let data = serde_json::to_string(&contents).unwrap();
-    let mut f = std::fs::File::create(extensions_config_path).unwrap();
-    f.write_all(data.as_bytes()).unwrap();
+    let mut f = tokio::fs::File::create(extensions_config_path).await?;
+    f.write_all(data.as_bytes()).await?;
 
     Ok(Rsp::success(url))
 }

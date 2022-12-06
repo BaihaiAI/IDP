@@ -13,12 +13,12 @@
 // limitations under the License.
 
 use std::collections::HashSet;
-use std::io::Write;
 
 use axum::Json;
 use common_model::Rsp;
 use err::ErrorTrace;
 use lazy_static::lazy_static;
+use tokio::io::AsyncWriteExt;
 
 use super::models::ExtensionConfig;
 use super::models::ListReq;
@@ -38,6 +38,7 @@ lazy_static! {
 pub async fn init_install(Json(payload): Json<ListReq>) -> Result<Rsp<()>, ErrorTrace> {
     let team_id = payload.team_id;
     let user_id = payload.user_id;
+    tracing::info!("team_id:{team_id},user_id:{user_id},run init_install");
     init_install_handler(team_id, user_id).await
 }
 
@@ -48,10 +49,10 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
         std::path::Path::new(&installed_extensions_path).join("extensions_config.json");
 
     if !extension_config_path.exists() {
-        std::fs::create_dir_all(&installed_extensions_path)?;
+        tokio::fs::create_dir_all(&installed_extensions_path).await?;
     } else {
-        std::fs::remove_dir_all(&installed_extensions_path)?;
-        std::fs::create_dir_all(&installed_extensions_path)?;
+        tokio::fs::remove_dir_all(&installed_extensions_path).await?;
+        tokio::fs::create_dir_all(&installed_extensions_path).await?;
     }
 
     let recommended_extensions_path = business::path_tool::recommended_extensions();
@@ -65,10 +66,7 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
         .filter(|content| INIT_EXTENSION.contains(content.name.as_str()))
     {
         let extension_path = recommended_extensions_path.join(&content.name);
-        common_tools::command_tools::copy(
-            extension_path.to_str().unwrap(),
-            &installed_extensions_path,
-        )?;
+        tokio::fs::copy(extension_path.to_str().unwrap(), &installed_extensions_path).await?;
 
         let url = format!(
             "{}/{}/{}/",
@@ -78,8 +76,8 @@ pub async fn init_install_handler(team_id: u64, user_id: u64) -> Result<Rsp<()>,
     }
 
     let content_str = serde_json::to_string(&recommended_content)?;
-    let mut f = std::fs::File::create(extension_config_path).unwrap();
-    f.write_all(content_str.as_bytes()).unwrap();
+    let mut f = tokio::fs::File::create(extension_config_path).await?;
+    f.write_all(content_str.as_bytes()).await?;
 
     Ok(Rsp::success_without_data())
 }
