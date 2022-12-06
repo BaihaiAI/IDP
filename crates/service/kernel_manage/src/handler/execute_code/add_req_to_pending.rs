@@ -22,9 +22,7 @@ use crate::AppContext;
 use crate::Error;
 
 pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) -> Result<(), Error> {
-    let hostname = business::os_utils::get_hostname();
-    // TODO ugly/dirty
-    if business::kubernetes::is_k8s() && !hostname.contains("raycluster") {
+    if business::kubernetes::is_k8s() {
         if req.resource.num_cpu < 0.1 || req.resource.num_cpu > 1000.0 {
             return Err(Error::new(&format!(
                 "cpu must greater than 0.1 cores, your setting is {}",

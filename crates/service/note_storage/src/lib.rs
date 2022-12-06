@@ -51,8 +51,6 @@ pub async fn main() {
 
     // tokio::spawn(sum_project_disk(rb.clone()));
 
-    // TODO each team use different sqlite /store/$team_id/idp-note-rs/idp.db
-    // TODO current sqlite only used to store pipeline result, future we store task statein redis
     // let path = Path::new("/opt/config/config.toml");
     let project_info_map = Arc::new(Mutex::new(HashMap::<String, HashMap<String, String>>::new()));
     let pg_option: Option<Pool<Postgres>> = if business::kubernetes::is_k8s() {

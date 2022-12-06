@@ -16,6 +16,7 @@ use std::path::Path;
 
 use err::ErrorTrace;
 use tracing::error;
+use tracing::info;
 
 use crate::Header;
 
@@ -269,37 +270,64 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         command.env(k, v);
     }
     let mut child = command.spawn()?;
-    std::thread::Builder::new().name("wait_kernel".to_string()).spawn(move || {
-        /*
-        let Ok(exit_status) = child.wait() else {
-            panic!("");
-        };
-        */
-        let exit_status = child.wait().expect("wait kernel child process");
-        #[cfg(unix)]
-        if let Some(signal) = std::os::unix::process::ExitStatusExt::signal(&exit_status) {
-            let err_msg = format!("kernel was kill by signal {signal}");
-            #[cfg(not)]
-            if signal == 9 {
-                // /sys/fs/cgroup/user.slice/user-1000.slice/memory.current
-                dbg!(std::fs::read_to_string("/sys/fs/cgroup/memory/memory.limit_in_bytes").unwrap());
+    std::thread::Builder::new()
+        .name("wait_kernel".to_string())
+        .spawn(move || {
+            /*
+            let Ok(exit_status) = child.wait() else {
+                panic!("");
+            };
+            */
+            let exit_status = child.wait().expect("wait kernel child process");
+            // let mut reason = format!("{}", exit_status);
+            #[cfg(unix)]
+            if let Some(signal) = std::os::unix::process::ExitStatusExt::signal(&exit_status) {
+                let err_msg = if signal == 9 {
+                    // /sys/fs/cgroup/user.slice/user-1000.slice/memory.current
+                    // dbg!(std::fs::read_to_string("/sys/fs/cgroup/memory/memory.limit_in_bytes").unwrap());
+                    format!("kernel was Out Of Memory")
+                } else {
+                    format!("kernel was kill by signal {signal}")
+                };
+                error!("{err_msg}");
+                report_core_dumped_to_kernel_manage(pod_id, &err_msg);
+                return;
             }
-            tracing::error!("{err_msg}");
-            let rsp = reqwest::blocking::Client::builder().build().unwrap().post(format!("http://127.0.0.1:9007/api/v1/execute/kernel/core_dumped_report?pod_id={pod_id}&reason={err_msg}")).send().unwrap();
-            dbg!(rsp.status());
-            return;
-        }
-        // TODO report OOM
-        #[cfg(unix)]
-        if std::os::unix::process::ExitStatusExt::core_dumped(&exit_status) {
-            error!("kernel core dumped! please check log in coredumpctl");
-        }
-        if !exit_status.success() {
-            error!("kernel exit code {:?}", exit_status.code());
-        }
-    }).unwrap();
+
+            #[cfg(unix)]
+            if std::os::unix::process::ExitStatusExt::core_dumped(&exit_status) {
+                report_core_dumped_to_kernel_manage(pod_id, "core_dumped");
+                return;
+            }
+            if !exit_status.success() {
+                let reason = format!("kernel exit code {:?}", exit_status.code());
+                report_core_dumped_to_kernel_manage(pod_id, &reason);
+            }
+        })
+        .unwrap();
 
     Ok(())
+}
+
+fn report_core_dumped_to_kernel_manage(pod_id: u64, reason: &str) {
+    let url = format!(
+        "http://{}:{}/api/v1/execute/kernel/core_dumped_report?pod_id={pod_id}&reason={reason}",
+        business::kubernetes::tenant_cluster_header_k8s_svc(),
+        business::kernel_manage_port()
+    );
+    error!("--> report_core_dumped_to_kernel_manage: pod_id={pod_id}, reason={reason}");
+    let rsp = reqwest::blocking::ClientBuilder::new()
+        .build()
+        .unwrap()
+        .post(url)
+        .send()
+        .unwrap();
+    if rsp.status() != 200 {
+        error!("report core dumped to kernel failed! {}", rsp.status());
+    }
+    if let Ok(rsp) = rsp.text() {
+        info!("{rsp}")
+    }
 }
 
 pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {

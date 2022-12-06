@@ -49,8 +49,7 @@ pub fn runtime_pod_is_running(project_id: u64) -> bool {
     std::net::TcpStream::connect(format!("{}:8089", runtime_pod_svc(project_id))).is_ok()
 }
 
-#[allow(unreachable_code)]
-pub fn cluster_header_k8s_svc() -> String {
+pub fn tenant_cluster_header_k8s_svc() -> String {
     if !is_k8s() {
         return "127.0.0.1".to_string();
     }

@@ -228,7 +228,7 @@ async fn put_cell_update_req(req: PartialUpdateCellReq, team_id: u64) {
     let resp = client
         .put(format!(
             "http://{}:{}/api/v2/idp-note-rs/content/cell?teamId={team_id}",
-            business::kubernetes::cluster_header_k8s_svc(),
+            business::kubernetes::tenant_cluster_header_k8s_svc(),
             business::note_storage_port()
         ))
         .json(&req)

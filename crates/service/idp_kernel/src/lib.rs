@@ -64,7 +64,7 @@ fn kernel_manage_ws_connect(
     // };
     let ascii_json_str = urlencoding::encode(&json_str).to_string();
 
-    let hostname = business::kubernetes::cluster_header_k8s_svc();
+    let hostname = business::kubernetes::tenant_cluster_header_k8s_svc();
     let url = format!(
         "ws://{hostname}:{}/api/v1/execute/ws/kernel/connect",
         business::kernel_manage_port(),
