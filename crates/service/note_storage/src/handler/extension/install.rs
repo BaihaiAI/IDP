@@ -41,7 +41,7 @@ pub async fn install_handler(
     let extension_path = format!("{}/{}", &installed_extensions_path, name);
     tokio::fs::create_dir_all(&extension_path).await?;
 
-    tokio::fs::copy(
+    common_tools::command_tools::copy(
         recommended_extension_path.to_str().unwrap(),
         &extension_path,
     )

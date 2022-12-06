@@ -50,7 +50,6 @@ pub async fn load_handler(
 ) -> Result<impl IntoResponse, ErrorTrace> {
     let path = business::path_tool::get_store_full_path(team_id, project_id, &path_str);
     let mime = file_mime_magic::get_mime_type(&path)?;
-    tracing::info!("finn {}", mime);
 
     let f = tokio::fs::File::open(&path).await?;
     let stream = tokio_util::io::ReaderStream::new(f);
