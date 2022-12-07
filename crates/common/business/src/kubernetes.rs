@@ -46,7 +46,20 @@ pub fn runtime_pod_svc(project_id: u64) -> String {
 }
 
 pub fn runtime_pod_is_running(project_id: u64) -> bool {
-    std::net::TcpStream::connect(format!("{}:8089", runtime_pod_svc(project_id))).is_ok()
+    let addr = match std::net::ToSocketAddrs::to_socket_addrs(&format!(
+        "{}:8089",
+        runtime_pod_svc(project_id)
+    )) {
+        Ok(mut addrs) => {
+            if let Some(addr) = addrs.next() {
+                addr
+            } else {
+                return false;
+            }
+        }
+        Err(_) => return false,
+    };
+    std::net::TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(1200)).is_ok()
 }
 
 pub fn tenant_cluster_header_k8s_svc() -> String {
