@@ -338,6 +338,7 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
     }
 
     if arg.header.pipeline_opt.is_some() {
+        dbg!(&arg.header.pipeline_opt);
         spawn_pipeline_kernel(arg).await
     } else {
         spawn_non_pipeline_kernel(arg).await
@@ -378,9 +379,9 @@ async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
             return Err(ErrorTrace::new("submitter rsp fail"));
         }
     }
-    // if !business::kubernetes::runtime_pod_is_running(project_id) {
-    //     return Err(ErrorTrace::new("start runtime pod fail"));
-    // }
+    if !business::kubernetes::runtime_pod_is_running(project_id) {
+        std::thread::sleep(std::time::Duration::from_millis(500));
+    }
 
     let start_kernel_url = format!(
         "http://{}:{}/start_kernel",
