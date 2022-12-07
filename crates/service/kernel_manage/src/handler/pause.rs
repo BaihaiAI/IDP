@@ -60,7 +60,12 @@ pub async fn pause(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Erro
     let dir = criu_dump_dir(ip, pid);
     _ = std::fs::create_dir_all(&dir);
 
-    let resp = reqwest::get(format!("http://{ip}:9241/cr/pause?pid={pid}")).await?;
+    let project_id = kernel.header.project_id;
+    let resp = reqwest::get(format!(
+        "http://{}:9241/cr/pause?pid={pid}",
+        business::kubernetes::runtime_pod_svc(project_id)
+    ))
+    .await?;
     if !resp.status().is_success() {
         return Err(Error::new("pause failed").code(500));
     }

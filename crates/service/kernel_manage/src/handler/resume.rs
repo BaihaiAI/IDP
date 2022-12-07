@@ -35,9 +35,14 @@ pub async fn resume(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Err
         return Err(Error::new("only paused kernel can resume"));
     }
 
-    let ip = kernel.kernel_info.ip;
+    let _ip = kernel.kernel_info.ip;
     let pid = kernel.kernel_info.pid;
-    let resp = reqwest::get(format!("http://{ip}:9241/cr/resume?pid={pid}")).await?;
+    let project_id = kernel.header.project_id;
+    let resp = reqwest::get(format!(
+        "http://{}:9241/cr/resume?pid={pid}",
+        business::kubernetes::runtime_pod_svc(project_id)
+    ))
+    .await?;
     if !resp.status().is_success() {
         return Err(Error::new("resume failed").code(500));
     }

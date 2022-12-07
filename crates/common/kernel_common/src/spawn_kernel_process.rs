@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::path::Path;
+use std::process::Stdio;
 
 use err::ErrorTrace;
 use tracing::error;
@@ -226,6 +227,7 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         .arg(base64::encode(serde_json::to_string(&header).unwrap()))
         .arg(pod_id.to_string())
         .current_dir(working_directory);
+    command.stdin(Stdio::null());
     let mut env = std::collections::HashMap::new();
     env.insert(
         "MPLBACKEND",
@@ -376,7 +378,8 @@ async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
         let http_status_code = resp.status();
         if !http_status_code.is_success() {
             // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
-            return Err(ErrorTrace::new("submitter rsp fail"));
+            let rsp = resp.text().await?;
+            return Err(ErrorTrace::new(&format!("submitter rsp fail {rsp}")));
         }
     }
     if !business::kubernetes::runtime_pod_is_running(project_id) {
