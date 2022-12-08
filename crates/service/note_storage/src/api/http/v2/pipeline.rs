@@ -29,6 +29,7 @@ use business::path_tool::escape_path_as_string;
 use business::path_tool::get_nbconvert_by_team_id;
 use business::path_tool::get_pipeline_output_path;
 use business::path_tool::get_store_full_path;
+use common_model::entity::cell::CellType;
 use common_model::enums::mime::Mimetype;
 use common_model::service::rsp::Rsp;
 use common_tools::cookies_tools::get_cookie_value_by_team_id;
@@ -275,7 +276,12 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
     let result_file = format!("{}/{}", tmp_dir, filename_str);
 
     let mut nb = file_tool::read_notebook_from_disk(&real_path).await?;
-    for cell in nb.cells.iter_mut() {
+    nb.cells = nb
+        .cells
+        .into_iter()
+        .filter(|cell| matches!(cell.cell_type, CellType::Code | CellType::Markdown))
+        .collect::<Vec<_>>();
+    for mut cell in nb.cells.iter_mut() {
         cell.execution_time = None;
         // markdown cell outputs field was remove in next iter
         // if cell.cell_type == CellType::Markdown {

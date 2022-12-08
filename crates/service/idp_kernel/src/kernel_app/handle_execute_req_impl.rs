@@ -40,6 +40,7 @@ impl super::KernelApp {
         let stdout = sys.getattr("stdout").unwrap();
         let stderr = sys.getattr("stderr").unwrap();
 
+        // ray cluster worker flush stdout has a delay to header, frontend would receive stdout after idle/duration msg
         stdout.call_method0("set_busy").unwrap();
         stderr.call_method0("set_busy").unwrap();
 
@@ -139,6 +140,8 @@ impl super::KernelApp {
             duration: start.elapsed().as_millis() as u32,
             code: req.code,
         });
+
+        // ray cluster worker flush stdout has a delay to header, frontend would receive stdout after idle/duration msg
         stdout.call_method0("set_idle").unwrap();
         stderr.call_method0("set_idle").unwrap();
     }
