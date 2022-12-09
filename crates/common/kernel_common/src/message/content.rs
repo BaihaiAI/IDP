@@ -81,6 +81,7 @@ pub enum Content {
         /// name is stdout or stderr
         name: String,
         text: String,
+        /// ray cluster worker flush stdout has a delay to header, frontend would receive stdout after idle/duration msg
         is_busy: bool,
     },
     DisplayData {

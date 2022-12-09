@@ -3,6 +3,7 @@ set -exu
 
 remote=ucloud
 namespace=nightly
+#binary=kernel_manage
 binary=note_storage
 region=b
 team_id=$(ssh $remote "kubectl -n $namespace exec svc/postgres-inner -- psql -U postgres -d idp_prod_saas -c \"select team_id from user_info where username='hr@baihai.ai'\" --no-align  --tuples-only")
