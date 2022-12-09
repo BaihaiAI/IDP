@@ -61,11 +61,12 @@ pub async fn get_extension() {
             tracing::debug!("resp: {:#?}", resp);
             if resp.is_none() || (resp_new.cmp(&resp).is_lt() && resp_new.is_some()) {
                 tracing::info!("get_remote_extension");
-                let origin_name = match resp_new {
-                    Some(data) => &data.name,
-                    None => "",
-                };
-                get_remote_extension(origin_name).await;
+                if resp_new.is_some() {
+                    let (origin_name, version) =
+                        (&resp_new.unwrap().name, &resp_new.unwrap().version);
+                    let origin_version = resp.map(|data| &data.version);
+                    get_remote_extension(origin_name, version, origin_version.map(|x| &**x)).await;
+                }
                 resp_new = resp_new_iter.next();
             } else if resp_new.is_none() || (resp_new.cmp(&resp).is_gt() && resp.is_some()) {
                 tracing::info!("remove extension");
@@ -97,25 +98,23 @@ pub async fn get_extension() {
     }
 }
 
-pub async fn get_remote_extension(name: &str) {
+pub async fn get_remote_extension(name: &str, version: &str, origin_version: Option<&str>) {
+    tracing::info!(
+        "model_name:{:#?},version:{:#?},origin_version:{:#?}",
+        name,
+        version,
+        origin_version
+    );
     let store_path = business::path_tool::recommended_extensions();
-    let dest_path = store_path.join(name);
+    let base_path = store_path.join(name);
+    let dest_path = base_path.join(version);
     let extension_url = get_extension_url().await;
-    let origin_url = format!("{}/{}", extension_url, name);
-    if dest_path.exists() {
-        match tokio::fs::remove_dir_all(&dest_path).await {
-            Ok(_) => tracing::debug!("successful overwrite extension: {:#?}", dest_path),
-            Err(err) => {
-                tracing::error!("fail to cp folder: {:#?},err:{:#?}", dest_path, err);
-                return;
-            }
-        };
-    }
+    let us3_url = format!("{}/{}/{}", extension_url, name, version);
     let mut cmd = tokio::process::Command::new(US3CLI_DEST);
     cmd.arg("cp")
         .arg("-r")
         .arg("-f")
-        .arg(&origin_url)
+        .arg(&us3_url)
         .arg(&dest_path);
     tracing::info!("{:?}", cmd);
     match cmd
@@ -126,12 +125,12 @@ pub async fn get_remote_extension(name: &str) {
     {
         Ok(_) => tracing::info!(
             "successful cp folder: {:#?} to destpath:{:#?}",
-            origin_url,
+            us3_url,
             dest_path
         ),
         Err(_) => tracing::info!(
             "fail to cp folder: {:#?} to destpath:{:#?}",
-            origin_url,
+            us3_url,
             dest_path
         ),
     }
