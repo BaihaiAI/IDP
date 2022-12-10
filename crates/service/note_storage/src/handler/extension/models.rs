@@ -21,7 +21,7 @@ use serde::Serialize;
 
 lazy_static! {
     static ref INVISABLE_EXTENSION: HashSet<&'static str> = {
-        let a = std::fs::read_to_string("/opt/extension_config.json").unwrap();
+        let a = std::fs::read_to_string("/opt/config/extension_config.json").unwrap();
         let extension_config: ExtensionConfig = serde_json::from_str(&a).unwrap();
         let mut m: HashSet<&'static str> = HashSet::new();
         extension_config.invisible.into_iter().for_each(|x| {
