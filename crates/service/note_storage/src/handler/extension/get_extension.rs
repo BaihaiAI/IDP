@@ -30,13 +30,25 @@ pub async fn get_extension() {
 
         let dest_path = store_path.join("extension_temp.json");
         let extension_url = get_extension_url().await;
+
+        let lock_path = store_path.join(".lock");
+        let lock_url = format!("{extension_url}/.lock");
+        let mut cmd = tokio::process::Command::new(US3CLI_DEST);
+        cmd.arg("cp").arg("-f").arg(&lock_url).arg(&lock_path);
+        tracing::info!("{:?}", cmd);
+        let output = cmd.output().await.unwrap();
+        if output.status.success() {
+            tokio::time::sleep(std::time::Duration::from_secs(100)).await;
+            continue;
+        }
+
         let origin_url = format!("{extension_url}/extensions_config.json");
         let mut cmd = tokio::process::Command::new(US3CLI_DEST);
         cmd.arg("cp").arg("-f").arg(&origin_url).arg(&dest_path);
         tracing::info!("{:?}", cmd);
         let extension_resp_new = match cmd
             .spawn()
-            .expect("can't get current extension_config")
+            .expect("can't get /home/ray/us3cli-linux64")
             .wait()
             .await
         {
