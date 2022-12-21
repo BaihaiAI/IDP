@@ -33,6 +33,9 @@ lazy_static! {
         });
         m
     };
+}
+
+lazy_static! {
     static ref AIGC_INIT_EXTENSION: HashSet<&'static str> = {
         let a = std::fs::read_to_string("/opt/config/extension_config.json").unwrap();
         let extension_config: ExtensionConfig = serde_json::from_str(&a).unwrap();
