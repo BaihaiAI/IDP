@@ -36,6 +36,7 @@ lazy_static! {
 pub struct ExtensionConfig {
     pub init: Vec<String>,
     pub invisible: Vec<String>,
+    pub aigc_init: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,6 +46,16 @@ pub struct ListReq {
     pub team_id: u64,
     #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
     pub user_id: u64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InitReq {
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    pub team_id: u64,
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    pub user_id: u64,
+    pub nav_type: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
