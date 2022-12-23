@@ -54,7 +54,10 @@ lazy_static! {
 pub async fn init_install(Json(payload): Json<InitReq>) -> Result<Rsp<()>, ErrorTrace> {
     let team_id = payload.team_id;
     let user_id = payload.user_id;
-    tracing::info!("team_id:{team_id},user_id:{user_id},run init_install");
+    tracing::info!(
+        "team_id:{team_id},user_id:{user_id},run init_install,nav_type:{:?}",
+        payload.nav_type
+    );
     init_install_handler(team_id, user_id, payload.nav_type).await
 }
 enum NavType {
