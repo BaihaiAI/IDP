@@ -206,35 +206,27 @@ async fn clone_state_monitor(
     origin_name: String,
     target_name: String,
 ) -> Result<(), ErrorTrace> {
-    use std::process::Stdio;
-
     // firstly set clone state as cloning.
     cache_service
         .set_clone_state(&clone_state_key, CloneState::Cloning)
         .await?;
 
-    let output = Command::new(&conda_path)
-        .arg("clean")
-        .arg("--all")
-        .arg("-y")
-        .spawn()?
-        .wait()
-        .await?;
+    let mut cmd = Command::new(&conda_path);
+    cmd.arg("clean").arg("--all").arg("-y");
+    info!("cmd = {cmd:?}");
+    let output = cmd.spawn()?.wait().await?;
     if !output.success() {
         return Err(ErrorTrace::new("conda clean fail"));
     }
 
     let mut cmd = Command::new(&conda_path);
-    let mut child = cmd
-        .arg("create")
+    cmd.arg("create")
         .args(["-y", "-n"])
         .arg(target_name)
         .arg("--clone")
-        .arg(origin_name)
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()?;
+        .arg(origin_name);
+    info!("cmd = {cmd:?}");
+    let mut child = cmd.spawn()?;
 
     let exit_status = child.wait().await?;
     if exit_status.success() {
