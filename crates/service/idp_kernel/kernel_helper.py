@@ -62,10 +62,21 @@ def func_ast_parse_py37(code: str):
     if not stmts:
         return -1, -1, -1, -1, -1, -1
     last_stmt = stmts[-1]
-
     # if only one stmt and stmt is class/function define
-    if last_stmt[1][0] - last_stmt[0][0] <= 1 and any(["def" in code, "class" in code]):
+    ast_stmts = ast.parse(code, mode="exec").body
+    if not isinstance(ast_stmts[-1], ast.Expr):
         return last_stmt[1][0], last_stmt[1][1], -1, -1, -1, -1
+    # ugly alternative 1
+    # lines = code.splitlines(keepends=True)
+    # last_stmt_code = lines[last_stmt[0][0]][last_stmt[0][1]:]
+    # for line in range(last_stmt[0][0] + 1, last_stmt[1][0] - 1):
+    #     last_stmt += lines[line]
+    #     # last_stmt += '\n'
+    # last_stmt_code += lines[last_stmt[1][0]][last_stmt[1][1]:]
+
+    # ugly alternative 2
+    # if last_stmt[1][0] - last_stmt[0][0] <= 1 and any(["def" in code, "class" in code]):
+    #     return last_stmt[1][0], last_stmt[1][1], -1, -1, -1, -1
     if len(stmts) >= 2:
         previous_stmt = stmts[-2]
         return (
