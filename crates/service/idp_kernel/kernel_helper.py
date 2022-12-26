@@ -3,19 +3,42 @@ from typing import List, Union, Tuple
 import tokenize
 import re
 import ast
-import json
+import sys
 
+'''
+alternative to split code, use tokenize: https://stackoverflow.com/a/39879026/12750738
+return (
+    previous_stmt_end_lineno
+    previous_stmt_end_col_offset
+    last_expr_lineno
+    last_expr_col_offset
+    last_expr_end_lineno
+    last_expr_end_col_offset
+)
 
+-> Tuple[int, int, int, int, int, int]
+'''
 def func_ast_parse(code: str):
+    if sys.version_info.minor <= 7:
+        return func_ast_parse_py37(code)
     stmts = ast.parse(code, mode="exec").body
     if not stmts:
+        # ast.get_source_segment
         return -1, -1, -1, -1, -1, -1
     last_stmt = stmts[-1]
+    # if sys.version_info.minor <= 7:
+    #     last_stmt.end_lineno = -1
+    #     last_stmt.end_col_offset = -1
+
+    # if only one stmt and stmt is class/function define
     if not isinstance(last_stmt, ast.Expr):
         return last_stmt.end_lineno, last_stmt.end_col_offset, -1, -1, -1, -1
     # last_stmt is expr
     if len(stmts) >= 2:
         previous_stmt = stmts[-2]
+        # if sys.version_info.minor <= 7:
+        #     previous_stmt.end_lineno = -1
+        #     previous_stmt.end_col_offset = -1
         return (
             previous_stmt.end_lineno,
             previous_stmt.end_col_offset,
@@ -26,6 +49,35 @@ def func_ast_parse(code: str):
         )
     else:
         return (-1, -1, last_stmt.end_lineno, last_stmt.end_col_offset, -1, -1)
+
+
+def func_ast_parse_py37(code: str):
+    import io
+    stmts = []
+    cur_stmt_start = (0, 0)
+    for token in tokenize.tokenize(io.BytesIO(code.encode()).readline):
+        if token.type == tokenize.NEWLINE:
+            stmts.append((cur_stmt_start, token.end))
+            cur_stmt_start = (token.end[0]+1, 0)
+    if not stmts:
+        return -1, -1, -1, -1, -1, -1
+    last_stmt = stmts[-1]
+
+    # if only one stmt and stmt is class/function define
+    if last_stmt[1][0] - last_stmt[0][0] <= 1 and any(["def" in code, "class" in code]):
+        return last_stmt[1][0], last_stmt[1][1], -1, -1, -1, -1
+    if len(stmts) >= 2:
+        previous_stmt = stmts[-2]
+        return (
+            previous_stmt[1][0],
+            previous_stmt[1][1],
+            last_stmt[0][0],
+            last_stmt[0][1],
+            last_stmt[1][0],
+            last_stmt[1][1],
+        )
+    else:
+        return (-1, -1, last_stmt[1][0], last_stmt[1][1], -1, -1)
 
 
 def _execute(cmd):
