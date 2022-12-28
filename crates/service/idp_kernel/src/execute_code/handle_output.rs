@@ -28,7 +28,9 @@ impl<'py> super::execute_code_context::ExecuteCodeContext<'py> {
         tracing::debug!("output_type_name = {output_type_name}");
         match output_type_name {
             "GraphicObj" => {
-                self.handle_matplotlib_output(eval_output);
+                if self.flush_matplotlib_flag {
+                    self.handle_matplotlib_output(eval_output);
+                }
             }
             "str" => {
                 // handle plotly

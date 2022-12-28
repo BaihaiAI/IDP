@@ -170,6 +170,7 @@ class GraphicObj:
         self.data = []
 
 
+# figs: List[matplotlib.figure.Figure]
 def cvt_figs_to_graphic_obj(figs) -> GraphicObj:
     import io
     import base64
@@ -177,14 +178,13 @@ def cvt_figs_to_graphic_obj(figs) -> GraphicObj:
 
     graphic_obj = GraphicObj()
     for fig in figs:
-        if not hasattr(fig, "figure"):
-            continue
-        fig = fig.figure
-
         text_plain = fig.__repr__()
 
         buf = io.BytesIO()
-        fig.savefig(buf, bbox_inches="tight")
+        if hasattr(fig, "_boxout"):
+            fig.savefig(buf, bbox_inches="tight")
+        else:
+            fig.savefig(buf)
         # fig.savefig(buf, format='png')
         buf.seek(0)
         base64_output = base64.b64encode(buf.read())

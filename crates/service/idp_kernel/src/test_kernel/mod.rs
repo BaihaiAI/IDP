@@ -56,6 +56,7 @@ impl TestContext {
     pub fn new() -> Self {
         logger::init_logger();
         std::env::set_var("MPLBACKEND", "module://baihai_matplotlib_backend");
+        // std::env::set_var("MPLBACKEND", "module://matplotlib_inline.backend_inline");
 
         // use fork in development
         // use fork+exec in production mode for better performance
