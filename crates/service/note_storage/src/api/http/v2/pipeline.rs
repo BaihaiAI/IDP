@@ -283,6 +283,9 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
         .collect::<Vec<_>>();
     for mut cell in nb.cells.iter_mut() {
         cell.execution_time = None;
+        if matches!(cell.cell_type, CellType::Code) && cell.execution_count.is_none() {
+            cell.execution_count = Some(9999);
+        }
         // markdown cell outputs field was remove in next iter
         // if cell.cell_type == CellType::Markdown {
         //     cell.execution_count = None;
