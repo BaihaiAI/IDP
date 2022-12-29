@@ -213,6 +213,7 @@ class DisplayPub:
         sys.stdout.publish_ipython_data(json.dumps(output)) # type: ignore
 
     def clear_output(self, wait: bool):
+        sys.stdout.clear_cell_output() # type: ignore
         try:
             from matplotlib._pylab_helpers import Gcf
             Gcf.destroy_all()

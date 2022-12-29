@@ -90,6 +90,9 @@ pub enum Content {
     ExecuteResult {
         data: std::collections::HashMap<String, String>,
     },
+    ClearOutput {
+        wait: bool,
+    },
 
     // ShutdownRequest { restart: bool },
     // InterruptRequest {},

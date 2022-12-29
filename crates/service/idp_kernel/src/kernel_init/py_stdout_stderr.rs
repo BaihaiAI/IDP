@@ -101,4 +101,13 @@ impl PyStdoutStderr {
                 .unwrap();
         }
     }
+
+    pub fn clear_cell_output(&self) {
+        self.sender
+            .send(kernel_common::Message {
+                header: self.header.clone(),
+                content: kernel_common::Content::ClearOutput { wait: true },
+            })
+            .unwrap();
+    }
 }
