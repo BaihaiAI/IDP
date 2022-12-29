@@ -25,6 +25,7 @@ Traceback (most recent call last):
 TypeError: _repr_html_() missing 1 required positional argument: 'self'
 */
 fn handle_mime_output(eval_output: &pyo3::PyAny) -> HashMap<String, String> {
+    /// branch 7.34.0 IPython/core/formatters.py:72
     const REPR_MIME_LIST: [(&str, &str); 9] = [
         ("_repr_png_", "image/png"),
         ("_repr_jpeg_", "image/jpeg"),

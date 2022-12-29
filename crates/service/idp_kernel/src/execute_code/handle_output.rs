@@ -27,11 +27,11 @@ impl<'py> super::execute_code_context::ExecuteCodeContext<'py> {
 
         tracing::debug!("output_type_name = {output_type_name}");
         match output_type_name {
-            "GraphicObj" => {
-                if self.flush_matplotlib_flag {
-                    self.handle_matplotlib_output(eval_output);
-                }
-            }
+            // "GraphicObj" => {
+            //     if self.flush_matplotlib_flag {
+            //         self.handle_matplotlib_output(eval_output);
+            //     }
+            // }
             "str" => {
                 // handle plotly
                 let str_result = eval_output.extract::<String>().unwrap();
@@ -43,9 +43,9 @@ impl<'py> super::execute_code_context::ExecuteCodeContext<'py> {
                     self.handle_mime_output(eval_output);
                 }
             }
-            "list" => {
-                self.handle_mpl_fig_list(eval_output);
-            }
+            // "list" => {
+            //     self.handle_mpl_fig_list(eval_output);
+            // }
             // "wandb.sdk.wandb_run.Run"
             "Run" => {
                 tracing::debug!("--> is a wandb type?");
@@ -85,6 +85,7 @@ impl<'py> super::execute_code_context::ExecuteCodeContext<'py> {
                 self.transport_ctx.execute_result(map);
             }
             _ => {
+                #[cfg(not)]
                 if eval_output.getattr("figure").is_ok() {
                     self.send_repr_to_execute_result_for_figure_object(eval_output);
 
@@ -101,6 +102,7 @@ impl<'py> super::execute_code_context::ExecuteCodeContext<'py> {
         }
     }
 
+    #[cfg(not)]
     fn handle_mpl_fig_list(&self, eval_output: &pyo3::PyAny) {
         // handle adtk or matplotlib plot
         if let Ok(first_item) = eval_output.get_item::<u32>(0) {
@@ -120,6 +122,7 @@ impl<'py> super::execute_code_context::ExecuteCodeContext<'py> {
         self.handle_mime_output(eval_output);
     }
 
+    #[cfg(not)]
     fn send_repr_to_execute_result_for_figure_object(&self, figure_obj: &pyo3::PyAny) {
         let mut data_map = std::collections::HashMap::new();
         data_map.insert(

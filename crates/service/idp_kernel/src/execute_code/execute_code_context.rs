@@ -33,8 +33,8 @@ pub(crate) struct ExecuteCodeContext<'py> {
     // used in traceback
     pub is_running_eval_part: bool,
     pub eval_part_lieno_offset: usize,
-    /// better alternative add stdout.publish_display_data?
-    pub flush_matplotlib_flag: bool,
+    // better alternative add stdout.publish_display_data?
+    // pub flush_matplotlib_flag: bool,
 }
 
 #[derive(Clone)]
@@ -95,7 +95,7 @@ impl<'py> ExecuteCodeContext<'py> {
             python_defines,
             is_running_eval_part: false,
             eval_part_lieno_offset: 0,
-            flush_matplotlib_flag: false,
+            // flush_matplotlib_flag: false,
         }
     }
     pub fn execute(&mut self) -> Result<(), pyo3::PyErr> {

@@ -24,6 +24,7 @@ pub struct PyStdoutStderr {
     pub header: kernel_common::Header,
     pub stdout_or_stderr: &'static str,
     pub buf: String,
+    /// ray cluster worker flush stdout has a delay to header, frontend would receive stdout after idle/duration msg
     pub is_busy: bool,
 }
 
@@ -78,5 +79,26 @@ impl PyStdoutStderr {
 
     fn set_busy(&mut self) {
         self.is_busy = true
+    }
+
+    // publish display_data or execute_result message
+    fn publish_ipython_data(&self, dict_json: String) {
+        let data = serde_json::from_str::<std::collections::HashMap<String, String>>(&dict_json)
+            .expect(&dict_json);
+        if data.contains_key("image/png") || data.contains_key("image/jpeg") {
+            self.sender
+                .send(kernel_common::Message {
+                    header: self.header.clone(),
+                    content: kernel_common::Content::DisplayData { data },
+                })
+                .unwrap();
+        } else {
+            self.sender
+                .send(kernel_common::Message {
+                    header: self.header.clone(),
+                    content: kernel_common::Content::ExecuteResult { data },
+                })
+                .unwrap();
+        }
     }
 }

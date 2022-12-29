@@ -14,7 +14,7 @@
 
 pub mod escape_slash_from_frontend;
 pub mod execute_code_context;
-pub(crate) mod handle_matplotlib_output;
+// pub(crate) mod handle_matplotlib_output;
 mod handle_mime_output;
 mod handle_output;
 mod handle_plotly_output;

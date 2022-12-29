@@ -19,7 +19,6 @@ use kernel_common::content::ReplyStatus;
 use kernel_common::Content;
 use tracing::debug;
 use tracing::error;
-use tracing::warn;
 
 impl super::KernelApp {
     pub(crate) fn publish_content(&self, content: Content) {
@@ -90,13 +89,20 @@ impl super::KernelApp {
         // first we need to escape some char which added by frontend when transfer
         match execute_ctx.execute() {
             Ok(()) => {
-                execute_ctx.code =
-                    "__import__('baihai_matplotlib_backend').flush_figures()".to_string();
-                execute_ctx.flush_matplotlib_flag = true;
-                if let Err(err) = execute_ctx.execute() {
-                    warn!("flush matplotlib figures error: {err}");
+                // execute_ctx.code =
+                //     "__import__('baihai_matplotlib_backend').flush_figures()".to_string();
+                // execute_ctx.flush_matplotlib_flag = true;
+                // if let Err(err) = execute_ctx.execute() {
+                //     warn!("flush matplotlib figures error: {err}");
+                // }
+                // execute_ctx.flush_matplotlib_flag = false;
+                if let Err(err) =
+                    execute_ctx
+                        .py
+                        .run("__import__('baihai_matplotlib_backend').show()", None, None)
+                {
+                    error!("after_run flush_figures {err}");
                 }
-                execute_ctx.flush_matplotlib_flag = false;
                 self.publish_content(Content::ExecuteReply(ExecuteReply {
                     execution_count: self.execution_count,
                     reply_status: ReplyStatus::Ok,

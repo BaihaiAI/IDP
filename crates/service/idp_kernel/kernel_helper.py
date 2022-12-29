@@ -1,4 +1,3 @@
-import warnings
 from typing import List, Union, Tuple
 import tokenize
 import re
@@ -111,7 +110,14 @@ def fake_shell(cmd):
         print(line, end="")
 
 
-class Ipy:
+# Why IdpInteractiveShell not inherit IPython.core.interactiveshell.InteractiveShell
+# Idp not require user install ipython
+class IdpInteractiveShell:
+    def __init__(self) -> None:
+        # branch 7.34.0 IPython/core/display.py:311
+        self.display_formatter = DisplayFormatter()
+        self.display_pub = DisplayPub()
+
     def system(self, cmd: str):
         # system can't get stdout so we use subprocess
         # os.system(args)
@@ -146,6 +152,113 @@ class Ipy:
         """
         pass
 
+    def register_post_execute(self, func):
+        pass
+
+class DisplayFormatter:
+    # return format_dict, metadata_dict
+    def format(self, obj, include=None, exclude=None):
+        # object handled itself, don't proceed
+        return {"__display_formatter": obj}, {}
+
+# IPython/core/displaypub.py
+class DisplayPub:
+    def publish(self, data, metadata=None, **kwargs):
+        if isinstance(data, dict) and "__display_formatter" in data:
+            data = data["__display_formatter"]
+        
+        output = {}
+        try:
+            from matplotlib.figure import Figure
+            import io
+            import base64
+            if isinstance(data, Figure):
+                fig = data
+                buf = io.BytesIO()
+                if hasattr(fig, "_boxout"):
+                    fig.savefig(buf, bbox_inches="tight")
+                else:
+                    fig.savefig(buf)
+                # fig.savefig(buf, format='png')
+                buf.seek(0)
+                base64_output = base64.b64encode(buf.read())
+                buf.close()
+                png_data = base64_output.decode("utf-8")
+                # fig._repr_png_ = lambda : png_data
+                output["image/png"] = png_data
+        except ModuleNotFoundError:
+            pass
+        for mime in [
+            ("_repr_png_", "image/png"),
+            ("_repr_jpeg_", "image/jpeg"),
+            ("_repr_html_", "text/html"),
+            ("_repr_markdown_", "text/markdown"),
+            ("_repr_svg_", "image/svg+xml"),
+            ("_repr_latex_", "text/latex"),
+            ("_repr_json_", "application/json"),
+            ("_repr_javascript_", "application/javascript"),
+            ("_repr_pdf_", "application/pdf"),
+        ]:
+            attr, mime_key = mime[0], mime[1]
+            if hasattr(data, attr):
+                mime_value = getattr(data, attr)()
+                if mime_value is not None:
+                    output[mime_key] = mime_value
+        # if hasattr(data, "text/plain"):
+        #     output["text/plain"] = getattr(data, "text/plain")
+        #     print(data['text/plain'])
+        if not output:
+            return
+        import json
+        sys.stdout.publish_ipython_data(json.dumps(output)) # type: ignore
+
+    def clear_output(self, wait: bool):
+        try:
+            from matplotlib._pylab_helpers import Gcf
+            Gcf.destroy_all()
+        except ModuleNotFoundError:
+            pass
+
+
+import builtins
+# ipython publish_display_data() would check isinstance(InteractiveShell._instance, InteractiveShell)
+# so we need to cheat ipython IdpInteractiveShell is instance of InteractiveShell
+def isinstance_to_cheat_ipython(instance, class_) -> bool:
+    # use __instancecheck__ not work
+    # InteractiveShell.__instancecheck__ = lambda self, instance: True
+
+    # try:
+    #     from IPython.core.interactiveshell import InteractiveShell
+    #     if class_ == InteractiveShell:
+    #         return True
+    # except ModuleNotFoundError:
+    #     pass
+    # finally:
+    #     return builtins.isinstance_origin(instance, class_)
+    if builtins.isinstance_origin(instance, IdpInteractiveShell): # type: ignore
+        return True
+    return builtins.isinstance_origin(instance, class_) # type: ignore
+
+def init_ipython_display():
+    # try:
+    #     import matplotlib, matplotlib_inline
+    #     matplotlib.use("module://matplotlib_inline.backend_inline")
+    # except ModuleNotFoundError:
+    #     pass
+    try:
+        import matplotlib
+        # matplotlib.interactive(True)
+    except ModuleNotFoundError:
+        pass
+    builtins.isinstance_origin = builtins.isinstance # type: ignore
+    builtins.isinstance = isinstance_to_cheat_ipython
+    try:
+        from IPython.core.interactiveshell import InteractiveShell
+        InteractiveShell._instance = IdpInteractiveShell() # type: ignore
+        # assert InteractiveShell.instance() is not None
+    except ModuleNotFoundError:
+        pass
+
 
 def load_or_skip(path: str, enable_checkpoint: str):
     if enable_checkpoint == "false":
@@ -165,34 +278,20 @@ def after_run(session_path: str, var_path: str, enable_checkpoint: str):
         dill.dump_session(session_path)
 
 
-class GraphicObj:
-    def __init__(self):
-        self.data = []
+# class GraphicObj:
+#     def __init__(self):
+#         self.data = []
 
 
 # figs: List[matplotlib.figure.Figure]
-def cvt_figs_to_graphic_obj(figs) -> GraphicObj:
-    import io
-    import base64
+def display_publish_matplotlib_figures(figs):
     from matplotlib._pylab_helpers import Gcf
 
-    graphic_obj = GraphicObj()
+    display_pub = DisplayPub()
     for fig in figs:
-        text_plain = fig.__repr__()
-
-        buf = io.BytesIO()
-        if hasattr(fig, "_boxout"):
-            fig.savefig(buf, bbox_inches="tight")
-        else:
-            fig.savefig(buf)
-        # fig.savefig(buf, format='png')
-        buf.seek(0)
-        base64_output = base64.b64encode(buf.read())
-        buf.close()
-        png_data = base64_output.decode("utf-8")
-        graphic_obj.data.append((text_plain, png_data))
+        # text_plain = fig.__repr__()
+        display_pub.publish(fig)
         Gcf.destroy(fig.number)
-    return graphic_obj
 
 
 """
@@ -689,6 +788,7 @@ def make_tokens_by_line(lines: List[str]):
     NEWLINE, NL = tokenize.NEWLINE, tokenize.NL
     tokens_by_line = [[]]
     if len(lines) > 1 and not lines[0].endswith(("\n", "\r", "\r\n", "\x0b", "\x0c")):
+        import warnings
         warnings.warn(
             "`make_tokens_by_line` received a list of lines which do not have lineending markers ('\\n', '\\r', '\\r\\n', '\\x0b', '\\x0c'), behavior will be unspecified"
         )

@@ -94,9 +94,10 @@ pub fn init_python(
     )
     .unwrap();
     py.run(
-        "def get_ipython():
-    import kernel_helper
-    return kernel_helper.Ipy()",
+        "import kernel_helper
+def get_ipython():
+    return kernel_helper.IdpInteractiveShell()
+kernel_helper.init_ipython_display()",
         None,
         None,
     )
@@ -128,10 +129,10 @@ pub fn init_python(
     debug!("end init_python, time cost = {:?}", start.elapsed());
     PythonDefines {
         func_ast_parse: kernel_helper.getattr("func_ast_parse").unwrap().into(),
-        func_cvt_figs_to_graphic_obj: kernel_helper
-            .getattr("cvt_figs_to_graphic_obj")
-            .unwrap()
-            .into(),
+        // func_cvt_figs_to_graphic_obj: kernel_helper
+        //     .getattr("cvt_figs_to_graphic_obj")
+        //     .unwrap()
+        //     .into(),
         cvt_magic_code: kernel_helper.getattr("cvt_magic_code").unwrap().into(),
         load_or_skip: kernel_helper.getattr("load_or_skip").unwrap().into(),
         after_run: kernel_helper.getattr("after_run").unwrap().into(),
@@ -141,7 +142,7 @@ pub fn init_python(
 #[derive(Clone)]
 pub struct PythonDefines {
     pub func_ast_parse: pyo3::Py<pyo3::PyAny>,
-    pub func_cvt_figs_to_graphic_obj: pyo3::Py<pyo3::PyAny>,
+    // pub func_cvt_figs_to_graphic_obj: pyo3::Py<pyo3::PyAny>,
     pub cvt_magic_code: pyo3::Py<pyo3::PyAny>,
     pub load_or_skip: pyo3::Py<pyo3::PyAny>,
     pub after_run: pyo3::Py<pyo3::PyAny>,
