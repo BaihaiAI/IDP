@@ -117,6 +117,8 @@ class IdpInteractiveShell:
         # branch 7.34.0 IPython/core/display.py:311
         self.display_formatter = DisplayFormatter()
         self.display_pub = DisplayPub()
+        # part of ipython/traitlets required API
+        self.this_class = IdpInteractiveShell
 
     def system(self, cmd: str):
         # system can't get stdout so we use subprocess
@@ -152,8 +154,16 @@ class IdpInteractiveShell:
         """
         pass
 
-    def register_post_execute(self, func):
-        pass
+    # part of ipython required API
+    # def register_post_execute(self, func):
+    #     pass
+    
+    # part of ipython/traitlets required API
+    # def subclass_init(self, cls):
+    #     # print("--> subclass_init", cls)
+    #     # type object 'ZMQInteractiveShell' has no attribute 'subclass_init'
+    #     # cls.subclass_init()
+    #     pass
 
 class DisplayFormatter:
     # return format_dict, metadata_dict
@@ -240,6 +250,50 @@ def isinstance_to_cheat_ipython(instance, class_) -> bool:
         return True
     return builtins.isinstance_origin(instance, class_) # type: ignore
 
+'''
+## Why we also need `ZMQInteractiveShell._instance`
+`InteractiveShell._instance = IdpInteractiveShell()` this line cheat ipython display to use Idp instance
+because zmqshell inherit Interactive, and ipython use traitlets meta programing to init all sub/super class
+
+### import some package has ipython deps
+> from deepchecks.tabular.checks import ModelInfo
+```
+  File "/home/w/.local/lib/python3.10/site-packages/ipykernel/zmqshell.py", line 428, in <module>
+    class ZMQInteractiveShell(InteractiveShell):
+  File "/home/w/.local/lib/python3.10/site-packages/traitlets/traitlets.py", line 975, in __init__
+    cls.setup_class(classdict)
+  File "/home/w/.local/lib/python3.10/site-packages/traitlets/traitlets.py", line 1007, in setup_class
+    super().setup_class(classdict)
+  File "/home/w/.local/lib/python3.10/site-packages/traitlets/traitlets.py", line 992, in setup_class
+    v.subclass_init(cls)
+AttributeError:  'IdpInteractiveShell' object has no attribute 'subclass_init'
+```
+
+### if we add `def subclass_init(self, cls):`
+```
+  File "/home/w/.local/lib/python3.10/site-packages/deepchecks/__init__.py", line 34, in <module>
+    from deepchecks.core import (BaseCheck, BaseSuite, CheckFailure, CheckResult, Condition, ConditionCategory,
+  File "/home/w/.local/lib/python3.10/site-packages/deepchecks/core/__init__.py", line 15, in <module>
+    from .check_json import CheckFailureJson, CheckResultJson
+  File "/home/w/.local/lib/python3.10/site-packages/deepchecks/core/check_json.py", line 21, in <module>
+    from deepchecks.core.check_result import CheckFailure, CheckResult, DisplayMap
+  File "/home/w/.local/lib/python3.10/site-packages/deepchecks/core/check_result.py", line 25, in <module>
+    from deepchecks.core.display import DisplayableResult, save_as_html
+  File "/home/w/.local/lib/python3.10/site-packages/deepchecks/core/display.py", line 27, in <module>
+    from deepchecks.utils.ipython import is_colab_env, is_databricks_env, is_kaggle_env, is_sagemaker_env
+  File "/home/w/.local/lib/python3.10/site-packages/deepchecks/utils/ipython.py", line 20, in <module>
+    from ipykernel.zmqshell import ZMQInteractiveShell
+  File "/home/w/.local/lib/python3.10/site-packages/ipykernel/zmqshell.py", line 428, in <module>
+    class ZMQInteractiveShell(InteractiveShell):
+  File "/home/w/.local/lib/python3.10/site-packages/traitlets/traitlets.py", line 975, in __init__
+    cls.setup_class(classdict)
+  File "/home/w/.local/lib/python3.10/site-packages/traitlets/traitlets.py", line 1028, in setup_class
+    for c in mro_trait:
+UnboundLocalError:  local variable 'mro_trait' referenced before assignment
+```
+
+### if we add ZMQInteractiveShell._instance and delete `def subclass_init(self, cls):`
+'''
 def init_ipython_display():
     # try:
     #     import matplotlib, matplotlib_inline
@@ -253,6 +307,11 @@ def init_ipython_display():
         pass
     builtins.isinstance_origin = builtins.isinstance # type: ignore
     builtins.isinstance = isinstance_to_cheat_ipython
+    try:
+        from ipykernel.zmqshell import ZMQInteractiveShell
+        ZMQInteractiveShell._instance = IdpInteractiveShell() # type: ignore
+    except ModuleNotFoundError:
+        pass
     try:
         from IPython.core.interactiveshell import InteractiveShell
         InteractiveShell._instance = IdpInteractiveShell() # type: ignore
