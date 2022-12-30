@@ -174,6 +174,7 @@ impl KernelEntry {
         let (kernel_operate_tx, kernel_operate_rx) = channel::<KernelOperate>(15);
 
         let kernel_info = kernel_ws_conn.kernel_info.clone();
+        #[cfg(not)]
         let execute_record_db = ctx.execute_record_db.clone();
         tokio::spawn({
             debug!("enter tokio::spawn, time cost = {:?}", start.elapsed());
@@ -222,6 +223,7 @@ impl KernelEntry {
                     .unwrap()
                     + shutdown_idle_interval_duration,
                 core_dumped_cell_id: None,
+                #[cfg(not)]
                 execute_record_db,
                 last_persist_output: std::time::Instant::now(),
             };
@@ -262,6 +264,7 @@ pub struct KernelCtx {
 
     /// (core_dumped_cell_id, core_dumped_reason)
     core_dumped_cell_id: Option<(String, String)>, // kernel_info: kernel_common::KernelInfo,
+    #[cfg(not)]
     execute_record_db: sled::Db,
 }
 

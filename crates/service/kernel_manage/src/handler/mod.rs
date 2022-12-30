@@ -14,9 +14,9 @@
 
 mod cell_state;
 pub mod execute_code;
-mod interrupt;
-// pub mod debug_kernel;
+#[cfg(not)]
 pub mod execute_record;
+mod interrupt;
 pub mod kernel_list;
 mod pause;
 mod pip_install;

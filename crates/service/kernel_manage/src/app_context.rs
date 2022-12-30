@@ -39,6 +39,7 @@ pub struct AppContext {
     // pub kernel_entry_get: mpsc::Sender<(Inode, oneshot::Sender<Option<Arc<KernelEntry>>>)>,
     // pub kernel_entry_delete: mpsc::Sender<Inode>,
     // pub kernel_entry_insert: mpsc::Sender<KernelEntry>,
+    #[cfg(not)]
     pub execute_record_db: sled::Db,
 }
 
@@ -88,6 +89,7 @@ impl AppContext {
         Ok(rx.await?)
     }
     pub fn new() -> Self {
+        #[cfg(not)]
         let sled_kv_db = match sled::open("kernel_manage.db") {
             Ok(db) => db,
             Err(err) => {
@@ -158,6 +160,7 @@ impl AppContext {
             kernel_ws_conn_take: kernel_ws_conn_take_tx,
             kernel_ws_conn_insert: kernel_ws_conn_insert_tx,
             kernel_entry_ops_tx,
+            #[cfg(not)]
             execute_record_db: sled_kv_db,
         }
     }

@@ -122,6 +122,7 @@ async fn service_route_inner(
         "/kernel/pause" => handler::pause(ctx, req).await?.to_hyper(),
         "/kernel/resume" => handler::resume(ctx, req).await?.to_hyper(),
 
+        #[cfg(not)]
         "/execute_record" => {
             handler::execute_record::find_notebook_cell_id_execute_record(ctx, req)?.to_hyper()
         }

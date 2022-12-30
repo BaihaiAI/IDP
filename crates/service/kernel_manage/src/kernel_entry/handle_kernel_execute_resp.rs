@@ -56,6 +56,7 @@ impl super::KernelCtx {
         {
             cell.execution_count = Some(execution_count as _);
         }
+        #[allow(unused_variables)]
         if let kernel_common::Content::Duration {
             duration,
             ref code,
@@ -64,11 +65,13 @@ impl super::KernelCtx {
         {
             cell.execution_time = Some(duration.to_string());
 
+            #[cfg(not)]
             let data_source_list =
                 common_model::api_model::get_develop_active_connect_data(resp.header.project_id)
                     .await
                     .map(|ret| ret.data)
                     .unwrap_or_default();
+            #[cfg(not)]
             let run_record = crate::handler::execute_record::ExecuteRecord {
                 code: code.clone(),
                 data_source_list,
@@ -77,6 +80,7 @@ impl super::KernelCtx {
                     .expect("chrono from_timestamp_opt"),
                 header: resp.header.clone(),
             };
+            #[cfg(not)]
             if let Err(err) = self.execute_record_db.insert(
                 run_record.key().into_bytes(),
                 serde_json::to_vec(&run_record).unwrap(),

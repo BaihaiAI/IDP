@@ -48,16 +48,19 @@ struct Req {
 }
 
 pub fn find_notebook_cell_id_execute_record(
-    ctx: AppContext,
+    _ctx: AppContext,
     req: Request<Body>,
 ) -> Result<Resp<Vec<ExecuteRecord>>, Error> {
+    #[cfg(not)]
     let req = serde_urlencoded::from_str::<Req>(req.uri().query().unwrap_or_default())?;
 
+    #[cfg(not)]
     let prefix = format!(
         "{}_{}_{}_{}_",
         req.team_id, req.project_id, req.path, req.cell_id
     );
-    let mut ret = Vec::new();
+    let ret = Vec::new();
+    #[cfg(not)]
     for (_k, v) in ctx.execute_record_db.scan_prefix(prefix).flatten() {
         if let Ok(record) = serde_json::from_slice::<ExecuteRecord>(&v) {
             ret.push(record);
