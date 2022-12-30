@@ -278,6 +278,13 @@ pub async fn init_router(
                         .with_state(reload_handle),
                 )
                 .nest(
+                    "/publish_model",
+                    Router::new().route(
+                        "/",
+                        post(crate::handler::publish_third_party_model_platform::publish_model),
+                    ),
+                )
+                .nest(
                     "/runtime",
                     Router::new().route(
                         "/status",

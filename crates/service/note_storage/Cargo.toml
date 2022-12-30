@@ -63,6 +63,8 @@ tree_magic = "0.2.3"
 urlencoding = "2.1"
 uuid = { version = "1.1", features = ["serde", "v4"] }
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
+# vendored-openssl
+ssh2 = "0.9.3"
 
 [dev-dependencies]
 #fs_extra = "0.2"
