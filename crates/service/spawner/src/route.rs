@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::routing::post;
-use axum::Router;
-
-pub fn init_router() -> Router {
-    Router::new().route(
-        "/start_kernel",
-        post(crate::handler::start_kernel::start_kernel),
-    )
+pub fn init_router() -> axum::Router {
+    axum::Router::new()
+        .route(
+            "/start_kernel",
+            axum::routing::post(crate::handler::start_kernel::start_kernel),
+        )
+        .route("/health_check", axum::routing::get(|| async { "" }))
 }

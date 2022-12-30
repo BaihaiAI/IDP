@@ -60,7 +60,22 @@ pub fn runtime_pod_is_running(project_id: u64) -> bool {
         }
         Err(_) => return false,
     };
-    std::net::TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(960)).is_ok()
+    let mut stream =
+        match std::net::TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(1000)) {
+            Ok(stream) => stream,
+            Err(_) => return false,
+        };
+    use std::io::Write;
+    if stream.write_all(b"GET /health_check HTTP/1.1\n").is_err() {
+        return false;
+    }
+    true
+    // let mut buf = [0; 128];
+    // use std::io::Read;
+    // if stream.read(&mut buf).is_err() {
+    // return false;
+    // }
+    // buf.starts_with(b"HTTP/1.1 200")
 }
 
 pub fn tenant_cluster_header_k8s_svc() -> String {
