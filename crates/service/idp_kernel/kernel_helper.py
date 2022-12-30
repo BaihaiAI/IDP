@@ -178,26 +178,39 @@ class DisplayPub:
             data = data["__display_formatter"]
         
         output = {}
-        try:
-            from matplotlib.figure import Figure
-            import io
-            import base64
-            if isinstance(data, Figure):
-                fig = data
-                buf = io.BytesIO()
-                if hasattr(fig, "_boxout"):
-                    fig.savefig(buf, bbox_inches="tight")
-                else:
-                    fig.savefig(buf)
-                # fig.savefig(buf, format='png')
-                buf.seek(0)
-                base64_output = base64.b64encode(buf.read())
-                buf.close()
-                png_data = base64_output.decode("utf-8")
-                # fig._repr_png_ = lambda : png_data
-                output["image/png"] = png_data
-        except ModuleNotFoundError:
-            pass
+        if "Figure" in type(data).__name__:
+            try:
+                from matplotlib.figure import Figure
+                import io
+                import base64
+                if isinstance(data, Figure):
+                    fig = data
+                    buf = io.BytesIO()
+                    if hasattr(fig, "_boxout"):
+                        fig.savefig(buf, bbox_inches="tight")
+                    else:
+                        fig.savefig(buf)
+                    # fig.savefig(buf, format='png')
+                    buf.seek(0)
+                    base64_output = base64.b64encode(buf.read())
+                    buf.close()
+                    png_data = base64_output.decode("utf-8")
+                    # fig._repr_png_ = lambda : png_data
+                    output["image/png"] = png_data
+            except ModuleNotFoundError:
+                pass
+            # we change default render to vscode so doesn't need this
+            # try:
+            #     from plotly.graph_objs._figure import Figure
+            #     if isinstance(data, Figure):
+            #         output["text/html"] = data.to_html(
+            #             include_plotlyjs='cdn',
+            #             full_html=False
+            #         )
+            #         data.show
+            #         data._repr_html_
+            # except ModuleNotFoundError:
+            #     pass
         for mime in [
             ("_repr_png_", "image/png"),
             ("_repr_jpeg_", "image/jpeg"),
@@ -210,6 +223,8 @@ class DisplayPub:
             ("_repr_pdf_", "application/pdf"),
         ]:
             attr, mime_key = mime[0], mime[1]
+            # if mime_key in output:
+            #     continue
             if hasattr(data, attr):
                 mime_value = getattr(data, attr)()
                 if mime_value is not None:
@@ -316,6 +331,11 @@ def init_ipython_display():
         from IPython.core.interactiveshell import InteractiveShell
         InteractiveShell._instance = IdpInteractiveShell() # type: ignore
         # assert InteractiveShell.instance() is not None
+    except ModuleNotFoundError:
+        pass
+    try:
+        import plotly.io as pio
+        pio.renderers.default = "vscode"
     except ModuleNotFoundError:
         pass
 
