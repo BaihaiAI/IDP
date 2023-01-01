@@ -154,6 +154,9 @@ class IdpInteractiveShell:
         """
         pass
 
+    def register_magics(self, magic):
+        pass
+
     # part of ipython required API
     # def register_post_execute(self, func):
     #     pass
