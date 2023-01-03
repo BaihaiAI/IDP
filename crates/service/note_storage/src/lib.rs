@@ -49,6 +49,31 @@ pub async fn main() {
         return;
     }
 
+    if business::kubernetes::is_k8s() {
+        match license_generator::verify_license(
+            license_generator::DEFAULT_LICENSE_PUBLIC_KEY_PATH,
+            license_generator::DEFAULT_LICENSE_PATH,
+        ) {
+            Ok(license) => {
+                let now_timestamp = std::time::SystemTime::now()
+                    .duration_since(std::time::SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs();
+                let expired_in_secs = license.expire_timestamp - now_timestamp;
+                tokio::spawn(async move {
+                    // alternative use tokio_util::time::DelayQueue
+                    tokio::time::sleep(std::time::Duration::from_secs(expired_in_secs)).await;
+                    tracing::error!("license expire, exit...");
+                    std::process::exit(1);
+                });
+            }
+            Err(err) => {
+                tracing::error!("verify_license fail, exit... {err}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     // tokio::spawn(sum_project_disk(rb.clone()));
 
     // let path = Path::new("/opt/config/config.toml");

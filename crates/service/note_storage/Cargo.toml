@@ -15,6 +15,7 @@ common_model = { path = "../../common/model" }
 common_tools = { path = "../../common/common_tools" }
 err = { path = "../../common/err" }
 kernel_common = { path = "../../common/kernel_common" }
+license_generator = { path = "../../license_generator" }
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }
 serde_helper = { path = "../../common/serde_helper" }
@@ -44,6 +45,7 @@ sqlx = { version = "0.6.0", default-features = false, features = [
     "postgres",
     "macros",
 ] }
+ssh2 = "0.9.3" # vendored-openssl
 str-utils = "0.1.5"
 suppaftp = "4.2.0"
 tar = { version = "0.4", default-features = false }
@@ -63,8 +65,6 @@ tree_magic = "0.2.3"
 urlencoding = "2.1"
 uuid = { version = "1.1", features = ["serde", "v4"] }
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
-# vendored-openssl
-ssh2 = "0.9.3"
 
 [dev-dependencies]
 #fs_extra = "0.2"

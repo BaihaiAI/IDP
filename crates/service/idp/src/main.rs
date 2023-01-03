@@ -34,7 +34,7 @@ async fn main() {
 
     #[cfg(feature = "license")]
     if let Err(msg) = license_generator::verify_license(&args.public_key, &args.license) {
-        println!("{}", msg);
+        eprintln!("{}", msg);
         std::process::exit(1);
     }
 

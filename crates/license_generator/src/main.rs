@@ -15,47 +15,68 @@
 use license_generator::License;
 use license_generator::LicenseFile;
 use license_generator::IDP_VERSION;
-use rsa::pkcs1::EncodeRsaPublicKey;
 use rsa::pkcs1v15::SigningKey;
 use rsa::RsaPrivateKey;
 use sha2::Sha256;
 use signature::RandomizedSigner;
 use signature::Signature;
 
-fn main() {
-    let private_key = read_priv_key();
-    let license = generate_license();
-
-    generate_pub_key_file(&private_key);
-    generate_license_file(private_key, license);
+#[derive(clap::Parser)]
+struct Args {
+    // #[clap(long, value_parser, value_name = "PATH")]
+    // pub_key: String,
+    #[clap(long, value_parser, value_name = "PATH")]
+    pri_key: String,
+    #[clap(long, value_parser, value_name = "INT", default_value = "30")]
+    expire_in_days: u64,
+    #[clap(
+        long,
+        value_parser,
+        value_name = "PATH",
+        default_value = "license",
+        help = "license file output path"
+    )]
+    output: String,
 }
 
-fn read_priv_key() -> RsaPrivateKey {
-    let priv_key_path = std::env::var("PRIV_KEY_PATH").expect("env PRIV_KEY_PATH not present");
+#[test]
+fn verify_cli() {
+    use clap::CommandFactory;
+    Args::command().debug_assert();
+}
+
+fn main() {
+    let args = <Args as clap::Parser>::parse();
+    let priv_key_path = args.pri_key;
     let priv_key_str = std::fs::read_to_string(&priv_key_path)
         .unwrap_or_else(|_| panic!("private key path read err {priv_key_path}"));
-    <rsa::RsaPrivateKey as rsa::pkcs1::DecodeRsaPrivateKey>::from_pkcs1_pem(&priv_key_str)
-        .expect("invalid rsa pem file format")
+    let private_key =
+        <rsa::RsaPrivateKey as rsa::pkcs1::DecodeRsaPrivateKey>::from_pkcs1_pem(&priv_key_str)
+            .expect("invalid rsa pem file format");
+
+    let license = generate_license(args.expire_in_days);
+
+    // generate_pub_key_file(&private_key);
+    generate_license_file(private_key, license, args.output);
 }
 
-fn generate_license() -> License {
-    let license_expire_days =
-        std::env::var("LICENSE_EXPIRE_DAYS").expect("env LICENSE_EXPIRE_DAYS not present");
-    let license_expire_days = license_expire_days
-        .parse::<u64>()
-        .expect("env LICENSE_EXPIRE_DAYS is not a number");
+fn generate_license(license_expire_days: u64) -> License {
     let now_timestamp = std::time::SystemTime::now()
         .duration_since(std::time::SystemTime::UNIX_EPOCH)
         .unwrap()
         .as_secs();
     let license_expire_timestamp = now_timestamp + license_expire_days * 24 * 3600;
     License {
-        expire_timestamp: license_expire_timestamp as u32,
+        expire_timestamp: license_expire_timestamp,
         version: IDP_VERSION.to_string(),
     }
 }
 
-fn generate_license_file(private_key: RsaPrivateKey, license: License) {
+fn generate_license_file(
+    private_key: RsaPrivateKey,
+    license: License,
+    license_output_path: String,
+) {
     let signing_key = SigningKey::<Sha256>::new(private_key);
     let mut rng = rand::thread_rng();
     let data = bincode::serialize(&license).expect("failed to serialize license");
@@ -66,13 +87,14 @@ fn generate_license_file(private_key: RsaPrivateKey, license: License) {
         signature: hex::encode(signature.as_bytes()),
     };
     let file_content = bincode::serialize(&license_file).expect("failed to serialize license");
-    let license_path = std::env::var("LICENSE_PATH").expect("env LICENSE_PATH not present");
+    let license_path = license_output_path;
     std::fs::write(&license_path, &file_content).expect("failed to write license file");
-    println!("License generate succeed. Path: {license_path}");
 }
 
+#[cfg(not)]
 #[allow(clippy::expect_fun_call)]
 fn generate_pub_key_file(private_key: &RsaPrivateKey) {
+    use rsa::pkcs1::EncodeRsaPublicKey;
     let public_key = private_key.to_public_key();
     let pub_key_str = public_key
         .to_pkcs1_pem(rsa::pkcs1::LineEnding::CRLF)
