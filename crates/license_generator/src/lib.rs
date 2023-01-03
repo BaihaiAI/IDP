@@ -31,7 +31,9 @@ pub struct License {
 
 #[derive(Serialize, Deserialize)]
 pub struct LicenseFile {
+    /// license struct bincode hexed string
     pub license: String,
+    /// SigningKey::<Sha256>::new(private_key).sign_with_rng
     pub signature: String,
 }
 
@@ -60,7 +62,7 @@ pub fn verify_license(pub_key_path: &str, license_path: &str) -> Result<License,
         Err(_) => return Err("Signature::from_bytes fail, Invalid signature format.".to_string()),
     };
 
-    let hexed_license = match hex::decode(license_file.license) {
+    let license_struct_bytes = match hex::decode(license_file.license) {
         Ok(hexed_license) => hexed_license,
         Err(_) => return Err("hex::decode fail2, Invalid license format.".to_string()),
     };
@@ -78,20 +80,20 @@ pub fn verify_license(pub_key_path: &str, license_path: &str) -> Result<License,
 
     let verifying_key = VerifyingKey::<Sha256>::new(public_key);
 
-    if verifying_key.verify(&hexed_license, &signature).is_err() {
+    if verifying_key
+        .verify(&license_struct_bytes, &signature)
+        .is_err()
+    {
         return Err("Signature verify fail.".to_string());
     }
 
-    let license: License = match bincode::deserialize(&hexed_license) {
+    let license: License = match bincode::deserialize(&license_struct_bytes) {
         Ok(license) => license,
         Err(_) => return Err("bincode::deserialize fail, Invalid license format.".to_string()),
     };
 
     let expire_timestamp = license.expire_timestamp;
-    let now_timestamp = std::time::SystemTime::now()
-        .duration_since(std::time::SystemTime::UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
+    let now_timestamp = get_timestamp_from_internet();
     if expire_timestamp < now_timestamp {
         return Err("License expired.".to_string());
     }
@@ -101,4 +103,19 @@ pub fn verify_license(pub_key_path: &str, license_path: &str) -> Result<License,
     }
 
     Ok(license)
+}
+
+pub fn get_timestamp_from_internet() -> u64 {
+    #[derive(serde::Deserialize)]
+    struct TimestampApiRsp {
+        unixtime: u64,
+    }
+    // default timeout 30s
+    match reqwest::blocking::get("http://worldtimeapi.org/api/timezone/Etc/GMT") {
+        Ok(rsp) => rsp.json::<TimestampApiRsp>().unwrap().unixtime,
+        Err(_) => std::time::SystemTime::now()
+            .duration_since(std::time::SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs(),
+    }
 }

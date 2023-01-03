@@ -55,16 +55,20 @@ pub async fn main() {
             license_generator::DEFAULT_LICENSE_PATH,
         ) {
             Ok(license) => {
-                let now_timestamp = std::time::SystemTime::now()
-                    .duration_since(std::time::SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-                let expired_in_secs = license.expire_timestamp - now_timestamp;
+                let expire_timestamp = license.expire_timestamp;
                 tokio::spawn(async move {
-                    // alternative use tokio_util::time::DelayQueue
-                    tokio::time::sleep(std::time::Duration::from_secs(expired_in_secs)).await;
-                    tracing::error!("license expire, exit...");
-                    std::process::exit(1);
+                    loop {
+                        let timestamp = tokio::task::spawn_blocking(|| {
+                            license_generator::get_timestamp_from_internet()
+                        })
+                        .await
+                        .unwrap();
+                        if timestamp > expire_timestamp {
+                            tracing::error!("license expire, exit...");
+                            std::process::exit(1);
+                        }
+                        tokio::time::sleep(std::time::Duration::from_secs(24 * 3600)).await;
+                    }
                 });
             }
             Err(err) => {
