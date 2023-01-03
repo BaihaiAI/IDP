@@ -25,15 +25,25 @@ idp --license license --public-key rsa2048-pub.pem
 
 openssl 1.1:
 
-> openssl genrsa -out rsa2048-priv.pem
+```
+openssl genrsa -out rsa2048-priv.pem
+openssl rsa -in rsa2048-priv.pem -pubout -out rsa2048-pub.pem
+```
 
 openssl 3.0:
 
-> openssl genrsa -traditional -out rsa2048-priv.pem
+```
+openssl genrsa -traditional -out rsa2048-priv.pem
+openssl rsa -in rsa2048-priv.pem -RSAPublicKey_out -out rsa2048-pub.pem
+```
 
-最后通过私钥文件生成出公钥文件
+要求公钥开头必须是
 
-> openssl rsa -in rsa2048-priv.pem -pubout -out rsa2048-pub.pem
+> -----BEGIN RSA PUBLIC KEY
+
+私钥开头必须是
+
+> -----BEGIN RSA PRIVATE KEY
 
 ## 使用生成器（license_generator）生成License和公钥文件
 

@@ -12,11 +12,7 @@ clap = { version = "4.0", default-features = false, features = [
 ] }
 hex = "0.4"
 rand = "0.8"
-reqwest = { version = "0.11", default-features = false, features = [
-    "rustls-tls",
-    "json",
-    "blocking",
-] }
+ureq = { version = "2.0", features = ["json"] }
 rsa = { version = "0.7", default-features = false, features = ["pem"] }
 serde = { version = "1.0.145", features = ["derive"] }
 sha2 = "0.10.6"

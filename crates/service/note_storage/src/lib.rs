@@ -67,7 +67,7 @@ pub async fn main() {
                             tracing::error!("license expire, exit...");
                             std::process::exit(1);
                         }
-                        tokio::time::sleep(std::time::Duration::from_secs(24 * 3600)).await;
+                        tokio::time::sleep(std::time::Duration::from_secs(3600)).await;
                     }
                 });
             }

@@ -20,8 +20,8 @@ use signature::Signature;
 use signature::Verifier;
 
 pub const IDP_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const DEFAULT_LICENSE_PATH: &str = "/opt/config/license";
-pub const DEFAULT_LICENSE_PUBLIC_KEY_PATH: &str = "/opt/config/license_public_key.pem";
+pub const DEFAULT_LICENSE_PATH: &str = "/opt/config/idp_license";
+pub const DEFAULT_LICENSE_PUBLIC_KEY_PATH: &str = "/opt/config/idp_license_public_key.pem";
 
 #[derive(Serialize, Deserialize)]
 pub struct License {
@@ -75,7 +75,7 @@ pub fn verify_license(pub_key_path: &str, license_path: &str) -> Result<License,
     let public_key =
         match <rsa::RsaPublicKey as rsa::pkcs1::DecodeRsaPublicKey>::from_pkcs1_pem(&pub_key_str) {
             Ok(public_key) => public_key,
-            Err(_) => return Err("Invalid public key file format.".to_string()),
+            Err(err) => return Err(format!("Invalid public key file format {err}")),
         };
 
     let verifying_key = VerifyingKey::<Sha256>::new(public_key);
@@ -92,9 +92,9 @@ pub fn verify_license(pub_key_path: &str, license_path: &str) -> Result<License,
         Err(_) => return Err("bincode::deserialize fail, Invalid license format.".to_string()),
     };
 
-    let expire_timestamp = license.expire_timestamp;
     let now_timestamp = get_timestamp_from_internet();
-    if expire_timestamp < now_timestamp {
+    let expire_timestamp = license.expire_timestamp;
+    if now_timestamp >= expire_timestamp {
         return Err("License expired.".to_string());
     }
 
@@ -106,16 +106,34 @@ pub fn verify_license(pub_key_path: &str, license_path: &str) -> Result<License,
 }
 
 pub fn get_timestamp_from_internet() -> u64 {
-    #[derive(serde::Deserialize)]
-    struct TimestampApiRsp {
-        unixtime: u64,
-    }
     // default timeout 30s
-    match reqwest::blocking::get("http://worldtimeapi.org/api/timezone/Etc/GMT") {
-        Ok(rsp) => rsp.json::<TimestampApiRsp>().unwrap().unixtime,
+    match get_timestamp_from_internet_() {
+        Ok(rsp) => rsp,
         Err(_) => std::time::SystemTime::now()
             .duration_since(std::time::SystemTime::UNIX_EPOCH)
             .unwrap()
             .as_secs(),
     }
+}
+
+fn get_timestamp_from_internet_() -> Result<u64, ureq::Error> {
+    #[derive(serde::Deserialize)]
+    struct TimestampApiRsp {
+        unixtime: u64,
+    }
+    let rsp = ureq::get("http://worldtimeapi.org/api/timezone/Asia/Shanghai")
+        .timeout(std::time::Duration::from_secs(3))
+        .call()?
+        .into_json::<TimestampApiRsp>()?;
+    Ok(rsp.unixtime)
+}
+
+#[test]
+fn test_get_timestamp_from_internet_() {
+    let internet_timestamp = get_timestamp_from_internet_().unwrap();
+    let system_timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    assert!(system_timestamp - internet_timestamp <= 3);
 }
