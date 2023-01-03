@@ -47,13 +47,6 @@ openssl rsa -in rsa2048-priv.pem -RSAPublicKey_out -out rsa2048-pub.pem
 
 ## 使用生成器（license_generator）生成License和公钥文件
 
-### 需要配置的环境变量
-生成器通过配置环境变量来配置如下内容：
-- 生成器读取的私钥文件名（由openssl生成）：PRIV_KEY_PATH
-- License的过期天数：LICENSE_EXPIRE_DAYS
-- 生成器输出的License文件名：LICENSE_PATH
-- 生成器输出的公钥文件名：PUB_KEY_PATH
-
 ### license 生成器使用
 > ./license_generator --pri-key rsa2048-priv.pem
 
