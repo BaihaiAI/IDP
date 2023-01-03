@@ -15,7 +15,7 @@ kernel_common = { path = "../../common/kernel_common", default-features = false 
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }
 
-base64 = "0.13.1"
+base64 = "0.20"
 crossbeam-channel = "0.5"
 libc = "0.2"
 pyo3 = "0.17"

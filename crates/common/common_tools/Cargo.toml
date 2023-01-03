@@ -15,7 +15,7 @@ business = { path = "../business" }
 common_model = { path = "../model" }
 
 axum = { version = "0.6", features = ["headers"], optional = true }
-base64 = { version = "0.13.0" }
+base64 = { version = "0.20" }
 chrono = { version = "0.4.23", optional = true }
 encoding_rs = "0.8"
 err = { path = "../err" }

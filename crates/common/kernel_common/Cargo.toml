@@ -15,7 +15,7 @@ err = { path = "../err" }
 serde_helper = { path = "../serde_helper" }
 
 # libc = { version = "0.2", optional = true }
-base64 = "0.13"
+base64 = "0.20"
 reqwest = { version = "0.11", default-features = false, features = [
     "rustls-tls",
     "json",
