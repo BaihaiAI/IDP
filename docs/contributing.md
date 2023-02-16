@@ -16,7 +16,7 @@ title: Contributing
 
 ## code style 
 
-Please read [contributing.md](/docs/code-style.md)
+Please read [code-style.md](/docs/code-style.md)
 
 ## PR branch naming style
 
