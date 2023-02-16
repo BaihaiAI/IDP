@@ -77,6 +77,7 @@ If you have any question, feel free to reach out to us in the following ways:
  - [On Twitter](https://twitter.com/baihaiAI)
  - [On Linkedin](https://www.linkedin.com/company/80179567/admin/)
  - [Mail to us](https://baihai.co/contactus.html)
+ - [Wechat Group](https://raw.githubusercontent.com/BaihaiAI/IDP/main/docs/WeChat%20Group%20QR.png)
 
 
 ## Case Study
