@@ -1,3 +1,9 @@
+<div align="right">
+
+  [English](README.md) | [简体中文](README_zh.md)
+
+</div>
+
 ![](docs/logo_new.png)
 
 [![LICENSE](https://img.shields.io/badge/licence-Apache%202.0-brightgreen)](https://github.com/BaihaiAI/IDP/blob/main/LICENSE)
