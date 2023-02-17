@@ -8,15 +8,16 @@ title: Code Style
 
 </div>
 
-All rs source file must write in english and can not contains chinese word
+所有包括rs后缀名在内的Rust代码文件内不能出现中文，必须用英文。
 
-Please make sure your code pass fmt/clippy checking, and pass our extra clippy lints.
+请确保你提交的代码能够通过rustfmt 和 clippy的检测，并符合clippy里的lint级别要求。
 
-Here is some extras lints you need to pass
 
-## use guard statement reduce if/match block nested
+以下是你需要通过的lint:
 
-Bad example:
+## 使用guard语句减少嵌套的if/match块
+
+糟糕的例子:
 
 ```rust
 if flag1 {
@@ -35,7 +36,7 @@ if flag1 {
 }
 ```
 
-Good example:
+优秀的例子:
 
 ```rust
 if !flag {
@@ -53,9 +54,9 @@ let xxx = match xxx_opt {
 // do some thing
 ```
 
-## use Future join await multi Future
+## 通过使用.await来执行Future
 
-Bad example:
+糟糕的例子:
 
 ```rust
 for cell_update_item in cells {
@@ -66,7 +67,7 @@ for cell_update_item in cells {
 }
 ```
 
-Good example:
+优秀的例子:
 
 ```rust
 let mut futs = Vec::new();
