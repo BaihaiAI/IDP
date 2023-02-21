@@ -2,6 +2,12 @@
 title: Contributor Covenant Code of Conduct
 ---
 
+<div align="right">
+
+  [English](code-of-conduct.md) | [简体中文](code-of-conduct_zh.md)
+
+</div>
+
 # 社区行为守则
 
 ## 郑重承诺
