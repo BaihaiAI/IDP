@@ -87,21 +87,18 @@ cd idp-studio-v1.0.0-linux-x64
 ## 社区行为守则
 请阅读[社区行为守则](/docs/code-of-conduct.md)，该文档描述了在IDP开源社区需要遵守的行为准则。
 
-## IDP演示
-- [4分钟了解IDP核心亮点功能](https://www.bilibili.com/video/BV1Ja411o7to/?spm_id_from=333.337.search-card.all.click)
-- [快速上手算法开发生产](https://www.bilibili.com/video/BV1Qa411f7as/?spm_id_from=333.337.search-card.all.click)
-- [更多精彩内容](https://space.bilibili.com/1227589642)
+## IDP用户手册
+对于具体功能和使用说明，请查看[IDP用户手册](https://baihai-idp.yuque.com/mwvla8/tyonh6?#)
+
 
 ## 怎样联系我们
 如果你有任何关于IDP的问题，欢迎通过以下方式与我们取得联系：
  - [Slack](https://join.slack.com/t/idp-tjo1834/shared_invite/zt-1kee8cd8x-iNZ0rvwClRfx7sLgmmKKyg)
- - [Twitter](https://twitter.com/baihaiAI)
  - [领英Linkedin](https://www.linkedin.com/company/80179567/admin/)
+ - [Bilibili](https://space.bilibili.com/1227589642)
  - [发送邮件](https://baihai.co/contactus.html)
  - [加入微信交流群](https://raw.githubusercontent.com/BaihaiAI/IDP/main/docs/WeChat%20Group%20QR.png)
 
-## 经典案例
-IDP的[经典案例](https://www.baihai.co/case.html)。
 
 ## IDP使用的开源许可证
 本项目使用 [Apache-2.0 License](LICENSE).
