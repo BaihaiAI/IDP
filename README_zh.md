@@ -26,15 +26,25 @@ IDP采取插件式架构，可便捷集成AI开发全流程所需的插件，如
 
 IDP的核心功能如下：
 ● 支持多语言： 交互式编程环境，在同一个notebook中能够同时支持Python、SQL和Markdown语言。
+
 ● 数据可视化： 可以直接使用内置的数据可视化工具生成数据分析结果图，如柱状图、散点图、线状图等。
+
 ● 自动版本管理： 天然内置版本管理功能，用户可便捷跟踪和管理代码更改，清晰地进行版本对比。
+
 ● 代码辅助功能： 拥有强大的代码辅助功能，包括智能代码补全、快捷修复、定义跳转等。
+
 ● 包管理器： 轻松有效地搜索和管理Python软件包。
+
 ● 变量管理器： 可以交互式浏览和管理变量，方便比较不同的算法方法和参数设置。
+
 ● 环境管理： 支持多个运行环境，支持切换环境，支持安装、卸载、管理Python包；支持自定义运行环境，支持环境持久化存储，支持克隆环境。
+
 ● 大纲：支持查看Markdown标题大纲，以及快速定位至标题所在位置。
+
 ● 全局搜索：支持全局搜索，可以搜索文件和文本文件中的字符，并进行文件定位。
-● 文件管理器：具备目录是结构文件管理器，支持文件页签管理，支持预览图片、Excel文件
+
+● 文件管理器：具备目录是结构文件管理器，支持文件页签管理，支持预览图片、Excel文件。
+
 ● 终端：可通过终端运行一些高级脚本、进行安装操作或其他任务。
 
 ![](docs/open.png)
@@ -77,21 +87,18 @@ cd idp-studio-v1.0.0-linux-x64
 ## 社区行为守则
 请阅读[社区行为守则](/docs/code-of-conduct.md)，该文档描述了在IDP开源社区需要遵守的行为准则。
 
-## IDP演示
-- [4分钟了解IDP核心亮点功能](https://www.bilibili.com/video/BV1Ja411o7to/?spm_id_from=333.337.search-card.all.click)
-- [快速上手算法开发生产](https://www.bilibili.com/video/BV1Qa411f7as/?spm_id_from=333.337.search-card.all.click)
-- [更多精彩内容](https://space.bilibili.com/1227589642)
+## IDP用户手册
+对于具体功能和使用说明，请查看[IDP用户手册](https://baihai-idp.yuque.com/mwvla8/tyonh6?#)
+
 
 ## 怎样联系我们
 如果你有任何关于IDP的问题，欢迎通过以下方式与我们取得联系：
  - [Slack](https://join.slack.com/t/idp-tjo1834/shared_invite/zt-1kee8cd8x-iNZ0rvwClRfx7sLgmmKKyg)
- - [Twitter](https://twitter.com/baihaiAI)
  - [领英Linkedin](https://www.linkedin.com/company/80179567/admin/)
+ - [Bilibili](https://space.bilibili.com/1227589642)
  - [发送邮件](https://baihai.co/contactus.html)
  - [加入微信交流群](https://raw.githubusercontent.com/BaihaiAI/IDP/main/docs/WeChat%20Group%20QR.png)
 
-## 经典案例
-IDP的[经典案例](https://www.baihai.co/case.html)。
 
 ## IDP使用的开源许可证
 本项目使用 [Apache-2.0 License](LICENSE).

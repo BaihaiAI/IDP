@@ -44,15 +44,15 @@ Then open http://localhost:3000 with your browser.
 
 ### Start IDP with pre-built binary
 
-- [Windows x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-win-x64.zip)
-- [macOS arm64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-arm64.tar.gz)
-- [macOS x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-x64.tar.gz)
-- [Linux x86_64](http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
+- [Windows x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-win-x64.zip)
+- [macOS arm64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-arm64.tar.gz)
+- [macOS x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-x64.tar.gz)
+- [Linux x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
 
 For example start IDP with pre-built binary in Linux, require Python 3.7 and up (CPython and PyPy)
 
 ```
-wget http://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz
+wget https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz
 tar zxf idp-studio-v1.0.0-linux-x64.tar.gz
 cd idp-studio-v1.0.0-linux-x64
 ./idp
@@ -72,10 +72,9 @@ Please read [contributing.md](/docs/contributing.md) for details on the proces
 Please refer to the [Code of Conduct](/docs/code-of-conduct.md), which describes the expectations for interactions within the community.
 
 
-## Shows
-- [Understand IDP in 4 minutes](https://www.bilibili.com/video/BV1Ja411o7to/?spm_id_from=333.337.search-card.all.click)
-- [Getting start with IDP](https://www.bilibili.com/video/BV1Qa411f7as/?spm_id_from=333.337.search-card.all.click)
-- [Others](https://space.bilibili.com/1227589642)
+## Document
+Please refer to [IDP User Guide](https://baihai-idp.yuque.com/mwvla8/tyonh6?#) for detailed instructions.
+
 
 ## Community
 If you have any question, feel free to reach out to us in the following ways:
@@ -83,10 +82,8 @@ If you have any question, feel free to reach out to us in the following ways:
  - [On Twitter](https://twitter.com/baihaiAI)
  - [On Linkedin](https://www.linkedin.com/company/80179567/admin/)
  - [Mail to us](https://baihai.co/contactus.html)
+ - [Wechat Group](https://raw.githubusercontent.com/BaihaiAI/IDP/main/docs/WeChat%20Group%20QR.png)
 
-
-## Case Study
-[Case Study](https://www.baihai.co/case.html) list our use cases.
 
 ## License
 IDP is licensed under [Apache-2.0](LICENSE).
