@@ -2,6 +2,13 @@
 title: Contributing
 ---
 
+<div align="right">
+
+  [English](contributing.md) | [简体中文](contributing_zh.md)
+
+</div>
+
+
 # Contributing
 
 ## contribute workflow
