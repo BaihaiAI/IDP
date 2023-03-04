@@ -9,7 +9,7 @@
 
 ## 环境要求
 
-需要Git、Rustup、Python 3（v3.8以上）、Node.js active LTS（v16.17.0）、yarn和npm（v8以上）。
+需要Git、Rustup、Python 3（v3.8及以上）、Node.js active LTS（v16.17.0）、yarn和npm（v8及以上）。
 
 ### Linux操作系统所需额外构建依赖项
 
