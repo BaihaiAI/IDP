@@ -154,10 +154,11 @@ class TextEditor extends React.Component {
   }
 
   saveFile = () => {
-    console.log(this.state.mime, this.state.mime.startsWith('text'))
-    console.log(this.state.mime.indexOf('json') === -1)
+    // console.log(this.state.mime, this.state.mime.startsWith('text'))
+    // console.log(this.state.mime.indexOf('json') === -1)
     // if (this.state.value === '') return;
-    if (!this.state.mime.startsWith('text') && this.state.mime.indexOf('json') === -1) return;
+    // 能用组件打开的一定是文本文件，所以没必要判断了
+    // if (!this.state.mime.startsWith('text') && this.state.mime.indexOf('json') === -1) return;
     const _this = this;
     const params = {
       content: _this.state.value,

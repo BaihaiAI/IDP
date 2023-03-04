@@ -1,5 +1,5 @@
 import React from 'react'
-import DataSetShow from "../../components/dataSet/DataSetShow"
+import DataSetShow from "../../components/dataset/DataSetShow";
 
 function DataSet(props) {
   return (

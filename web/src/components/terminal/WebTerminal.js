@@ -18,6 +18,7 @@ function WebTerminal({ terminalId }) {
 
     const [fitAddon, setFitAddon] = useState(null);
     const [ws, setWs] = useState(null);
+    let wsInit = false; // 防止同时建立多个websocket连接
 
     // 计算终端高度和宽度
     const computeSize = useCallback(() => {
@@ -25,15 +26,15 @@ function WebTerminal({ terminalId }) {
         let width = IdpTerminal.terminalWidth;
         setSize({ height, width });
         const rows = Math.floor(height / 16);
-        const cols = Math.floor(width / 8);
+        const cols = Math.floor(width / 8) - 2;
         return { rows, cols };
     }, [IdpTerminal.sideWidth, IdpTerminal.terminalClientHeight, IdpTerminal.terminalWidth, IdpTerminal.terminalHeight, IdpTerminal.next, IdpTerminal.leftFileManageWidth]);
 
     //初始化当前系统环境，返回终端的 pid，标识当前终端的唯一性
     const [pid, setPid] = useState(0);
-    const initSysEnv = async () => {
+    const initSysEnv = async (currentEnv) => {
         const { rows, cols } = computeSize();
-        return await terminalApi.getTerminal({ rows, cols }).then(res => {
+        return await terminalApi.getTerminal({ rows, cols, env: currentEnv }).then(res => {
             if (res.code === 20000000) {
                 return res.data.pid
             } else {
@@ -60,9 +61,7 @@ function WebTerminal({ terminalId }) {
         term.focus();
         let ws = null;
         async function asyncInitSysEnv() {
-            const pid = await initSysEnv(term);
-            if (!pid) return;
-            setPid(pid);
+          wsInit = true;
             let currentEnv = getCurrentEnv();
             await environmentAPI.getEnvironmentName()
               .then(res => {
@@ -73,26 +72,38 @@ function WebTerminal({ terminalId }) {
               .catch(err => {
                 console.log(err)
               })
+            const pid = await initSysEnv(currentEnv);
+            if (!pid) {
+              wsInit = false;
+              return;
+            }
+            setPid(pid);
+          
             ws = new WebSocket(terminalWsUrl + pid);
             setWs(ws);
             ws.onopen = () => {
+              wsInit = false;
                 if (ws.readyState === 1 && currentEnv) {
-                    ws.send(`source /root/.bashrc\n`)
-                    ws.send(`source /root/.bash_profile\n`)
-                    ws.send(`source activate ${currentEnv} \n`);
-                    ws.send(`clear\n`)
+                    // ws.send(`source /root/.bashrc\n`)
+                    // ws.send(`source /root/.bash_profile\n`)
+                    // ws.send(`source activate ${currentEnv} \n`);
+                    // ws.send(`clear\n`)
                 }
             }
+            ws.onclose = (e) => {
+              console.log(e);
+              wsInit = false;
+            }
             const attachAddon = new AttachAddon(ws);
-            const fitAddon = new FitAddon();
             term.loadAddon(attachAddon);
-            term.loadAddon(fitAddon);
-            setFitAddon(fitAddon);
         }
         asyncInitSysEnv();
+        const fitAddon = new FitAddon();
+        term.loadAddon(fitAddon);
+        setFitAddon(fitAddon);
         term.onData(() => {
             // if (data.startsWith('stty rows')) return;
-            if (!ws || ws.readyState !== 1) {
+            if ((!ws || ws.readyState !== 1) && !wsInit) {
                 console.log('ws is not ready');
                 ws && ws.close();
                 asyncInitSysEnv();
@@ -118,6 +129,7 @@ function WebTerminal({ terminalId }) {
     }, [IdpTerminal.sideWidth, IdpTerminal.terminalWidth, IdpTerminal.terminalClientHeight, IdpTerminal.terminalHeight, IdpTerminal.next, IdpTerminal.leftFileManageWidth]);
 
     useEffect(() => {
+      console.log({size});
         if (fitAddon) {
             fitAddon.fit();
         }

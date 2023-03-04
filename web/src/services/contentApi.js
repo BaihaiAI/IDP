@@ -15,7 +15,6 @@ function cat2(options){
 }
 
 function cat2_example({version}){
-  console.log("----------")
   const url = `${noteApiPath2}/workspace/file/example`
   return request.post(url, {
     projectId: new Number(projectId),

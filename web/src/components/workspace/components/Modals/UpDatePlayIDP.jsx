@@ -22,7 +22,7 @@ function UpDatePlayIDP (props){
         // 空值
         version = ""
         contentApi.cat2_example({version}).then(res => {
-          message.success(res.message)
+          message.success("'玩转IDP'文件夹是最新的")
           changeVisible()
         })
       }

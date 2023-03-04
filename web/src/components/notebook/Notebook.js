@@ -29,7 +29,7 @@ import { userId, region, projectId ,teamId} from "@/store/cookie"
 
 import "./Notebook.less"
 import contentApi from "../../services/contentApi"
-import {useMemoizedFn, useUnmount} from "ahooks"
+import {useMemoizedFn, useThrottleFn, useUnmount} from "ahooks"
 import { store } from "@/store"
 import { getHistoryOpenFile, saveHistoryOpenFile } from "@/utils/storage"
 import PubSub from "pubsub-js"
@@ -38,6 +38,8 @@ import { NoteBookonBlur, NoteBookonFocuse } from '../workspace/keymap'
 import {contentContext} from "@/layout/content"
 import globalData from "@/idp/global"
 import {observer} from "mobx-react"
+import resourceControl from '../../idp/global/resourceControl';
+import clusterApi from '../../services/clusterApi';
 
 let sendWs = null
 let lspWebsocket = new LspWebsocket()
@@ -66,6 +68,12 @@ const Notebook = (props, ref) => {
   } = props
   deleteflag = props.deleteflag
 
+  const {run:dispatchVariableListAsyncThrottle} = useThrottleFn(
+    ({path,inode}) => {
+      dispatch(variableListAsync({path, inode}))
+    },
+    { wait: 5000 },
+  )
 
   const {setShowSaveVersion} =  useContext(contentContext)
   // lsp didOpen
@@ -221,9 +229,47 @@ const Notebook = (props, ref) => {
     return cellIdList
   }
 
+  // 获取机器运行状态
+  const getRuntimeStatus = () => {
+    let timer = null;
+    resourceControl.getRuntimeStatus((waitPending, machineStatus, pendingDuration) => {
+      if (machineStatus === 'pending') {
+        if (waitPending || pendingDuration < 12) {  // 选择了继续等待或者等待的时间小于12秒
+          timer && clearTimeout(timer);
+          timer = setTimeout(() => {
+            getRuntimeStatus();
+          }, 5000);
+        } else {
+          Modal.confirm({
+            title: '申请的资源大于当前系统可用资源，您可以点击“继续等待”按钮等待系统分配资源或者点击“取消”按钮调整资源配置重新申请资源',
+            maskClosable: false,
+            keyboard: false,
+            okText: '继续等待',
+            cancelText: '取消',
+            onOk: () => {
+              resourceControl.setWaitPending(true);
+              getRuntimeStatus();
+            },
+            onCancel: () => {
+              resourceControl.setWaitPending(false);
+              clusterApi.runtimeStop().then((res) => {
+                resourceControl.setMachineStatus('stopped');
+              })
+            }
+          });
+        }
+      } else if (machineStatus === 'starting') {
+        timer && clearTimeout(timer);
+        timer = setTimeout(() => {
+          getRuntimeStatus();
+        }, 5000);
+      }
+    });
+  }
+
   const socketMessage = (msg) => {
     const msgJson = JSON.parse(msg)
-    const { cellId,path } = msgJson
+    const { cellId, path, msgType } = msgJson
     /*    if (!msgJson["parent_header"]) return
     const msgId = msgJson["parent_header"]["msg_id"]
     const flag = msgId.slice(0, msgId.lastIndexOf("/"))
@@ -254,34 +300,43 @@ const Notebook = (props, ref) => {
       let cells = notebook.cells
       for (let i = 0; i < cells.length; i++) {
         if (cells[i].metadata.id === cellId) {
-
           let cell = { ...cells[i] }
           let cellState = "ready"
-          if ("start_kernel" == msgJson["msgType"]) {
+          if ("start_kernel" == msgType) {
             cell["outputs"] = [{
               "name": "stdout",
               "outputType": "stream",
               "text": [intl.get("START_KERNEL")]
             }]
             cellState = "pending"
-          } else if ("execute_input" === msgJson["msgType"]) {
+            setTimeout(() => getRuntimeStatus(), 5000); // 5秒后获取资源状态，为了工具栏中的状态一致
+          } else if ('shutdown_kernel' === msgType) {
+            cell['outputs'] = [...cell["outputs"],{
+              "ename": "Kernel is shutdown",
+              "evalue": "",
+              "traceback": []
+            }];
+            cellState = "ready";
+          } else if ("execute_input" === msgType) {
             cell["outputs"] = []
             cellState = "executing"
-          } else if ("reply_on_stop" === msgJson["msgType"]) {
+          } else if ("reply_on_stop" === msgType) {
             cellState = "ready"
             cell["outputs"] = [{
               ename: 'StopRunning',
               evalue: 'Stop running because there are cells with running errors above',
               traceback: [],
             }]
-          } else if ('status' === msgJson['msgType'] && 'idle' === msgJson['content']['execution_state']) {
+          } else if ('status' === msgType && 'idle' === msgJson['content']['execution_state']) {
             cellState = "ready"
+          } else if ('clear_output' === msgType) {
+            cell["outputs"] = [];
           } else {
             const res = sendWs.parseMessage(msgJson)
             if (Object.keys(res).length === 0) return
 
             // runtime_error 说明还没提交给kernel执行就已经出错了
-            if ("runtime_error" === msgJson["msgType"]) {
+            if ("runtime_error" === msgType) {
               cell["outputs"] = []
               if (msgJson["content"] && msgJson["content"]["message"] === 'No enough resource') {
                 Modal.error({
@@ -297,13 +352,13 @@ const Notebook = (props, ref) => {
 
             if (
               "duration" in msgJson.content ||
-              "runtime_error" === msgJson["msgType"] ||
-              "error" === msgJson["msgType"] ||
+              "runtime_error" === msgType ||
+              "error" === msgType ||
               (msgJson["content"] && msgJson["content"]["is_busy"] === false)
             ) {
               cellState = "ready"
               const { inode } = notebook.metadata;
-              dispatch(variableListAsync({path, inode}))
+              dispatchVariableListAsyncThrottle({path,inode})
             } else {
               cellState = "executing"
               // document.getElementById(`cellbox-${cellId}`).scrollIntoView({
@@ -457,6 +512,12 @@ const Notebook = (props, ref) => {
   }
 
   const doRunCell = (cell, isAll, batchId) => {
+    // if (resourceControl.machineStatus !== 'running') {
+    //   Modal.warning({
+    //     title: '未申请运行资源，请先在上方工具栏中配置CPU/GPU/内存后申请资源'
+    //   });
+    //   return;
+    // }
     const cellId = cell.metadata.id
     if ("" === cellId) {
       message.warning(intl.get("EDITOR_ERROR_1"))
@@ -502,12 +563,10 @@ const Notebook = (props, ref) => {
     // 发送websocket执行
     const randomInt = Math.ceil(Math.random() * 10000)
     // console.log(cell['metadata'])
-    const resource = resourceRef.current.getResource()
-    if (resource.numCpu === 0 || resource.memory === 0) {
-      message.warning('请先设置资源', 3)
+    if (resourceControl.numCpu === 0 || resourceControl.numMemory === 0) {
+      message.warning('请先在顶部工具栏配置资源大小', 3)
       return
     }
-    resourceRef.current.setKernelIsExecuting(true)
     const status = sendWs.sendMessage({
       inode:metadata.inode,
       teamId,
@@ -527,12 +586,12 @@ const Notebook = (props, ref) => {
       // recordExecuteTime: "true",
       batchId: batchId || new Date().getTime(),
       resource: {
-        numCpu: resource.numCpu,
-        numGpu: resource.numGpu,
-        memory: resource.memory,
-        priority: resource.priority,
+        numCpu: resourceControl.numCpu,
+        numGpu: resourceControl.numGpu,
+        memory: resourceControl.numMemory,
+        priority: resourceControl.priority,
       },
-      enableSaveSession: resourceRef.current.getEnableSaveSession()
+      enableSaveSession: sessionRef.current.getEnableSaveSession()
     })
 
 
@@ -574,7 +633,7 @@ const Notebook = (props, ref) => {
       code: '',
       meta: {},
       inputReply: value,
-      enableSaveSession: resourceRef.current.getEnableSaveSession()
+      enableSaveSession: sessionRef.current.getEnableSaveSession()
     })
 
     if (!status) {
@@ -749,20 +808,19 @@ const Notebook = (props, ref) => {
   }
 
   const restartKernel = (callback) => {
-    const resource = resourceRef.current.getResource()
     kernelApi
       .restart({
         inode: metadata.inode,
         path: path,
-        numCpu: resource.numCpu,
-        numGpu: resource.numGpu,
-        memory: resource.memory,
-        priority: resource.priority,
+        numCpu: resourceControl.numCpu,
+        numGpu: resourceControl.numGpu,
+        memory: resourceControl.numMemory,
+        priority: resourceControl.priority,
       })
       .then(function (response) {
         message.success(intl.get("KERNEL_RESTART_SUCCEEDED"))
         const { inode } = metadata;
-        dispatch(variableListAsync({path, inode}))
+        dispatchVariableListAsyncThrottle({path,inode})
         resetKernel()
         callback && callback()
       })
@@ -966,7 +1024,7 @@ const Notebook = (props, ref) => {
       lspDidOpen()
       dispatch(kernelExecuteStateAsync({ path }))
       const { inode } = metadata
-      dispatch(variableListAsync({path, inode}))
+      dispatchVariableListAsyncThrottle({path,inode})
       const content = JSON.parse(props.content)
       if (
         content.cells.length > 0 &&
@@ -1023,7 +1081,7 @@ const Notebook = (props, ref) => {
     }
   }, [path]);
 
-  let resourceRef = useRef();
+  let sessionRef = useRef();
 
   return (
     <div>
@@ -1046,7 +1104,7 @@ const Notebook = (props, ref) => {
           restartKernel={restartKernel}
           resumeRun={resumeRun}
           saveVersion={() => setShowSaveVersion(true)}
-          resourceRef={resourceRef}
+          sessionRef={sessionRef}
         />
         <div
           id={`cells-content${path}`}

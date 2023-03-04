@@ -9,12 +9,14 @@ const { DirectoryTree } = Tree;
 
 import terminal from '@/idp/lib/terminal';
 import { toJS } from "mobx";
+import globalData from "idp/global"
 
 function ZipView(props) {
 
     const { path, name, content } = props.item;
     const [list, setList] = useState(content)
     const [expandNode, setExpandNode] = useState([]);
+    const [btnTriggering, setBtnTriggering] = useState(true)
 
     useEffect(() => {
         if (list?.length !== 0) {
@@ -46,6 +48,7 @@ function ZipView(props) {
     }
 
     const unZipFolder = async () => {
+        setBtnTriggering(false)
         const key = toJS(terminal.openFilePath);
         const node = key.replace(/\s*/g, "");
         const nodeFileName = node.split('/').reduce((previousValue, currentValue, currentIndex, array) => {
@@ -56,12 +59,19 @@ function ZipView(props) {
         try {
             const reuslt = await warenhouseApi.decompressFile(key, nodePath);
             if (reuslt.code == '21000000') {
-              openNotification('open', <span>{intl.get('FILE_ZIP_DECOMPRESS_INFO_1')}{<span style={{ color: '#3793EF' }}>{intl.get('FILE_ZIP_DECOMPRESS_INFO_2')}</span>}{intl.get('FILE_ZIP_DECOMPRESS_INFO_3')}</span>, 5);
+                globalData.appComponentData.workspaceRef.loadTree({forceLoad:true})
+                openNotification('open', 
+            <span>
+                        {intl.get('FILE_ZIP_DECOMPRESS_INFO_1')}
+                        {intl.get('FILE_ZIP_DECOMPRESS_INFO_3')}
+                    </span>, 5);
             } else {
                 openNotification('error', intl.get('FILE_ZIP_DECOMPRESS_ERROR'));
             }
+            setBtnTriggering(true)
         } catch (error) {
-          openNotification('error', `${intl.get('FILE_ZIP_DECOMPRESS_ERROR') }: ${error}`);
+            openNotification('error', `${intl.get('FILE_ZIP_DECOMPRESS_ERROR') }: ${error}`);
+            setBtnTriggering(true)
         }
     }
 
@@ -80,7 +90,11 @@ function ZipView(props) {
             <div className="zipview-header">
                 <div style={{ position: 'relative' }}>
                     <span className="zh-span">{intl.get('PREVIEW')} {name}</span>
-                    <span onClick={() => unZipFolder()} className="zh-zip" style={{ right: terminal.leftSideWidth === 0 ? 60 : 360 }}>{intl.get('FILE_ZIP_DECOMPRESS')}</span>
+                    <span onClick={() => {
+                        if(btnTriggering){
+                            unZipFolder()
+                        }
+                    }} className="zh-zip" style={{ right: terminal.leftSideWidth === 0 ? 60 : 360 }}>{intl.get('FILE_ZIP_DECOMPRESS')}</span>
                 </div>
             </div>
             <div className="zipview-content">

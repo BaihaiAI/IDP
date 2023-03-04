@@ -12,6 +12,8 @@ export function showModel1(onOk,onCancel) {
     icon:<ExclamationCircleOutlined />,
     title:"是否确认共享您的模型？",
     content:"模型共享后，其他用户可以在共享中心查看、测试、克隆您的模型",
+    okText: '确认共享',
+    cancelText: '取消共享',
     onOk,
     onCancel
   })
@@ -22,6 +24,8 @@ export function showModel2(onOk,onCancel) {
     icon:<ExclamationCircleOutlined />,
     title:"模型创建成功！是否确认共享您的模型？",
     content:"模型共享后，其他用户可以在共享中心查看、测试、克隆您的模型。",
+    okText: '确认共享',
+    cancelText: '取消共享',
     onOk,
     onCancel
   })
@@ -35,6 +39,7 @@ export function showModel3(
     icon:<CloseCircleOutlined style={{color:"red"}} />,
     title:"抱歉，您没有模型共享操作权限。您完成 个人信息认证 后即可获得模型共享操作权限",
     okText:"去认证",
+    cancelText: "取消",
     onOk(){
       window.location.href = '/team/myAccount/personalInformation'
       typeof onOk ==='function'&& onOk()

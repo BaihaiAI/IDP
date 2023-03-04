@@ -1,7 +1,7 @@
 import { useEffect, useState, createContext, useContext } from "react"
 import { useDispatch } from "react-redux"
 import { contentUpdateCellSource } from "../../../../store/features/notebookSlice"
-import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
+import sneltoets from '@idp/global/sneltoets';
 import { useUpdateEffect } from "ahooks"
 import { Col, Row } from "antd"
 import RightTopBar from "../cellTools/RightTopBar"
@@ -39,8 +39,8 @@ function VisualizationCell(props) {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    setHideInput(ToolImpl.collapseAllInput)
-  }, [ToolImpl.collapseAllInput])
+    setHideInput(sneltoets.collapseAllInput)
+  }, [sneltoets.collapseAllInput])
 
   useUpdateEffect(() => {
     // 强制刷新 Command + Enter

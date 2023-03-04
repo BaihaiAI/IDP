@@ -208,8 +208,10 @@ const mountCloud = ({
   endPoint,
   alias,
   fsType,
-  url,
+  endPoint_url,
+  // url,
 }) => {
+  
   const data = {
     cloudName,
     mountPath,
@@ -220,10 +222,10 @@ const mountCloud = ({
     alias,
     fsType,
     project,
-    url,
-    teamId
+    url: endPoint_url,
+    teamId,
   }
-
+  console.log(data, '00000999')
   return request.post(`${commandApiPath}/cloud/mount`, data)
 }
 

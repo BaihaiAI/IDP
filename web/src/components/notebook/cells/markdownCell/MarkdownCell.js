@@ -19,6 +19,7 @@ const MarkdownCell = (props) => {
   const [theme, setTheme] = useState("lightTheme")
   const [visible, setVisiable] = useState(true)
   const markdownCellRef = useRef()
+  const [z_index, setZ_index] = useState(7)
   const dispatch = useDispatch()
 
   const onClick = () => {
@@ -42,6 +43,10 @@ const MarkdownCell = (props) => {
     )
   }
 
+  const mechodSetZ_index = (num) => {
+    setZ_index(num)
+  }
+
   return (
     <div className={theme} onClick={onClick}>
       <Row className="code-cell">
@@ -51,7 +56,9 @@ const MarkdownCell = (props) => {
         <Col span={24} className="code-wrapper">
           <Row
             className="code-editor-topbar"
-            style={{ display: !focus ? "none" : "flex" }}
+            onMouseEnter={() => setZ_index(100)}
+            onMouseLeave={() => setZ_index(7)}
+            style={{ display: !focus ? "none" : "flex", zIndex: z_index }}
           >
             <Col className="code-editor-topbar-actions">
               {/* <Tooltip placement="bottom" title={intl.get("DELETECELL")}>
@@ -70,6 +77,7 @@ const MarkdownCell = (props) => {
                 stopCell={stopCell}
                 runCurrentCellAndAbove={runCurrentCellAndAbove}
                 runCurrentCellAndBelow={runCurrentCellAndBelow}
+                mechodSetZ_index={mechodSetZ_index}
               />
             </Col>
           </Row>

@@ -10,7 +10,7 @@ if (Boolean(process.env.NODE_OPEN)) {
 }
 export const kernelWsSendUrl = `${wsOrigin}/${region}/api/v1/execute/ws/kernel/execute?projectId=${projectId}`
 export const lspWsUrl = `${wsOrigin}/${region}/api/v1/lsp/lsp/`
-export const terminalWsUrl = `${wsOrigin}/${region}/api/v1/terminal/socket/`
+export const terminalWsUrl = `${wsOrigin}/${region}/api/v2/terminal/${projectId}/socket/`
 export const pythonWsUrl = `${wsOrigin}/${region}/api/v2/idp-note-rs/exec_code/exec_python`
 
 let currentEnv = null

@@ -1,5 +1,5 @@
 import {kernelApiPath, noteApiPath2} from './httpClient'
-import { projectId, teamId } from '@/store/cookie';
+import { projectId, teamId } from '../store/cookie';
 import request from "./request"
 
 // function executeCell(options) {

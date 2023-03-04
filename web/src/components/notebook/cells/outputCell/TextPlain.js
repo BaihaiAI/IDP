@@ -33,11 +33,13 @@ function addScript(parentId, scripts) {
           const arr = t.slice(8, t.indexOf('>')).split(' ');
           for (const prop of arr) {
             if (prop.indexOf('=') > 0) {
-              const p = prop.split('=');
-              script.setAttribute(p[0], JSON.parse(p[1]))
+              const equalIndex = prop.indexOf('=')
+              const p1 = prop.slice(0,equalIndex)
+              const p2 = prop.slice(equalIndex+1)
+              script.setAttribute(p1, JSON.parse(p2))
             }
           }
-  
+
           if (t.indexOf('</script>') > 0) {
             script.text = t.slice(t.indexOf('>') + 1, t.indexOf('</script>'));
             result.push(script);
@@ -53,7 +55,7 @@ function addScript(parentId, scripts) {
         } else if (text.trim().startsWith('</script')) {
           script.text = textCach;
           result.push(script);
-  
+
           start = false;
           textCach = '';
           script = undefined;

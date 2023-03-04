@@ -3,6 +3,9 @@ import { withRouter } from "react-router"
 import { connect } from "react-redux"
 import cookie from "react-cookies"
 import intl from "react-intl-universal"
+import axios from 'axios';
+import { logout } from "./utils/logout";
+import { userId } from "./store/cookie";
 
 import { Layout, Modal, notification, Spin, message } from "antd"
 import { NotificationOutlined } from "@ant-design/icons"
@@ -10,7 +13,7 @@ import { NotificationOutlined } from "@ant-design/icons"
 import "./App.less"
 
 import { Provider } from "./context"
-import {isTraveler, projectId} from "./store/cookie"
+import { isTraveler, projectId } from "./store/cookie"
 import AppLoading from "./layout/appLoading"
 
 
@@ -19,6 +22,8 @@ import contentApi from "./services/contentApi"
 
 import { findFileTreeParentKey, locationToProjectListPage } from "./utils"
 import { GloablFocus, GloablBlur } from './components/workspace/keymap'
+
+import UserInfoGlobal from '@idp/global/userinfo';
 
 import PubSub from "pubsub-js"
 
@@ -51,9 +56,11 @@ import {
 } from "./store/features/configSlice"
 
 import globalData from "@/idp/global"
-import {observer} from "mobx-react"
+import { observer } from "mobx-react"
 import permissionApi from "@/services/permissionApi"
-
+import { fileType } from "./utils"
+import { removeHistoryOpenProject } from './store/cookie';
+import projectApi from "@/services/projectApi"
 
 const locales = {
   enUS: require("./locales/en-US.json"),
@@ -66,7 +73,7 @@ const defaultOpenFile = {
   suffix: "idpnb",
 }
 
-const setDefaultLang = ()=>{
+const setDefaultLang = () => {
   let lang = cookie.load("locale") || navigator.language || navigator.browserLanguage
   if (undefined === lang || "" === lang) {
     lang = "zhCN"
@@ -81,17 +88,20 @@ const setDefaultLang = ()=>{
 }
 
 function isIpynb(suffix) {
-  return suffix ==='ipynb' || suffix ==='idpnb'
+  return suffix === 'ipynb' || suffix === 'idpnb'
 }
 
-// 大版本更新提示框
+import { loadExtensions, loadLocalSystemExtensions } from '../config/extensions-config';
+import { userInfoApi } from "./services"
+
+let pluginLoadTime = null;
+
 @observer
 class App extends React.Component {
   constructor(props) {
     super(props)
 
-    // 获取项目信息
-    globalData.appComponentData.getProjectInfo();
+    this.initData();
 
     // 防止js没加载之前白屏
     document.getElementById('loading-gif').style.display = 'none'
@@ -111,33 +121,85 @@ class App extends React.Component {
     // 根据累加次数切换初始化信息
     this.healthCheckCount = 0
     this.appComponentData = globalData.appComponentData
+    this.firstProjectId = null
   }
 
-  getPermissionList = ()=>{
-    permissionApi.permissionList().then((res)=>{
+  initData = () => {
+    // 获取项目信息
+    if (!isTraveler() && !Boolean(process.env.NODE_OPEN)) {
+      this.checkAuth((res)=> {
+        const str = Object.prototype.toString.call(res);
+        if ( str == '[object Function]') {
+          res();
+        } else {
+          if (process.env.NODE == 'pro') {
+            this.getUserArea();
+          } else {
+            globalData.appComponentData.getProjectInfo();
+          }
+        }
+      })
+    }
+  }
+
+  checkAuth = async (callback) => {
+    const { status, data } = await axios.get('/0/api/v1/user/checkAuth', {params: {userId}});
+    if ( status == '401' && data == 'Jwt verification fails' ) {
+      message.info('登录信息已过期失效，系统将自动为您跳转到登录页面');
+      callback(logout)
+    } else {
+      callback(true);
+    }
+  }
+
+  getUserArea = async () => {
+    const result = await axios.get('/0/api/v1/user/getUserArea');
+    if (result.data.code == 200) {
+      const host = window.location.host;
+      if (result.data.data !== host) {
+        removeHistoryOpenProject();
+        setTimeout(() => {
+          window.location.href = `//${result.data.data}/studio`;
+        });
+      } else {
+        globalData.appComponentData.getProjectInfo();
+      }
+    }
+  }
+
+  loadPlugins = () => {
+    const that = this;
+    loadExtensions((data) => {
+      that.setState({ isPlugins: true })
+    });
+  }
+
+  getPermissionList = () => {
+    permissionApi.permissionList().then((res) => {
       const data = res.data
-      window.localStorage.setItem('permission_list',JSON.stringify(data))
+      window.localStorage.setItem('permission_list', JSON.stringify(data))
     })
   }
 
   componentDidMount() {
-    this.loadLocales()
-    if(!isTraveler()){
+    this.loadLocales();
+    if (!isTraveler()) {
       this.checkHealth()
-      if ( process.env.NODE_OPEN !== 'true') {
+      if (process.env.NODE_OPEN !== 'true') {
         this.getPermissionList()
       }
     }
+  }
 
-
-    window.onresize = () => {
-      this.props.updateClientHeight(document.body.clientHeight)
-      this.props.updateClientWidth(document.body.clientWidth)
+  getUserInfo = async () => {
+    const result = await userInfoApi.getUserInfo();
+    if ( result.code == 200) {
+      UserInfoGlobal.updateUserInfo(result.data);
     }
   }
 
   // 打开最近的文件
-  openLocalFile = ()=>{
+  openLocalFile = () => {
     const qs = new URLSearchParams(window.location.search)
     const shareId = qs.get("shareId")
     if (shareId && qs.get('projectId')) {
@@ -145,7 +207,15 @@ class App extends React.Component {
       this.setOpenShareFile(shareId)
     } else {
       // 打开最近一次打开的文件
-      this.setOpenFile()
+      if (Boolean(process.env.NODE_OPEN)) {
+        this.setOpenFile();
+      } else {
+        projectApi.getFirstProject(
+        ).then((res) => {
+          this.firstProjectId = res.data.id
+          this.setOpenFile()
+        })
+      }
     }
   }
 
@@ -169,6 +239,17 @@ class App extends React.Component {
 
   // 打开最近一次打开的文件
   setOpenFile = () => {
+    if(process.env.REACT_APP_VERSION !== 'MODEL' && !window.localStorage.getItem('hasGuide') && this.firstProjectId === projectId){
+      contentApi.cat({ path: "/玩转IDP/baihai.idpnb" }).then(() => {
+        this.addFileAndHandleIpynb({
+          path:"/玩转IDP/baihai.idpnb",
+          name:"baihai.idpnb",
+          suffix:"idpnb",
+        })
+      })
+      return
+    }
+
     const historyOpenFile = getHistoryOpenFile()
     if (
       (!historyOpenFile[projectId] ||
@@ -210,7 +291,7 @@ class App extends React.Component {
           if (i === 0) {
             firstOpenFile = openFile
           }
-          this.addFileAndHandleIpynb(openFile,true)
+          this.addFileAndHandleIpynb(openFile, true)
         }
       }
       if (firstOpenFile) {
@@ -222,14 +303,15 @@ class App extends React.Component {
 
 
 
-  addFileAndHandleIpynb = (openFile,notNeedChangePath) => {
-    if(notNeedChangePath){
+  addFileAndHandleIpynb = (openFile, notNeedChangePath) => {
+    if (notNeedChangePath) {
       openFile = {
         ...openFile,
-        notNeedChangePath:true
+        notNeedChangePath: true
       }
     }
     const suffix = openFile.suffix
+    const ft = fileType(openFile.path)
     if (suffix === "ipynb" || suffix === "idpnb") {
       this.props.addNewFile(openFile)
       this.props.contentCatAsync(openFile).then((res) => {
@@ -237,19 +319,21 @@ class App extends React.Component {
           const { inode } = res.payload.response.content.metadata
           const path = res.payload.path
           this.props.variableListAsync({ path, inode })
-        }else{
+        } else {
           this.appComponentData.notebookTabRef.current.removeTab(openFile.path)
           Modal.warning({
             title: `open ${openFile.path} fail`,
-            content:res.error.message
+            content: res.error.message
           })
         }
       })
-    }else {
-      this.setState({ cover: ''})
-      this.props.addFileAndContentAsync(openFile).then((res)=>{
+    } else if (ft === 'video' || ft === 'image') {
+      this.props.addNewFile(openFile)
+    } else {
+      this.setState({ cover: '' })
+      this.props.addFileAndContentAsync(openFile).then((res) => {
         this.setState({ cover: 'none' })
-        if(!res.payload){
+        if (!res.payload) {
           // 打开失败的话 改变local中的状态
           handlerSaveHistoryOpenFile(openFile.path, openFile.name, "close")
         } else {
@@ -294,49 +378,49 @@ class App extends React.Component {
           name,
           suffix: newKey.slice(newKey.lastIndexOf(".") + 1),
         }
-        const oldKeySuffix = oldkey.slice(oldkey.lastIndexOf(".")+1)
+        const oldKeySuffix = oldkey.slice(oldkey.lastIndexOf(".") + 1)
 
         this.appComponentData.notebookTabRef.current &&
-        this.appComponentData.notebookTabRef.current.updateDeleteFlag(oldkey).then(()=>{
-          if (isIpynb(openFile.suffix)) {
-            this.props.renameFile({oldkey,openFile})
-            if(isIpynb(oldKeySuffix)){
-              this.props.updatePath({ path: oldkey, newPath: newKey })
-            }
-            if(!isNeedUpdateKernel){
-              PubSub.publish("updateCollapseKernel")
-              isNeedUpdateKernel = true
-            }
-            this.props.contentCatAsync(openFile).then((res) => {
-              if (res.payload) {
-                historyDelFile(oldkey)
-                handlerSaveHistoryOpenFile(newKey, name, "open")
-                const { inode } = res.payload.response.content.metadata
-                const path = res.payload.path
-                this.props.variableListAsync({ path, inode })
-              }else{
-                this.appComponentData.notebookTabRef.current.removeTab(openFile.path)
+          this.appComponentData.notebookTabRef.current.updateDeleteFlag(oldkey).then(() => {
+            if (isIpynb(openFile.suffix)) {
+              this.props.renameFile({ oldkey, openFile })
+              if (isIpynb(oldKeySuffix)) {
+                this.props.updatePath({ path: oldkey, newPath: newKey })
               }
-            })
-          }else{
-            this.props.updateFileAndContentAsync({oldkey,newOpenFile:openFile}).then((res)=>{
-              if(isIpynb(oldKeySuffix)){
-                this.props.resetNotebookState(oldkey)
+              if (!isNeedUpdateKernel) {
+                PubSub.publish("updateCollapseKernel")
+                isNeedUpdateKernel = true
               }
+              this.props.contentCatAsync(openFile).then((res) => {
+                if (res.payload) {
+                  historyDelFile(oldkey)
+                  handlerSaveHistoryOpenFile(newKey, name, "open")
+                  const { inode } = res.payload.response.content.metadata
+                  const path = res.payload.path
+                  this.props.variableListAsync({ path, inode })
+                } else {
+                  this.appComponentData.notebookTabRef.current.removeTab(openFile.path)
+                }
+              })
+            } else {
+              this.props.updateFileAndContentAsync({ oldkey, newOpenFile: openFile }).then((res) => {
+                if (isIpynb(oldKeySuffix)) {
+                  this.props.resetNotebookState(oldkey)
+                }
 
-              if(res.payload){
-                historyDelFile(oldkey)
-                handlerSaveHistoryOpenFile(newKey, name, "open")
-              }else{
-                this.appComponentData.notebookTabRef.current.removeTab(oldkey)
-              }
-            })
-          }
+                if (res.payload) {
+                  historyDelFile(oldkey)
+                  handlerSaveHistoryOpenFile(newKey, name, "open")
+                } else {
+                  this.appComponentData.notebookTabRef.current.removeTab(oldkey)
+                }
+              })
+            }
 
-          if (this.props.activeTabKey === oldkey) {
-            this.props.changeActivePath(newKey)
-          }
-        })
+            if (this.props.activeTabKey === oldkey) {
+              this.props.changeActivePath(newKey)
+            }
+          })
       }
     } else {
       const filterTabList = tabList.filter(
@@ -353,38 +437,38 @@ class App extends React.Component {
           const itemNeWKey = newKey + "/" + item.name
 
           this.appComponentData.notebookTabRef.current &&
-          this.appComponentData.notebookTabRef.current
-            .updateDeleteFlag(itemOldKey)
-            .then(() => {
-              historyDelFile(itemOldKey)
-              handlerSaveHistoryOpenFile(itemNeWKey, item.name, "open")
+            this.appComponentData.notebookTabRef.current
+              .updateDeleteFlag(itemOldKey)
+              .then(() => {
+                historyDelFile(itemOldKey)
+                handlerSaveHistoryOpenFile(itemNeWKey, item.name, "open")
 
-              this.props.updateFileProp({
-                path: itemOldKey,
-                newProps: openFile,
-              })
-              if (this.props.activeTabKey === itemOldKey) {
-                this.props.changeActivePath(itemNeWKey)
-              }
-              if (openFile.suffix === "ipynb" || openFile.suffix === "idpnb") {
-
-                if(!isNeedUpdateKernel){
-                  PubSub.publish("updateCollapseKernel")
-                  isNeedUpdateKernel = true
-                }
-
-                this.props.contentCatAsync(openFile).then((res) => {
-                  if (res.payload) {
-                    const path = res.payload.path
-                    const { inode } = res.payload.response.content.metadata
-                    this.props.variableListAsync({ path, inode })
-                  }else{
-                    this.appComponentData.notebookTabRef.current.removeTab(openFile.path)
-                  }
+                this.props.updateFileProp({
+                  path: itemOldKey,
+                  newProps: openFile,
                 })
-              }
-              this.props.updatePath({ path: itemNeWKey, newPath: itemOldKey })
-            })
+                if (this.props.activeTabKey === itemOldKey) {
+                  this.props.changeActivePath(itemNeWKey)
+                }
+                if (openFile.suffix === "ipynb" || openFile.suffix === "idpnb") {
+
+                  if (!isNeedUpdateKernel) {
+                    PubSub.publish("updateCollapseKernel")
+                    isNeedUpdateKernel = true
+                  }
+
+                  this.props.contentCatAsync(openFile).then((res) => {
+                    if (res.payload) {
+                      const path = res.payload.path
+                      const { inode } = res.payload.response.content.metadata
+                      this.props.variableListAsync({ path, inode })
+                    } else {
+                      this.appComponentData.notebookTabRef.current.removeTab(openFile.path)
+                    }
+                  })
+                }
+                this.props.updatePath({ path: itemNeWKey, newPath: itemOldKey })
+              })
         })
       }
     }
@@ -394,11 +478,15 @@ class App extends React.Component {
       const key = keys[0]
       if (this.props.tabList.find((item) => item.path === key)) {
         this.appComponentData.notebookTabRef.current &&
-        this.appComponentData.notebookTabRef.current.updateDeleteFlag(key).then(() => {
-          this.appComponentData.notebookTabRef.current
-            .removeTab(key)
-            .then((newTargetKey) => {})
-        })
+          this.appComponentData.notebookTabRef.current.updateDeleteFlag(key).then(() => {
+            this.appComponentData.notebookTabRef.current
+              .removeTab(key)
+              .then((newTargetKey) => {
+                historyDelFile(key)
+              })
+          })
+      }else{
+        historyDelFile(key)
       }
     } else {
       const promiseList = []
@@ -411,6 +499,9 @@ class App extends React.Component {
       Promise.all(promiseList).then((results) => {
         this.props.clearTabsFromList(keys)
         this.props.updateNotebookListFromTabListAsync()
+        keys.forEach(key=>{
+          historyDelFile(key)
+        })
       })
     }
   }
@@ -424,6 +515,9 @@ class App extends React.Component {
           .health()
           .then(function (res) {
             // 如果路由错误跳转到登录页
+            if (res.code >= 21000000 && res.code < 30000000) {
+              _this.loadPlugins();
+            }
             _this.setState({ isHealth: true })
             _this.openLocalFile()
 
@@ -452,14 +546,9 @@ class App extends React.Component {
       cookieLocaleKey: "locale",
     })
     // react-intl-universal 是单例模式, 只应该实例化一次
-    intl
-      .init({
-        currentLocale,
-        locales,
-      })
-      .then(() => {
-        this.setState({ intlInit: true })
-      })
+    intl.init({ currentLocale, locales }).then(() => {
+      this.setState({ intlInit: true })
+    })
   }
 
 
@@ -487,41 +576,45 @@ class App extends React.Component {
 
   render() {
     // 防止js没加载之前白屏
-    document.getElementById('loading-gif').style.display = 'none'
-    const { projectInfo } = globalData.appComponentData
+    document.getElementById('loading-gif').style.display = 'none';
+    let projectInfo = '';
+    if ( !Boolean(process.env.NODE_OPEN) ) {
+      projectInfo = globalData.appComponentData.projectInfo;
+    } else {
+      projectInfo = {id: cookie.load('projectId')}
+    }
     // 查看projectInfo对象中 是否有后端返回的id属性
-    //
-    return  isTraveler() ||  (this.state.isHealth && this.state.intlInit && projectInfo.id) ? (
+    return isTraveler() || (this.state.isHealth && this.state.intlInit && projectInfo.id) ? (
       <Provider
         value={{
           addFileAndHandleIpynb: this.addFileAndHandleIpynb,
-          onWsSelected:this.wsSelected,
-          onWsDelete:this.wsDelete,
-          onRename:this.wsRename,
+          onWsSelected: this.wsSelected,
+          onWsDelete: this.wsDelete,
+          onRename: this.wsRename,
         }}
       >
-          <div className={this.state.theme}
-            tabIndex="3"
-            onFocus={() => GloablFocus({
-              openGlobalSearch(event){
-                event.preventDefault();
-                PubSub.publish("openGlobalSearch")
-              }
-            })}
-            onBlur={() => GloablBlur()}
-          >
-            <Layout
-              className="layout">
-              {
-                this.props.children
-              }
-            </Layout>
-          </div>
-          <div className="cover" style={{
-            display: this.state.cover
-          }}>
-            <Spin size="large" />
-          </div>
+        <div className={this.state.theme}
+          tabIndex="3"
+          onFocus={() => GloablFocus({
+            openGlobalSearch(event) {
+              event.preventDefault();
+              PubSub.publish("openGlobalSearch")
+            }
+          })}
+          onBlur={() => GloablBlur()}
+        >
+          <Layout
+            className="layout">
+            {
+              this.props.children
+            }
+          </Layout>
+        </div>
+        <div className="cover" style={{
+          display: this.state.cover
+        }}>
+          <Spin size="large" />
+        </div>
       </Provider>
     ) : (
       <AppLoading initTips={this.state.initTips} />

@@ -15,6 +15,8 @@ const ToolAddCell = (props) => {
   const {cells} = useContext(NotebookComponentContext)
 
   const mouseover = (e) => {
+    // e?.stopPropagation()
+    // e?.preventDefault()
     if (timer) {
       clearTimeout(timer)
       timer = null
@@ -103,6 +105,18 @@ const ToolAddCell = (props) => {
             >
               + {intl.get("DATA_VISUALIZATION")}
             </Button>
+            <Button
+              style={{
+                marginRight: "10px",
+                backgroundColor: "#fff",
+                color: "#8a8a8a",
+                fontWeight: 500,
+                borderRadius: 4,
+              }}
+              onClick={() => addCell("data_exploration")}
+            >
+              + 数据探索
+            </Button>
           </div>
         </div>
       ) : (
@@ -155,6 +169,18 @@ const ToolAddCell = (props) => {
               onClick={() => addCell("visualization")}
             >
               + {intl.get("DATA_VISUALIZATION")}
+            </Button>
+            <Button
+              style={{
+                marginRight: "10px",
+                backgroundColor: "#fff",
+                color: "#8a8a8a",
+                fontWeight: 500,
+                borderRadius: 4,
+              }}
+              onClick={() => addCell("data_exploration")}
+            >
+              + 数据探索
             </Button>
           </div>
         </div>

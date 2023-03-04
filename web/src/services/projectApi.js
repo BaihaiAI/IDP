@@ -34,11 +34,20 @@ const transProjectOwner = ({ id, owner }) => {
   })
 }
 
+const getFirstProject =  ()=>{
+  return request.get("/0/api/v1/project/getFirstProject",{
+    params:{
+      teamId
+    }
+  })
+}
+
 const projectApi = {
   getProjectPage,
   getProjectInfo,
   deleteProject,
   addOrUpdateProject,
   transProjectOwner,
+  getFirstProject
 }
 export default projectApi

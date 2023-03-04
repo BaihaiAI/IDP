@@ -1,4 +1,4 @@
-import {rightSideData} from "idp/global/rightSideControl"
+import {rightSideData} from "../../global/rightSideControl"
 
 const rightSidesDefaultConfig: rightSideData[] = []
 

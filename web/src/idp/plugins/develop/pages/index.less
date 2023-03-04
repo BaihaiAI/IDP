@@ -1,0 +1,271 @@
+#develop-root {
+    .ant-tabs-nav-operations .ant-tabs-nav-more {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
+    .ant-tabs-nav {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 0;
+
+        .ant-tabs-nav-wrap {
+            background-color: #f4f6f8;
+            //border-bottom: 1px solid #e2e8f0;
+        }
+    }
+
+    .ant-tabs-card>.ant-tabs-nav .ant-tabs-tab,
+    .ant-tabs-card>div>.ant-tabs-nav .ant-tabs-tab {
+        border-radius: 0;
+        margin-left: 0;
+        border: 0;
+        background-color: transparent;
+        font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+        font-size: 12px;
+        padding: 9px 6px;
+        height: 32px;
+
+        &:first-of-type {
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-left: 31px;
+
+            .ant-tabs-tab-btn {
+                color: #333333;
+                font-size: 14px;
+                line-height: 1;
+            }
+        }
+
+        .ant-tabs-tab-remove {
+            margin-top: 4px;
+
+            svg {
+                width: 8px;
+                height: 11px;
+                margin-right: -3px;
+            }
+        }
+
+        .ant-tabs-tab-btn {
+            color: #666666;
+            height: 14px;
+        }
+
+        &.ant-tabs-tab-active {
+            .ant-tabs-tab-btn {
+                color: #333333;
+            }
+
+            background-color: #fff;
+            border-radius: 10px 10px 0 0;
+        }
+    }
+}
+
+.develop-main {
+    width: 100%;
+    background-color: #fff;
+    padding: 30px 50px;
+    font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+    overflow-y: scroll;
+    height: 100vh;
+
+    .develop-title {
+        height: 18px;
+        font-size: 16px;
+        color: #333333;
+        line-height: 18px;
+        position: relative;
+
+        &::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            background: #1890ff;
+            position: absolute;
+            left: -15px;
+            top: 5px;
+            border-radius: 50%;
+        }
+    }
+
+    .develop-text {
+        font-size: 12px;
+        color: #999999;
+        line-height: 14px;
+        padding-top: 8px;
+        padding-left: 0;
+        height: 35px;
+
+        .develop-action {
+            color: rgb(55, 147, 239);
+        }
+    }
+
+    .develop-map {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        padding-left: 0;
+        flex-direction: row;
+
+    }
+
+    .develop-card {
+        width: 360px;
+        height: 90px;
+        background: #fff;
+        border: 1px solid #e9e9e9;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 10px 25px;
+        overflow: hidden;
+        box-shadow: 0px 0px 4px 0px rgb(0 0 0 / 15%);
+        transition: all .3s;
+        list-style: none;
+
+        &:hover {
+            box-shadow: 0px 0px 4px 0px rgb(0 0 0 / 35%);
+            border: 1px solid rgba(0, 0, 0, .06);
+        }
+    }
+
+    .develop-recommended {
+        display: flex;
+        padding: 5px;
+        width: 100%;
+        height: 100%;
+        position: relative;
+
+        .develop-action {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            padding: 3px;
+            font-size: 13px;
+            font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+            background: #1890ff;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: .8;
+            transition: all .3;
+            border-radius: 2px;
+
+            &:hover {
+                background: #1890ff;
+                opacity: 1;
+            }
+
+            span {
+                line-height: 13px;
+            }
+        }
+
+        .develop-icon-mobx {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .develop-r-icon {
+            width: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 70px;
+            border-radius: 8px;
+            background: rgba(255, 237, 237, .4);
+            margin-right: 5px;
+            img {
+                height: 48px;
+                width: 48px;
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: center;
+            }
+        }
+
+        .develop-r-group {
+            padding: 0px;
+
+            .develop-r-name {
+                height: 17px;
+                font-size: 14px;
+                font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+                color: #333333;
+                line-height: 17px;
+                font-weight: 500;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                width: 275px;
+            }
+
+            .develop-r-description {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                width: 275px;
+                font-size: 12px;
+                font-weight: 400;
+                font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+            }
+
+            .develop-r-version {
+                font-weight: 13px;
+                font-weight: 400;
+                font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+                color: #718190;
+
+                span {
+                    padding: 0px 10px;
+                    background: cornsilk;
+                }
+            }
+        }
+    }
+
+    .develop-icons {
+        display: flex;
+        display: flex;
+        position: absolute;
+        right: 10px;
+    }
+}
+
+.develop-deleteOutlined {
+    margin-left: 15px;
+}
+
+.develop-ic {
+    color: gray;
+    opacity: .9;
+    transition: all .3s;
+
+    &:hover {
+        color: blue !important;
+    }
+}
+
+.pluginInfo-main {
+    font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+    width: 400px;
+    padding: 0px 5px;
+
+    .pluginInfo-publisher,
+    .pluginInfo-description {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .pluginInfo-p-info,
+    .pluginInfo-d-info {
+        font-size: 12px;
+        font-weight: 400;
+        color: #718190;
+    }
+}

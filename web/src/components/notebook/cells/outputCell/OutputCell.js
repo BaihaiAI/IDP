@@ -7,14 +7,12 @@ import './outputCell.less'
 import { Col, Row, message,Input} from 'antd';
 import { store } from "../../../../store"
 import { selectActivePath } from '../../../../store/features/filesTabSlice';
-import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
+import sneltoets from '@idp/global/sneltoets';
 import { observer } from 'mobx-react';
-import { kernelWsSend } from '../../lib/kernelWs';
-
 
 const OutputCell = (props) => {
     const { path, cellId, cellProp,sendInputRequest } = props;
-    const [visible, setVisible] = useState(!ToolImpl.collapseAllOutput);
+    const [visible, setVisible] = useState(!sneltoets.collapseAllOutput);
 
     const [outputs, setOutputs] = useState(props.outputs);
     // const activePath = useSelector(selectActivePath);
@@ -32,8 +30,8 @@ const OutputCell = (props) => {
     }, [props.outputs])
 
     useEffect(() => {
-        setVisible(!ToolImpl.collapseAllOutput);
-    }, [ToolImpl.collapseAllOutput])
+        setVisible(!sneltoets.collapseAllOutput);
+    }, [sneltoets.collapseAllOutput])
 
 
     const toggleVisible = () => {
@@ -264,7 +262,7 @@ const OutputCell = (props) => {
                                     key={i}
                                     useClasses
                                     linkify={true}
-                                    className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+                                    className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                                 >{item}</Ansi>
                             </div>
                         ))
@@ -276,7 +274,7 @@ const OutputCell = (props) => {
                     }} />}
                 </div>
                 <div style={{ display: textPlainFound && !textHtmlFound ? '' : 'none' }}>
-                    <pre className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}>
+                    <pre className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}>
                         <span>{textPlain}</span>
                     </pre>
                 </div>
@@ -305,7 +303,7 @@ const OutputCell = (props) => {
                     <span style={headerEnameErrors ? { marginRight: '15px' } : { display: 'none' }}>
                         <Ansi
                             key="headerEnameErrors"
-                            className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+                            className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                             linkify={true}
                         >
                             {headerEnameErrors + ":"}
@@ -314,7 +312,7 @@ const OutputCell = (props) => {
                     <span style={headerEvalueErrors ? {} : { display: 'none' }}>
                         <Ansi
                             key="headerEvalueErrors"
-                            className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+                            className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                             linkify={true}
                         >
                             {headerEvalueErrors}
@@ -323,7 +321,7 @@ const OutputCell = (props) => {
                     </span>
                     <Ansi
                         key="errors"
-                        className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+                        className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                         clickHandle={errorLineClick}
                         linkify={true}
                     >
@@ -333,7 +331,7 @@ const OutputCell = (props) => {
             </div>
         )
         return returnTemplate;
-    }, [cellProp, outputs, cellId, ToolImpl.autoWarpOutput]);
+    }, [cellProp, outputs, cellId, sneltoets.autoWarpOutput]);
 
     return (
         <>

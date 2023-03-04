@@ -112,7 +112,7 @@ const ToolRunCell = (props) => {
         )
     }
 
-    const runTypeFlgs = ['sql', 'code', 'visualization'].includes(cellType);
+    const runTypeFlgs = ['sql', 'code', 'visualization', 'data_exploration'].includes(cellType);
     const fliterRunStatus = () => {
         const cellStateFlgs = ['pending', 'executing'].includes(cellState);
         return runTypeFlgs && cellStateFlgs;

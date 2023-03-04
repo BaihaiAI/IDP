@@ -29,7 +29,7 @@ import {
   updateFileDeleteFlag,
 } from "../../store/features/filesTabSlice"
 import Notebook from "./Notebook"
-import TextEditor from "../TextEditor"
+// import TextEditor from "../TextEditor"
 import CsvMode from "../csv/CsvMode"
 import SvgEditor from "../editor/svg"
 import { useNotebookItem } from "../../utils/hook/useActiveCellProps"
@@ -49,6 +49,10 @@ import { observer } from "mobx-react"
 
 import IdpTerminal from '@/idp/lib/terminal';
 import { ExcelEditor } from "../editor/excel"
+import { Video } from "../editor/video";
+import { fileType } from "@/utils"
+import { Image } from "../editor/image";
+import { TextEditor } from '../editor/text';
 
 const { TabPane } = Tabs
 
@@ -56,6 +60,9 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
   const { item, workSpaceHeight, sourceVeiw } = props
   let detailItem
   detailItem = useNotebookItem(item.path)
+  // console.log(detailItem, 'detailItem')
+  const { suffix, path, deleteFlag } = item
+  const ft = fileType(path)
   if (item.suffix === "ipynb" || item.suffix === 'idpnb') {
     return (
       <Notebook
@@ -67,6 +74,18 @@ const FancyRenderFile = React.forwardRef((props, ref) => {
         sourceVeiw={sourceVeiw}
       />
     )
+  } else if (ft === 'video') {
+    return (<Video
+      key={path}
+      path={path}
+      deleteflag={deleteFlag}
+    />)
+  } else if (ft === 'image') {
+    return (<Image
+      key={path}
+      path={path}
+      deleteflag={deleteFlag}
+    />)
   } else if (item.contentType === 'text') {
     switch (item.suffix) {
       case "py":

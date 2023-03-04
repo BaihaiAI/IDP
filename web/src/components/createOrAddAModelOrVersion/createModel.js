@@ -721,8 +721,6 @@ function CreateModel(props) {
                       >
                         <Upload
                           accept="image/*"
-                          // customRequest={() => {}}
-                          // beforeUpload={() => true}
                           multiple={true}
                           fileList={coverList}
                           // onChange={handleCoverUpload}
@@ -825,7 +823,7 @@ function CreateModel(props) {
                     >
                       <Radio.Group>
                         <Radio value={"EXECUTABLE"}>可执行文件</Radio>
-                        <Radio value={"SOURCE"}>源代码</Radio>
+                        {/* <Radio value={"SOURCE"}>源代码</Radio> */}
                       </Radio.Group>
                     </Form.Item>
                   </Col>
@@ -941,7 +939,7 @@ function CreateModel(props) {
                     >
                       <Radio.Group>
                         <Radio value={"EXECUTABLE"}>可执行文件</Radio>
-                        <Radio value={"SOURCE"}>源代码</Radio>
+                        {/* <Radio value={"SOURCE"}>源代码</Radio> */}
                       </Radio.Group>
                     </Form.Item>
                   </Col>

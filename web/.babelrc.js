@@ -10,7 +10,7 @@ module.exports = {
                     "safari": "11.1"
                 },
                 "useBuiltIns": "entry",
-                "corejs": "3.22"
+                "corejs": "3" // 声明corejs版本
             }
         ],
         [
@@ -23,13 +23,6 @@ module.exports = {
             "@babel/preset-typescript"
         ]
     ],
-    "env": {
-        "development": {
-            "plugins": [
-                "dynamic-import-node"
-            ]
-        }
-    },
     "plugins": [
         [
             "@babel/plugin-proposal-decorators",

@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useState, useImperativeHandle } from "react"
 import Icons from "../../Icons/Icons"
-import { Button, Space, Row, Tooltip, Col } from "antd"
+import { Button, Space, Row, Tooltip, Col, Checkbox } from "antd"
 import intl from "react-intl-universal"
 import "./topToolsBar.less"
 import { ResourceBar } from "./ResourceBar"
@@ -15,14 +15,23 @@ const TopToolsBar = (props) => {
     resumeRun,
     saveVersion,
     hasEffectiveClick = true,
-    resourceRef,
+    sessionRef,
   } = props
 
   const [restartKernelDisabled, setRestartKernelDisabled] = useState(false)
+  const [enableSaveSession, setEnableSaveSession] = useState(false)
+
+  const autoCheckpoint = (e) => {
+    setEnableSaveSession(e.target.checked)
+  }
+  const getEnableSaveSession = () => {
+    return enableSaveSession
+  }
+  useImperativeHandle(sessionRef, () => ({ getEnableSaveSession }))
 
   return (
     <Row className="toptoolsbar" wrap={false}>
-      <Col>
+      <Col span={7}>
         <Space>
           {isPaused ? <Tooltip placement="bottom" title={intl.get("RESUME_RUN_TIP")}>
             <Button
@@ -95,8 +104,11 @@ const TopToolsBar = (props) => {
           </Tooltip>
         </Space>
       </Col>
-      <Col span={17}>
-        <ResourceBar resourceRef={resourceRef} />
+      <Col span={13}>
+        <ResourceBar />
+      </Col>
+      <Col span={3}>
+        <Checkbox onChange={autoCheckpoint}>{intl.get('RESOURCEBAR_CHECKPOINT')}</Checkbox>
       </Col>
     </Row>
   )

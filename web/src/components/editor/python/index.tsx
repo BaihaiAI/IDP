@@ -9,12 +9,15 @@ import { Output } from './Output';
 import { region, teamId, projectId } from '../../../store/cookie';
 import { terminalWsUrl, getCurrentEnv, setCurrentEnv } from '../../../store/config';
 import "./python.less";
-import { message } from 'antd';
+import { message, Modal } from 'antd';
 import { selectFileList, addFile, removeFile, addFileOutput } from '../../../store/features/pythonSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import globalData from "idp/global"
 import terminalApi from '../../../services/terminalApi'
 import environmentAPI from '../../../services/environment'
+import { observer } from 'mobx-react';
+import resourceControl from '../../../idp/global/resourceControl';
+import { setFileContent } from '../../../store/features/filesTabSlice';
 
 interface Props {
   workSpaceHeight: number
@@ -25,7 +28,7 @@ interface Props {
   }
 }
 
-export const PythonEditor: React.FC<Props> = (props: Props) => {
+export const PythonEditor: React.FC<Props> = observer((props: Props) => {
   const { path, posLine, workSpaceHeight,item } = props
   const [content, setContent] = useState(item.content)
   const dispatch = useDispatch()
@@ -39,6 +42,7 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
       path,
       type: 'python',
     };
+    dispatch(setFileContent({path, value}));
     contentApi.save(params)
       .then(function (response) {
       })
@@ -69,6 +73,12 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
 
   const [ws, setWs] = useState(null);
   const doRun = (parameters: string) => {
+    if (resourceControl.machineStatus !== 'running') {
+      Modal.warning({
+        title: '未申请运行资源，请先在工具栏中配置CPU/GPU/内存后申请资源'
+      });
+      return;
+    }
     if (!ws || ws.readyState !== 1) {
       ws && ws.close();
       asyncInitSysEnv()
@@ -88,10 +98,11 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
   }
   const doStop = () => {
     ws.send('\x03')
+    ws.send('popd\n');
     setStatus('ready')
   }
-  const initSysEnv = async () => {
-    return await terminalApi.getTerminal({ }).then((res: any) => {
+  const initSysEnv = async (currentEnv) => {
+    return await terminalApi.getTerminal({ env: currentEnv }).then((res: any) => {
       if (res.code === 20000000) {
         return res.data.pid
       } else {
@@ -100,7 +111,8 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
         return null
       }
     }).catch(() => {
-      message.error('环境初始化失败');
+      message.error('运行机器未启动，请先启动运行机器');
+      resourceControl.getRuntimeStatus(null);
       return null
     });
   }
@@ -114,12 +126,10 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
   }
   const isComplete = (data: String) => {
     return data === 'complete' || data.indexOf('bash-') !== -1 || data.indexOf('idp-raycluster') !== -1
-      || (data.startsWith('~') && data.indexOf('notebooks') !== -1) || data.indexOf('idp-develop') !== -1
+      || (data.startsWith('~') && data.indexOf('notebooks') !== -1) || data.indexOf('idp-develop') !== -1 
+      || data.indexOf('idp-kernel-') !== -1
   }
   async function asyncInitSysEnv() {
-    let ws = null;
-    const pid = await initSysEnv();
-    if (!pid) return;
     let currentEnv = getCurrentEnv();
     await environmentAPI.getEnvironmentName()
       .then(res => {
@@ -130,13 +140,16 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
       .catch(err => {
         console.log(err)
       })
+    let ws = null;
+    const pid = await initSysEnv(currentEnv);
+    if (!pid) return;
     ws = new WebSocket(terminalWsUrl + pid);
     // ws = new WebSocket(pythonWsUrl)
     setWs(ws);
     ws.onopen = () => {
       if (ws.readyState === 1 && currentEnv) {
-        ws.send(`source /root/.bash_profile\n`)
-        ws.send(`source activate ${currentEnv} \n`);
+        // ws.send(`source /root/.bash_profile\n`)
+        // ws.send(`source activate ${currentEnv} \n`);
       }
     }
     ws.onmessage = (e: any) => {
@@ -150,12 +163,20 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     dispatch(addFile({ path }))
-    asyncInitSysEnv()
     return () => {
-      ws && ws.close();
       dispatch(removeFile({ path }))
     };
   }, [])
+
+  useEffect(() => { 
+    if (!ws && resourceControl.machineStatus === 'running') {
+      asyncInitSysEnv()
+    }
+
+    return () => {
+      ws && ws.close();
+    };
+  }, [resourceControl.machineStatus, ws]);
 
   const setExtraKeys = () => {
     const mac = codeMirror.keyMap.default === codeMirror.keyMap.macDefault;
@@ -221,4 +242,4 @@ export const PythonEditor: React.FC<Props> = (props: Props) => {
       </div>
     </div>
   )
-}
+})

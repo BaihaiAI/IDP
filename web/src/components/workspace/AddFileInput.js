@@ -9,7 +9,7 @@ class AddFileInput extends React.Component {
 
     getComplete = (value) => {
         const part = value.slice(value.indexOf('.') + 1);
-        const suffixs = ['ipynb', 'idpnb', 'py', 'md', 'txt', 'sql', 'json', 'csv'];
+        const suffixs = ['idpnb', 'ipynb', 'py', 'md', 'txt', 'sql', 'json', 'csv'];
         for (const suffix of suffixs) {
             if (suffix.startsWith(part)) {
                 return suffix.slice(part.length);

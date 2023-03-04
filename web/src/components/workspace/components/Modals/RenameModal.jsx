@@ -16,7 +16,7 @@ RenameModal.propTypes = {
 }
 
 function RenameModal(props) {
-
+  // console.log(props)
   const {
     rename,
     submitRename,

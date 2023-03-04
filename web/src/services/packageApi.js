@@ -36,7 +36,8 @@ function install(options) {
 }
 
 function uninstall(options) {
-    const url = `${kernelApiPath}/package/uninstall`;
+    console.log("-------------------")
+    const url = `${noteApiPath2}/package/uninstall`;
     const data = {
       projectId: projectId,
         packageName: options.packageName,

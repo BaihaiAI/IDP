@@ -1,4 +1,4 @@
-import { projectId, teamId, userId, region } from '@/store/cookie';
+import { projectId, teamId, userId, region } from '../../../store/cookie';
 import request from '../../../services/request'
 const manageApiPath = "/0/api/v1",
       modelApiPath = "/0/api/v1/model-api",

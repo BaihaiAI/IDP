@@ -1,6 +1,7 @@
 import { action, observable, toJS } from "mobx"
-import rightSidesDefaultConfig from "@/idp/component/workspaceSides/rightSidesDefaultConfig"
-import { ReactElement } from "react"
+import rightSidesDefaultConfig from "../../component/workspaceSides/rightSidesDefaultConfig"
+import { ReactElement } from "react";
+import { PluginsConfigInfo } from "../plugins";
 
 export type rightSideData = {
     key: string,
@@ -9,7 +10,9 @@ export type rightSideData = {
     title?: string | Function
     component: ReactElement,
     name?: string,
-    weight?: number
+    weight?: number,
+    configJson?: PluginsConfigInfo,
+    type?:string
 }
 class RightSideControl {
 

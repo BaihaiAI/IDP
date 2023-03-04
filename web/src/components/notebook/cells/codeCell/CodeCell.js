@@ -28,7 +28,7 @@ import "codemirror/addon/edit/closebrackets";
 
 import { extraKeys } from '../../lib/extraKeys';
 import RightTopBar from '../cellTools/RightTopBar';
-import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
+import sneltoets from '@idp/global/sneltoets';
 import packageApi from '../../../../services/packageApi';
 import './CodeCell.less'
 import { useNotebookItem } from '../../../../utils/hook/useActiveCellProps';
@@ -100,8 +100,8 @@ export const CodeCell = (props) => {
   }, [])
 
   useEffect(() => {
-    setHideInput(ToolImpl.collapseAllInput);
-  }, [ToolImpl.collapseAllInput]);
+    setHideInput(sneltoets.collapseAllInput);
+  }, [sneltoets.collapseAllInput]);
 
   useEffect(() => {
     // 如果是自动安装缺失包，自动刷新
@@ -528,7 +528,7 @@ export const CodeCell = (props) => {
               mode: "python",
               keyMap: 'sublime',
               lineWrapping: true,
-              lineNumbers: ToolImpl.lineNumbers,
+              lineNumbers: sneltoets.lineNumbers,
               indentUnit: 4,  // 缩进的空格数
               addModeClass: true,
               autofocus: true,

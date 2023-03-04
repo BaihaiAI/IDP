@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { observer } from 'mobx-react';
 import { useHotkeys } from "react-hotkeys-hook";
-import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
+import sneltoets from '@idp/global/sneltoets';
 
 import './shortcutlist.less'
-import { observe } from 'mobx';
-import { observer } from 'mobx-react';
-
-
 
 function ShortcutList(props) {
     const [active, setActive] = useState(0)
@@ -104,13 +101,13 @@ function ShortcutList(props) {
     }
     const closeModle = (e) => {
         e.stopPropagation()
-        ToolImpl.updateSneltoetsListVisible(false);
+        sneltoets.updateSneltoetsListVisible(false);
     }
     useHotkeys('esc', closeModle)
 
     return (
         <React.Fragment>
-            {ToolImpl.sneltoetsListVisible ? (
+            {sneltoets.sneltoetsListVisible ? (
                 <div className='shortcut-warrp' onClick={closeModle}>
                     <div className='shortcut' onClick={(e) => e.stopPropagation()}>
                         <div className='title'>

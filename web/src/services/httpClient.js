@@ -12,9 +12,11 @@ export const manageApiPath = '/0/api/v1';
 export const shopApiPath = '/2/api/v1/idp-shop';
 export const clusterPath = `/${region}/api/v2/cluster`;
 export const terminalPath = `/${region}/api/v1/terminal`;
+export const terminalPath2 = `/${region}/api/v2/terminal`;
 export const adminRsPath = "/0/api/v1/admin-rs"
 export const modelServicePath = "/0/api/v1/model-service"
 export const modelApiPath = '/0/api/v1/model-api'
+export const volcanoApiPath = '/0/api/v1/idp-volcano-helper';
 
 function redirect(url) {
   if (url) {
@@ -24,6 +26,7 @@ function redirect(url) {
 
 // 自动提交异常信息
 export function submitErrInfo(source, error) {
+  if (source && source.indexOf('feedback/save') !== -1) return;
   const isJson = typeof (error) === 'object'
     && Object.prototype.toString.call(error).toLowerCase() === '[object object]'
     && !error.length;
@@ -191,3 +194,11 @@ export function decideCodeSuccessOrFail(code) {
   return status
 }
 
+// 开源版阻止调用
+export function preventInOpen(fun) {
+  if (!Boolean(process.env.NODE_OPEN)) {
+    return fun();
+  } else {
+    return Promise.resolve();
+  }
+}

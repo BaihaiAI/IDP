@@ -64,13 +64,48 @@ function isThreeAnyUnread({}){
     }})
     }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// 新通知列表
+function notificationList2({viewFlag, size, current}){
+    const url = `${prefix}/notification/message`
+    return request.get(url, {params: {
+      readFlag: viewFlag,
+      pageSize: size,
+      pageIndex: current
+    }})
+  }
+  // 改变为已读 或者是全部已读
+  function changeStatus({id, viewFlag}){
+    const url = `${prefix}/notification/message`;
+    return request.put(url,{ 
+      id,
+      viewFlag,
+    })
+  }
+  // 删除
+  function deleteNotification({id}){
+    const url = `${prefix}/notification/message`;
+    return request.delete(url, {data: {id}})
+  }
+  // 是否有未读
+  function isUnRead(){
+    const url = `${prefix}/notification/status`;
+    return request.get(url)
+  }
+
 const auditApi = {
     getAuditList,
     getAuditDetail,
     updateAudit,
     notificationList,
     changeStatusOrDetele,
-    isThreeAnyUnread
+    isThreeAnyUnread,
+    // ---
+    notificationList2,
+    changeStatus,
+    deleteNotification,
+    isUnRead
 }
 
 export default auditApi

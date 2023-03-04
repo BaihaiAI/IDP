@@ -17,6 +17,7 @@ import kernelApi from "../../../services/kernelApi"
 import OutputCell from "./outputCell/OutputCell"
 import "./cell.less"
 import VisualizationCell from "./visualizationCell/VisualizationCell"
+import ExplorationCell from './explorationCell/ExplorationCell.jsx'
 import { store } from "../../../store"
 
 const arrToString = (arr) => {
@@ -55,6 +56,7 @@ const Cell = (props) => {
     cells,
     sendInputRequest,
   } = props
+
 
   const cellId = data.metadata.id;
   const cellType = data["cell_type"];
@@ -188,6 +190,7 @@ const Cell = (props) => {
   }, [data["execution_time"]])
 
   const cellEditor = () => {
+    // console.log(cellType, 'cellType')
     switch (cellType) {
       case "code":
         return (
@@ -291,6 +294,34 @@ const Cell = (props) => {
             runCurrentCellAndBelow={runCurrentCellAndBelow}
           />
         )
+      case 'data_exploration':
+        return (
+          <ExplorationCell
+            path={path}
+            cellId={cellId}
+            index={index}
+            source={source}
+            executionTime={executionTime}
+            metadata={data["metadata"]}
+            focus={cellProp.focus}
+            lspStore={lspStore}
+            lspWebsocket={lspWebsocket}
+            runCell={runCell}
+            doRunCell={doRunCell}
+            runCellAndGotoNext={runCellAndGotoNext}
+            stopCell={stopCell}
+            onFocus={handleEditorFocus}
+            onBlur={handleEditorBlur}
+            formatSource={formatSource}
+            outputs={data.outputs}
+            cellProp={cellProp}
+            findFocusCellIdAndType={findFocusCellIdAndType}
+            resetCellPosition={resetCellPosition}
+            handleScroll={handleScroll}
+            runCurrentCellAndAbove={runCurrentCellAndAbove}
+            runCurrentCellAndBelow={runCurrentCellAndBelow}
+          />
+        )
       default:
         return <div></div>
     }
@@ -345,7 +376,7 @@ const Cell = (props) => {
         </Row>
         {/* start 运行结果展现模块*/}
 
-        {cellType === "markdown" || cellType === "visualization" ? (
+        {cellType === "markdown" || cellType === "visualization" || cellType === 'data_exploration' ? (
           <div />
         ) : (
           <OutputCell path={path} cellProp={cellProp} key={cellId} cellId={cellId} outputs={data["outputs"]} sendInputRequest={sendInputRequest} />

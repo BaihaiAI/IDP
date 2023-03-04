@@ -1,5 +1,5 @@
 import {  manageApiPath, adminRsPath } from './httpClient'
-import { userId } from '../store/cookie'
+import { userId,teamId } from '../store/cookie'
 import request from "./request"
 
 function save(options) {
@@ -19,7 +19,8 @@ function save_new(options){
     contact,
     userName,
     fileList:fileIdList,
-    userId 
+    userId,
+    teamId
   })
 }
 

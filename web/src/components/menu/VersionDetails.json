@@ -1,6 +1,17 @@
 {
   "version":[
     {
+      "time": "2022-12-25",
+      "versionnum": "V 1.19.0",
+      "characteristic": [
+        "[侧边栏]: 新增超参数优化功能"
+      ],
+      "repair": [],
+      "functionadjustment": [
+        "[终端]: 支持安装系统工具和库包"
+      ]
+    },
+    {
       "time": "2022-11-19",
       "versionnum": "V 1.18.0",
       "characteristic": [

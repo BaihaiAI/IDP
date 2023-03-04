@@ -3,7 +3,9 @@ import { Table } from 'antd';
 import './csvmode.less'
 import { observer } from 'mobx-react';
 import terminal from '@/idp/lib/terminal';
+import pages from '@/idp/plugins/headerIdp/pages';
 function Preview(props) {
+  // 这个文件如果要改动，问一下杨华彬再改，会有意想不到的bug
   const { content } = props
   const [tableHeader, setTableHeader] = useState([])
   const [tablecontent, setTableContent] = useState([])
@@ -22,12 +24,16 @@ function Preview(props) {
   }
 
   useEffect(() => {
+    console.log(currentPage, 'currentPage')
+  }, [currentPage])
+
+  useEffect(() => {
       setTotal(tablecontent.length)
 
       let { height } = document.getElementsByClassName("csv-preview")[0].getBoundingClientRect()
       height = height - (39 + 40)
       height = Math.floor(height / 39)
-      
+      height = height > 0 ? height : 20;
       setPageSize(height)
   }, [])
 
@@ -35,7 +41,11 @@ function Preview(props) {
     let res = content.split("\n")
     let resTitle = [],
       resBody = [];
-    if (res.length === 0 || res[0].trim() === '') return
+    if (res.length === 0 || res[0].trim() === '') {
+      setTableHeader([]);
+      setTableContent([]);
+      return;
+    }
     const titles = res[0].split(',')
     for (let i = 0; i < titles.length; i++) {
       const name = titles[i];
@@ -78,16 +88,16 @@ function Preview(props) {
         //   showSizeChanger: true,
         // }}
         pagination={{
-          current: currentPage,
-          hideOnSinglePage: true,
-          total,
+          // defaultCurrent: 1,
+          // current: Math.floor(currentPage),
+          // hideOnSinglePage: true,
+          // total,
           pageSize,
-          onChange: (page, pageSize) => {
-            setCurrentPage(page)
-          },
+          // onChange: (page, pageSize) => {
+          //   setCurrentPage(page)
+          //   setPageSize(pageSize)
+          // },
         }}
-
-
         />
     </div>
   )

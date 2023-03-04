@@ -172,6 +172,13 @@ export const filesTabSlice = createSlice({
       state.activePath = path
       changeHistoryOpenFileIndex({ projectId, path })
     },
+    // 修改file中的content，保证切换左侧边栏时，文本文件中新输入的数据不丢失
+    setFileContent(state, action) {
+      const { path, value } = action.payload;
+      const index = findFileListIndex(state.fileList, path);
+      if (index === -1) return;
+      state.fileList[index].content = value;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -245,7 +252,8 @@ export const {
   clearLeftOrRightFileList,
   clearTabsFromList,
   updateFileDeleteFlag,
-  renameFile
+  renameFile,
+  setFileContent,
 } = filesTabSlice.actions
 
 export default filesTabSlice.reducer

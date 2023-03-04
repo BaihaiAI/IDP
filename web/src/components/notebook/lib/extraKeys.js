@@ -40,7 +40,6 @@ function goto(cm, count) {
   
   const result = lsp.gotoDefine.result;
   if (result) {
-    console.log(result);
     const currentCellId = cm.options.cellId;
     if (lsp.gotoDefine.cellId !== currentCellId) return;
     if (result.length > 0) {

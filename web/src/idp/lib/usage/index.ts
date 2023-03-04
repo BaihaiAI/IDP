@@ -1,5 +1,5 @@
 import { action, observable } from 'mobx';
-import dashboardApi from "@/services/dashboard";
+import dashboardApi from "../../../services/dashboard";
 
 class Usage {
 
@@ -11,15 +11,14 @@ class Usage {
     @action async getUsageThunk() {
         const result = await dashboardApi.taskMonitorTotal();
         const data = result.data;
-        const cpuUsage = (data.items[0].localUsedPercent * 100).toFixed(0);
-        const gpuUsage = (data.items[1].localUsedPercent * 100).toFixed(0);
-        const memoryUsage = (data.items[2].localUsedPercent * 100).toFixed(0);
-        const storageUsage = (data.items[3].localUsedPercent * 100).toFixed(0);
+        const cpuUsage = (data.cpu * 100).toFixed(0);
+        const gpuUsage = (data.gpu * 100).toFixed(0);
+        const memoryUsage = (data.memory * 100).toFixed(0);
+        const storageUsage = (data.disk * 100).toFixed(0);
         this.cpuUsage = cpuUsage;
         this.memoryUsage = memoryUsage;
         this.gpuUsage = gpuUsage;
         this.storageUsage = storageUsage;
-        return result
     }
 
     @action selectCpuUsage() {

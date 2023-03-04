@@ -1,4 +1,5 @@
 import { action, observable } from 'mobx';
+import { historyOpenProject } from '../../../store/cookie';
 
 class FileManager {
 
@@ -8,6 +9,7 @@ class FileManager {
     @observable fileOperationType: string = 'COPY' || "CUT" || "NONE";
     @observable expandedFilePaths = ['/']; // 点击文件管理器打开的文件夹目录路径path
     @observable filePath: string = ''; // 当前点击的文件夹或者文件path
+    @observable fileName: string = ''; // 当前打点击文件的名称
 
     /**
      * 修改locastore值
@@ -18,7 +20,6 @@ class FileManager {
     @action updateHistoryOpenFile(sourcePath, targetPath, projectId) {
         const store_historyOpenFile = projectId ? projectId : window.localStorage.getItem('historyOpenFile');
         if (store_historyOpenFile) {
-            const historyOpenProject = window.localStorage.getItem('historyOpenProject');
             const store = JSON.parse(store_historyOpenFile);
             if (historyOpenProject) {
                 store[historyOpenProject].forEach((item) => {
@@ -28,7 +29,6 @@ class FileManager {
                         return;
                     }
                 });
-                console.log(store);
                 localStorage.setItem('historyOpenFile', JSON.stringify(store));
             }
         }
@@ -44,6 +44,10 @@ class FileManager {
 
     @action getFilePath() {
         return this.filePath;
+    }
+
+    @action updateFileName(fileName: string) {
+        this.fileName = fileName;
     }
 
     /**

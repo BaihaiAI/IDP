@@ -1,6 +1,5 @@
 import './public-path';
 import ReactDOM from 'react-dom';
-import '../config/open-config';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from "react-router-dom";
 import PrepareApp from './PrepareApp';
@@ -9,25 +8,38 @@ import './index.less';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
 import cookie from 'react-cookies';
-
-import { store } from '@/store';
+import { store } from './store';
 import { ConfigProvider } from "antd";
-import IdpIdle from './components/IdleDetector';
-import { loadModule } from '@/public-modules';
+import globalData from "idpStudio/idp/global";
+import IdpIdle from '@/components/IdleDetector';
 
-// @ts-ignore
-let pages = require.context("../extension", true, /\/.*config\.json$/);
-pages.keys().map((key, index, arr) => {
-    let config = pages(key);
-    let module = require("../extension/" + config.fileName + '/' + config.entry);
+// 用那个放开那个插件
+const loadDevPlugins = [
+    require('../extension/centre/src/index'),
+    // require('../extension/contact/src/index'),
+    require('../extension/dataSet/src/index'),
+    // require('../extension/environment/src/index'),
+    // require('../extension/feedback/src/index'),
+    // require('../extension/monitor/src/index'),
+    // require('../extension/networkstatus/src/index'),
+    // require('../extension/notification/src/index'),
+    // require('../extension/teams/src/index'),
+    // require('../extension/tensorboard/src/index'),
+    // require('../extension/usage/src/index'),
+    // require('../extension/workflow/src/index'),
+    require("../extension/modelwarenhouse/src/index"),
+    // require("../extension/optuna/src/index"),
+    // require("../extension/colony/src/index"),
+];
+
+loadDevPlugins.forEach(module => {
     if (!module.hasOwnProperty('default')) {
-        const { plugin } = require("../extension/" + config.fileName + '/' + config.entry);
-        module = plugin;
+        module = module.plugin;
     } else {
         module = module.default;
     }
     if (module.autoStart) {
-        module.activate(loadModule(module.type))
+        module.activate(globalData);
     }
 });
 

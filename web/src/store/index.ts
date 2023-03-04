@@ -5,7 +5,6 @@ import filesTab from "./features/filesTabSlice"
 import configSlice from "./features/configSlice"
 import global from './features/globalSlice'
 import workflow from './features/workflowSplic';
-import usage from "./features/usageSlice"
 import pythonSlice from "./features/pythonSlice"
 import kernelSlice from "./features/kernelSlice"
 
@@ -18,7 +17,6 @@ export const store = configureStore({
     config: configSlice,
     global,
     workflow,
-    usage,
     python: pythonSlice,
     kernel: kernelSlice
   },

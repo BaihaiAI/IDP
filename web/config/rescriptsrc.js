@@ -11,6 +11,7 @@ if (process.env.NODE_OPEN === 'true') {
 console.log('@当前加载的proxy代理地址是:', target);
 
 module.exports = {
+    target,
     webpack: (config = {}) => {
         config.library = `${name}-[name]`;
         config.libraryTarget = 'umd';
@@ -31,7 +32,8 @@ module.exports = {
         config.proxy = {  //进行代理转发
             '/**/api/**': {
                 target: target,
-                changeOrigin: true,
+                secure: false,
+                // changeOrigin: true,
                 ws: true,
             }
         }

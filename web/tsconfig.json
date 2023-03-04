@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "experimentalDecorators": true,
-        "target": "es2016",
+        "target": "ESNext",
         "lib": [
             "dom",
             "dom.iterable",
@@ -14,7 +14,7 @@
         "strict": false,
         "forceConsistentCasingInFileNames": true,
         "noFallthroughCasesInSwitch": true,
-        "module": "commonjs",
+        "module": "esnext",
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "isolatedModules": true,
@@ -53,9 +53,6 @@
             "idpStore/*": [
                 "src/store/*"
             ],
-            "@studio/*": [
-                "dist_source/*"
-            ],
             "idp/*": [
                 "src/idp/*"
             ]
@@ -70,12 +67,10 @@
     "include": [
         "src/**/*",
         "config/**/*",
-        "plugs/**/*",
         "typings.d.ts",
         "extensions/**/*"
     ],
     "exclude": [
-        "node_modules",
-        "plugs"
+        "node_modules"
     ]
 }

@@ -61,7 +61,7 @@ function FileTreeList(props) {
           <div style={{position: 'relative'}}>
             <Tooltip title={item.key} mouseEnterDelay={1.5} visible={ overkeys === item.key } onVisibleChange={()=>onVisibleChange(item.key, overkeys == item.key)} placement="topLeft" >
                     <span className={"title-container"}>
-                    <span id={`class_${item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')}`} className={classNames("filename" + item.key, item.fileType)}>
+                    <span style={{ color: '#2C2F33'}} id={`class_${item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')}`} className={classNames("filename" + item.key, item.fileType)}>
                         {showTitle}
                         <span id={item.key.replace(/\s*/g, "").replace(new RegExp("/","g"), '_')} style={{ position: 'absolute', zIndex: 3, right: 0, opacity: 0 }}><Spin size="small" /></span>
                     </span>

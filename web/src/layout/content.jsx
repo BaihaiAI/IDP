@@ -1,4 +1,4 @@
-import React, {Fragment, useState} from 'react'
+import React, {Fragment, useEffect, useImperativeHandle, useState} from 'react'
 import RightSiderShow from "../components/rightSiderLine/RightSiderShow"
 import RightSideLine from "../components/rightSiderLine"
 import RouterConfig from "../router/router"
@@ -8,12 +8,13 @@ import RenderVersionPanel from "../components/notebook/version/VersionPanel"
 import DecisionClassification from '../components/notebook/operator/DecisionClassification'
 import {selectActivePath} from "@/store/features/filesTabSlice"
 import {useSelector} from "react-redux"
+import {isTraveler} from "@/store/cookie"
 
 
 
 export const contentContext = React.createContext()
 
-function Content() {
+function Content(props,ref) {
 
 
   const location = useLocation()
@@ -53,6 +54,23 @@ function Content() {
     )
   }
 
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        setRightLineSelectKey
+      }
+    },
+    [],
+  )
+
+  useEffect(() => {
+    if(isTraveler()){
+      window.location.href = '/team'
+    }
+  }, [])
+
+
 
   return (
     <contentContext.Provider value={{
@@ -89,4 +107,4 @@ function Content() {
   )
 }
 
-export default Content
+export default React.forwardRef(Content)

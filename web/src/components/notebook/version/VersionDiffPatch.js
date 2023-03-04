@@ -1,6 +1,6 @@
 import React,{ useContext, useEffect, useState, useRef, useMemo } from 'react'
 import { Context } from './VersionPanel'
-import { Button, Drawer, Radio, Tooltip, Modal, Form, Input, message } from 'antd'
+import { Button, Drawer, Radio, Tooltip, Modal, Form, Input, message, Spin } from 'antd'
 import contentApi from '../../../services/contentApi'
 import { useDispatch, useSelector } from "react-redux"
 import { ExclamationCircleOutlined } from "@ant-design/icons"
@@ -42,6 +42,8 @@ function VersionDiffPatch(props){
   const [verticalForm] = Form.useForm()
   const updateList = useSelector(selectUpdateList)
   const dispatch = useDispatch()
+
+  const [differentLoading, setDifferentLoading] = useState(false);
 
   useEffect(() => {
     if(!showVersionDrawer) return
@@ -167,15 +169,18 @@ function VersionDiffPatch(props){
   const getCellContent = (snapshot) => {
     const { id: leftId } = snapshot.left;
     const { id: rightId } = snapshot.right;
+    setDifferentLoading(true)
     if(!leftId && !rightId) return false;
     contentApi.viewComparison({leftId, rightId, path})
       .then(res => {
         const { cells1, cells2} = res.data
         setCellsLeft(cells1);
         setCellsRight(cells2);
+        setDifferentLoading(false)
       })
       .catch(err => {
         console.log(err)
+        setDifferentLoading(false)
       })
   }
 
@@ -603,6 +608,12 @@ function VersionDiffPatch(props){
             </div>
           </div>
         )}
+
+        {differentLoading? (
+        <div className="example">
+          <Spin  size='large'/>
+        </div>
+        ): null}
         
         <div className='right-sider'>
           <div className='snapshot-list'>

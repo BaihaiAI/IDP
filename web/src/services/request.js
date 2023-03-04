@@ -20,7 +20,7 @@ const request = axios.create({
 })
 
 const notNeedErrorMessageBoxArr = [
-  "/dashboard/team/task-monitor-total"
+  "/runtime/resource_usage"
 ]
 
 export const requestWithBigIntResponse = axios.create({
@@ -94,9 +94,7 @@ export const handleCode = ({ code, message: msg, url, data }) => {
       }
       break
   }
-  if (url && url.indexOf('feedback/save') !== -1) {
-    submitErrInfo(url, msg)
-  }
+  submitErrInfo(url, msg)
   judgeNeedErrMsg()
 }
 
@@ -105,11 +103,7 @@ function interceptorsRequestUseResolve(config) {
   /*if (config.data) {
     config.data = lodash.pickBy(config.data, lodash.identity)
   }*/
-  if (
-    config.data &&
-    config.headers["Content-Type"] ===
-      "application/x-www-form-urlencoded;charset=UTF-8"
-  ) {
+  if ( config.data && config.headers["Content-Type"] === "application/x-www-form-urlencoded;charset=UTF-8" ) {
     config.data = qs.stringify(config.data)
   }
   const url = config.url.split('?')[0]
@@ -190,11 +184,11 @@ function interceptAuthJwtResponseReject(res) {
   const { status, data } = res;
   // 处理id_token有问题的情况，避免页面出错
   if ( status == '401' && data == 'Jwt verification fails' ) {
-    logout();
+    // logout();
     return Promise.reject(new Error('登录信息已经过期或失效，请重新登录'));
   } 
   if (status == '403' && data == 'RBAC: access denied') {  
-    logout();
+    // logout();
     return Promise.reject(new Error('对不起，资源访问受限，系统自动将为您跳转到登录页'));
   }
 }

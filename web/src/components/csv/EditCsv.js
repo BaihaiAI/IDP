@@ -28,11 +28,14 @@ import { useMemoizedFn } from 'ahooks';
 import './csvmode.less'
 import { observer } from 'mobx-react';
 import terminal from '@/idp/lib/terminal';
+import { setFileContent } from '../../store/features/filesTabSlice';
+import { useDispatch } from 'react-redux';
 
 function EditCsv(props) {
   const { path, content, suffix, onChange, deleteflag, posLine, workSpaceHeight } = props;
   const [instance, setInstance] = useState(null);
   const [value, setValue] = useState(content);
+  const dispatch = useDispatch();
   let saveTimer = useRef();  // 当focus时，开启定时保存文件
 
   const handlerUnMount = useMemoizedFn(() => {
@@ -55,8 +58,8 @@ function EditCsv(props) {
   const saveFile = useMemoizedFn(() => {
     if (!instance) return;
     const value = instance.getValue();
-    if (value === '') return;
     onChange(value);
+    dispatch(setFileContent({ path, value }));
     const params = {
       content: value,
       path: path,

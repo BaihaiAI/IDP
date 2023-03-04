@@ -10,6 +10,7 @@ const httpExpiredCode = 401
 
 // 自动提交异常信息
 const submitErrInfo = (source, error) => {
+  if (source && source.indexOf('feedback/save') !== -1) return;
   const isJson = typeof (error) === 'object'
     && Object.prototype.toString.call(error).toLowerCase() === '[object object]'
     && !error.length;

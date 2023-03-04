@@ -127,6 +127,7 @@ const RightTopBar = (props) => {
     })
   }
 
+
   return (
     <Col className="code-editor-topbar-actions anticon">
       <Tooltip placement="bottom" title={intl.get("RUN_CURRENT_CELL_AND_ABOVE")}>

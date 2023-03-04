@@ -1,7 +1,7 @@
 import React,{useEffect} from 'react';
 import { useSetState } from 'ahooks'
 import { Form, Input, message, Modal } from "antd"
-import DataSetIcon from "../dataSet/DataSetIcon"
+import DataSetIcon from "../Icons/DataSetIcon"
 import dataSetApi from '../../services/dataSetApi'
 import intl from "react-intl-universal"
 

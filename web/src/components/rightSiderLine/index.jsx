@@ -39,7 +39,7 @@ function RightSideLine(props) {
                 collapsed={true}
                 width={48}
                 collapsedWidth={48}
-                style={{ paddingTop: 32, paddingLeft: 4 }}
+                style={{ paddingTop: 32 }}
                 onClick={() => {
                     if (vis) {
                         dispatch(changeOperatorDecision(false))

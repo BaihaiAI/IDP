@@ -1,11 +1,10 @@
 import React from "react"
-import { userId, teamId, projectId } from "@/store/cookie"
-import feedbackApi from "@/services/feedbackApi"
+import { userId, teamId, projectId } from "../../store/cookie"
+import feedbackApi from "../../services/feedbackApi"
 import intl from "react-intl-universal"
 import {  Modal, Form, Input, Upload, message } from "antd"
 
 import { PlusOutlined } from "@ant-design/icons"
-import "./Feedback.css"
 import PropTypes from "prop-types"
 
 const { TextArea } = Input
@@ -96,7 +95,7 @@ class Feedback extends React.Component {
               })
             })
         }else{
-          
+
           feedbackApi.save(vals)
             .then(res => {
               form.resetFields()

@@ -1,8 +1,10 @@
 import { action, observable } from "mobx"
 import React, { useId } from "react"
-import projectApi from "@/services/projectApi"
-import { locationToProjectListPage } from "@/utils"
+import projectApi from "../../../services/projectApi"
+import { locationToProjectListPage } from "../../../utils"
 import cookie from 'react-cookies';
+import userInfoGlobal from '../userinfo';
+import { saveHistoryOpenProject, historyOpenProject } from '../../../store/cookie';
 
 export type IdpProject = {
   id?: string,
@@ -22,12 +24,16 @@ class AppComponentData {
     this.socketAlive = true
   }
 
+  @action updateWorkspaceRef(workspaceRef: any) {
+    this.workspaceRef = workspaceRef;
+  }
+
   @action setSocketAlive(socketAlive: boolean) {
     this.socketAlive = socketAlive
   }
 
-
-  @action getProjectInfo(projectInfo: IdpProject) {
+  @action async getProjectInfo(projectInfo: IdpProject) {
+    const userInfo = await userInfoGlobal.getUserInfo();
     let projectId = new URLSearchParams(window.location.search).get("projectId");
     if (projectId) {
       // 等待接口
@@ -38,8 +44,8 @@ class AppComponentData {
           .getProjectInfo(projectId)
           .then((res) => {
             const projectInfo = res.data
-            this.projectInfo = projectInfo
-            window.localStorage.setItem("historyOpenProject", projectId)
+            this.projectInfo = projectInfo;
+            saveHistoryOpenProject(projectId);
           })
           .catch((res) => {
             locationToProjectListPage()
@@ -47,8 +53,11 @@ class AppComponentData {
       }
     } else {
       let search = window.location.search
-      projectId = window.localStorage.getItem("historyOpenProject");
+      projectId = historyOpenProject;
       let pathname = `./workspace`;
+      if (userInfo.navType === 'AIGC') {
+        pathname = './modelwarehouse/model_AIGC_Detail'
+      }
       if (process.env.REACT_APP_VERSION === 'MODEL') {
         pathname = `./modelwarehouse/myModel`;
       }
@@ -63,7 +72,6 @@ class AppComponentData {
       } else {
         const qs = new URLSearchParams(search)
         const shareId = qs.get("shareId")
-        // debugger
         if (shareId) {
           // 打开分享链接中的文件
           projectApi.getProjectPage({ current: 1, size: 5, name: '' }).then((result) => {
@@ -77,17 +85,21 @@ class AppComponentData {
             window.location.href = `${url}${search}`
           })
         } else {
-          if (process.env.REACT_APP_VERSION === 'MODEL') {
-            if ( cookie.load('userId')) {
+          if (process.env.REACT_APP_VERSION === 'MODEL' || userInfo?.navType === 'AIGC') {
+            if (cookie.load('userId') || userInfo?.navType === 'AIGC') {
               projectApi.getProjectPage({ current: 1, size: 1 }).then(res => {
                 if (res.code == 200 && res.data.records.length > 0) {
-                  window.location.href = `/studio/modelwarehouse/myModel?projectId=${res.data.records[0].id}`;
+                  if (userInfo?.navType === 'AIGC') {
+                    window.location.href = `/studio/modelwarehouse/model_AIGC_Detail?projectId=${res.data.records[0].id}`;
+                  } else {
+                    window.location.href = `/studio/modelwarehouse/myModel?projectId=${res.data.records[0].id}`;
+                  }
                 } else {
                   locationToProjectListPage()
                 }
               });
             } else {
-              if ( window.location.pathname !== '/studio/modelwarehouse/myModel') {
+              if (window.location.pathname !== '/studio/modelwarehouse/myModel') {
                 locationToProjectListPage()
               }
             }

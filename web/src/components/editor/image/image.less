@@ -1,0 +1,36 @@
+@import 'tui-image-editor/dist/tui-image-editor.css';
+
+.control-bar {
+    background-color: #f7f7f7;
+    .control {
+        border-bottom: 1px solid #ddd;
+        position: relative;
+        height: 31px;
+
+        .control-box {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            // display: flex;
+            z-index: 2;
+            justify-content: space-between;
+        }
+    }
+    .ant-pagination {
+        margin: 8px 8px;
+    }
+}
+
+.wrap {
+  width: 100%;
+  position: relative;
+  height: 100%;
+  overflow: auto;
+
+  .image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: scale-down;
+  }
+}

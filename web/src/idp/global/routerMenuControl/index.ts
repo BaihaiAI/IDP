@@ -1,6 +1,7 @@
 import { RouteComponentProps } from "react-router"
 import React from "react"
 import { action, observable, toJS } from "mobx"
+import { PluginsConfigInfo } from "../plugins";
 
 export type routerMenu = {
     key: string
@@ -12,6 +13,8 @@ export type routerMenu = {
     component: React.ComponentType<RouteComponentProps<any>>
     needCache?: boolean,
     weight?: number,
+    configJson?: PluginsConfigInfo,
+    type?: string
     notNeedExact?:boolean
 }
 

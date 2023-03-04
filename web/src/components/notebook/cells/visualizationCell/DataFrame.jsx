@@ -9,8 +9,7 @@ import Ansi from "ansi-to-react"
 import TextPlain from "../outputCell/TextPlain"
 import intl from "react-intl-universal"
 import { useDebounceFn } from "ahooks"
-import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
-
+import sneltoets from '@idp/global/sneltoets';
 const picType = "pic_type"
 const title = "title"
 // const xCol = "x_col"
@@ -206,7 +205,7 @@ function DataFrame(props, ref) {
                   key={i}
                   useClasses
                   linkify={true}
-                  className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+                  className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
                 >{item}</Ansi>
               </div>
             ))
@@ -218,7 +217,7 @@ function DataFrame(props, ref) {
           }} />}
         </div>
         <div style={{ display: textPlainFound && !textHtmlFound ? '' : 'none' }}>
-          <pre className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}>
+          <pre className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}>
             <span>{textPlain}</span>
           </pre>
         </div>
@@ -247,7 +246,7 @@ function DataFrame(props, ref) {
           <span style={headerEnameErrors ? { marginRight: '15px' } : { display: 'none' }}>
             <Ansi
               key="headerEnameErrors"
-              className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+              className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
               linkify={true}
             >
               {headerEnameErrors + ":"}
@@ -256,7 +255,7 @@ function DataFrame(props, ref) {
           <span style={headerEvalueErrors ? {} : { display: 'none' }}>
             <Ansi
               key="headerEvalueErrors"
-              className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+              className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
               linkify={true}
             >
               {headerEvalueErrors}
@@ -265,7 +264,7 @@ function DataFrame(props, ref) {
           </span>
           <Ansi
             key="errors"
-            className={ToolImpl.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
+            className={sneltoets.autoWarpOutput ? "ansi-warp-span" : "ansi-black-span"}
             linkify={true}
           >
             {errors}

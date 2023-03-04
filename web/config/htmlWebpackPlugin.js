@@ -1,11 +1,10 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 /**
  * HtmlWebpackPlugin 配置
  * @param {*} param0 
  * @returns 
  */
-function createHtmlWebpackPlugin({ template, filename, options = {}, minifyOptions = {}, env = 'dev' }) {
+function createHtmlWebpackPlugin({ options = {}, minifyOptions = {}, env = 'dev', react_app_version}) {
 
     const minify = env === 'dev' ? {} : Object.assign({
         removeComments: true, // 移除HTML中的注释
@@ -26,17 +25,15 @@ function createHtmlWebpackPlugin({ template, filename, options = {}, minifyOptio
         inject: true,
         colorLinkUrl: '/child/idpStudio-idp/static/color.less',
         loadingGifUrl: '/child/idpStudio-idp/static/loading.gif',
+        reactDom: '/child/idpStudio-idp/static/react-dom.production.min.js',
+        react: '/child/idpStudio-idp/static/react.production.min.js',
+        lessmin: '/child/idpStudio-idp/static/less.min.js',
+        react_app_version,
         loadPlugins: true,
-        minify,
-        chunks: ['index']
+        minify
     }, { ...options });
 
-    return new HtmlWebpackPlugin({
-        template: template || 'index.ejs',
-        filename: filename || 'index.html',
-        ...htmlOptions,
-        faviconUrl: (process.env.NODE === 'dev' || process.env.NODE_OPEN === 'true') ? './static/favicon.ico' : '/child/idpStudio-idp/static/favicon.ico',
-    })
+    return htmlOptions
 }
 
 module.exports = {

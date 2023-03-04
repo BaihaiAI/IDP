@@ -1,5 +1,5 @@
 import { manageApiPath } from "./httpClient"
-import {userId} from "@/store/cookie"
+import {userId} from "../store/cookie"
 import request from "./request.js"
 
 

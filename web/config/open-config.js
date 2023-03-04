@@ -6,6 +6,6 @@ import cookie from 'react-cookies';
         cookie.save('userId', '1');
         cookie.save('teamId', '1');
         cookie.save('projectId', '1');
-        localStorage.setItem("historyOpenProject", '1');
+        cookie.save('historyOpenProject');
     }
 })()

@@ -10,6 +10,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>IDP Studio</title>
     <link rel="stylesheet/less" type="text/css" href=<%=htmlWebpackPlugin.options.colorLinkUrl %> />
+    <script crossorigin src="<%=htmlWebpackPlugin.options.react %>"></script>
+    <script crossorigin src="<%=htmlWebpackPlugin.options.reactDom %>"></script>
+    <script defer=defer src="<%=htmlWebpackPlugin.options.lessmin %>"></script>
     <script>
         window.less = { async: false, env: 'production' }
     </script>
@@ -27,12 +30,14 @@
             }
             return "";
         }
-
         function redirectPath() {
+            const tourist = window.location.pathname;
             var userId = getCookie('userId');
             var idToken = getCookie('id_token');
             if (!idToken || !userId) {
-                window.location.href = '/login'
+                if (!(tourist.includes('/studio/modelwarehouse') > -1)) {
+                    window.location.href = '/login'
+                }
             }
         }
         redirectPath();

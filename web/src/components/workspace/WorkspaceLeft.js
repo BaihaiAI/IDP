@@ -39,6 +39,7 @@ import FileTree from "./FileTree"
 import { withRouter } from "react-router"
 import { unNeedRequestErrMsg } from "@/services/extraRequestConfig"
 import globalData from "idp/global"
+import workSpace from 'idp/global/workspace';
 import { observer } from "mobx-react"
 import appContext from "@/context"
 import CreateModel from '@/components/createOrAddAModelOrVersion/createModel'
@@ -135,6 +136,8 @@ class WorkspaceLeft extends React.Component {
       checkedNode: "",
     }
     this.fileTreeRef = React.createRef()
+    this.uploadThreads = 0; // 上传并发数
+    this.maxUploadThreads = 3; // 最大并发数
   }
 
   setExportFileLoading = (exportFileLoading) => {
@@ -415,7 +418,9 @@ class WorkspaceLeft extends React.Component {
     return new Promise((resolve) => {
       const path = [node.key];
       if ( node.fileType != 'database' && node.fileType !== 'database-table' && node.fileType != 'FILE' && fileManager.getLoadNodeList().indexOf(node.key) === -1) {
-        fileManager.pushLoadNodeList(node.key)
+        if(node.key.search('storage-service') === -1){
+          fileManager.pushLoadNodeList(node.key)
+        }
       }
       node.fileType != 'database' && node.fileType != 'FILE' && node.fileType !== 'database-table' && workspaceApi.lazyLoadDirBrowse({ path }).then((res) => {
           const { treeData } = this.state
@@ -440,6 +445,7 @@ class WorkspaceLeft extends React.Component {
     let allTreeData = [];
     let fileTreeData = [];
     const path = pathParms ? pathParms : fileManager.getLoadNodeList();
+
     workspaceApi.lazyLoadDirBrowse({ path }).then((result) => {
         const { children } = result.data;
         fileTreeData = this.setTreeData(children);
@@ -580,7 +586,8 @@ class WorkspaceLeft extends React.Component {
     lastLoadTime = null
     const { isShow } = this.props;
     isShow && this.loadTree({ loadDataSource: true })
-    globalData.appComponentData.workspaceRef = this
+    globalData.appComponentData.updateWorkspaceRef(this);
+    workSpace.updateWorkSpaceRef(this);
 
     this.updateSelectKeysSubscriber = PubSub.subscribe(
       "updateSelectKeys",
@@ -651,10 +658,10 @@ class WorkspaceLeft extends React.Component {
       IdpTerminal.setOpenFilePath(selectedKey);
       let _next = 1;
       const next = IdpTerminal.next;
-      if (next == 1) _next = next;
-      if (next == 2) _next = next;
-      if (next == 3) _next = 2;
-      const theFileType = keys[0].slice(keys[0].lastIndexOf(".") + 1);
+      if ( next == 1) _next = next;
+      if ( next == 2) _next = next;
+      if ( next == 3) _next = 2;
+      const theFileType = selectedKey.slice(selectedKey.lastIndexOf(".") + 1);
       if (theFileType === 'ipynb' || theFileType === 'idpnb') {
         IdpTerminal.setRightSideWidth(0);
         IdpTerminal.setNext(_next);
@@ -726,6 +733,7 @@ class WorkspaceLeft extends React.Component {
           fileManager.updateExpandedFilePaths(exFile);
        }
        fileManager.updateFilePath(path);
+       fileManager.updateFileName(selectedName)
     });
   }
 
@@ -926,7 +934,6 @@ class WorkspaceLeft extends React.Component {
       default:
         break
     }
-    console.log(visible.renameValue);
     this.setState({ visible })
   }
 
@@ -1146,6 +1153,7 @@ class WorkspaceLeft extends React.Component {
     let visible = this.state.visible
     visible.rename = true
     visible.renameValue = props.info.name
+    visible.originName = props.info.name
     this.setState({ visible })
   }
   menu_rename = () => {
@@ -1163,6 +1171,7 @@ class WorkspaceLeft extends React.Component {
     const _this = this //先存一下this，以防使用箭头函数this会指向我们不希望它所指向的对象。
     let visible = _this.state.visible
     const value = visible.renameValue
+    const originName = visible.originName
     if (
       "" === value ||
       !this.checkFileName(
@@ -1174,6 +1183,13 @@ class WorkspaceLeft extends React.Component {
       )
     ) {
       return
+    }
+
+    if(originName.endsWith('.ipynb') || originName.endsWith('.idpnb')){
+      if(value.substr(-6) !== originName.substr(-6)){
+        message.warning('不可修改ipynb或idpnb文件的后缀名')
+        return
+      }
     }
 
     visible.renameInputDisabled = true
@@ -1414,7 +1430,7 @@ class WorkspaceLeft extends React.Component {
       key: "temp" + Math.floor(Math.random(1000) * 10000) + "newFile",
       isTemp: true,
     }
-    props && this.setSelect(props.info)
+    props && props.info && props.info.key !== '/' && this.setSelect(props.info)
     this.insertTempFile(props.info, this.state.treeData, false, template)
     this.setState({ addAction: "folder" })
   }
@@ -1438,7 +1454,7 @@ class WorkspaceLeft extends React.Component {
       key: "temp" + Math.floor(Math.random(1000) * 10000) + "newFile.idpnb",
       isTemp: true,
     }
-    props && this.setSelect(props.info)
+    props && props.info && props.info.key !== '/' && this.setSelect(props.info)
     this.insertTempFile(props.info, this.state.treeData, true, template)
     this.setState({ addAction: "file" })
   }
@@ -1536,8 +1552,15 @@ class WorkspaceLeft extends React.Component {
     }
   }
 
+  // 控制上传并发数
+  controlUploadThreads = async () => {
+    if (this.uploadThreads >= this.maxUploadThreads) {
+      await this.sleep(500);
+      await this.controlUploadThreads();
+    }
+  }
 
-  uploadSubmit = (filePath, file, fileType) => {
+  uploadSubmit = async (filePath, file, fileType, uuid) => {
     const _this = this //先存一下this，以防使用箭头函数this会指向我们不希望它所指向的对象。
     const name = file.name //文件名
     const size = file.size //总大小
@@ -1576,10 +1599,16 @@ class WorkspaceLeft extends React.Component {
       form.append("total", shardCount) //总片数
       form.append("index", i + 1) //当前是第几片
       form.append("filePath", filePath) //目录
+      form.append("uuid", uuid) //目录
 
+      // 控制并发上传数
+      await this.controlUploadThreads();
+      this.uploadThreads += 1; // 上传线程+1
+      // chongyin
       workspaceApi
         .uploadFile(form)
         .then(function (response) {
+          _this.uploadThreads -= 1;  // 上传线程-1
           if (response.data === "over") {
             // message.success(`${name} ${intl.get('UPLOAD_SUCCEEDED')}`);
             let uploadFileList = [..._this.state.uploadFileList]
@@ -1607,6 +1636,7 @@ class WorkspaceLeft extends React.Component {
         })
         .catch(function (error) {
           console.log(error)
+          _this.uploadThreads -= 1;  // 上传线程-1
           message.error(`${name} ${intl.get("UPLOAD_FAILED")}`)
           let uploadFileList = [..._this.state.uploadFileList]
           let index = -1
@@ -1630,6 +1660,7 @@ class WorkspaceLeft extends React.Component {
     })
   }
   uploadFolder = async (path, files) => {
+    const uuid = new Date().getTime();
     let uploadFileList = [...this.state.uploadFileList]
     for (const file of files) {
       // if (file.size < 4 * 1024 * 1024) continue
@@ -1649,13 +1680,14 @@ class WorkspaceLeft extends React.Component {
       //   message.warning(file.name + ' ' + intl.get('UPLOAD_ERROR_2'));
       //   continue;
       // }
-      this.uploadSubmit(path, file, "folder")
+      this.uploadSubmit(path, file, "folder", uuid)
       await this.sleep(50)
     }
     document.getElementById("chooseFolder").value = ""
   }
 
   uploadFiles = (path, files, childArr) => {
+    const uuid = new Date().getTime();
     let fileList = []
     for (const file of files) {
       // 判断文件名中是否有空格
@@ -1707,7 +1739,7 @@ class WorkspaceLeft extends React.Component {
     }
     this.setState({ uploadFileList })
     for (const file of fileList) {
-      this.uploadSubmit(path, file, "file")
+      this.uploadSubmit(path, file, "file", uuid)
     }
     document.getElementById("chooseFiles").value = ""
   }
@@ -1811,6 +1843,7 @@ class WorkspaceLeft extends React.Component {
   }
 
   handlerStickFile = ({ props }) => {
+    console.log(props)
     const selectKey = props.info.key
     let originParentKey
     let targetParentKey
@@ -1823,6 +1856,10 @@ class WorkspaceLeft extends React.Component {
     originParentKey = findFileTreeParentKey(this.state.cutOrCopyKey)
     const originPath = originParentKey + "/" + fileOrDirName
     const targetPath = targetParentKey + "/" + fileOrDirName
+    if (props.info.fileType === "DIRECTORY" && originPath.trim() === selectKey) {
+      message.warning('请不要吧选中文件夹粘贴到选中文件夹内部')
+      return
+    }
 
     const loop = (data, key, callback) => {
       for (let i = 0; i < data.length; i++) {
@@ -2070,15 +2107,15 @@ class WorkspaceLeft extends React.Component {
           key: "COPY_ABSOLUTE_PATH",
           name: intl.get("COPY_ABSOLUTE_PATH"),
         },
-        // { key: "SEPARATOR_4" },
-        // {
-        //   key: "TENSORBOARD",
-        //   name: intl.get("TENSORBOARD"),
-        //   handler: ({ event, props }) => {
-        //     const tensor = props.info.isLeaf ? props.info.key.slice(0, props.info.key.lastIndexOf('/')) : props.info.key
-        //     this.props.history.push(`/tensorboard?projectId=${projectId}&tensor=${tensor}`)
-        //   },
-        // },
+        { key: "SEPARATOR_4" },
+        {
+          key: "TENSORBOARD",
+          name: intl.get("TENSORBOARD"),
+          handler: ({ event, props }) => {
+            const tensor = props.info.isLeaf ? props.info.key.slice(0, props.info.key.lastIndexOf('/')) : props.info.key
+            this.props.history.push(`/tensorboard?projectId=${projectId}&tensor=${tensor}`)
+          },
+        },
         { key: "SEPARATOR_5" },
         { key: "UNZIP", name: intl.get('FILE_ZIP_DECOMPRESS'), handler: this.unZipFolder },
         {
@@ -2107,57 +2144,57 @@ class WorkspaceLeft extends React.Component {
               })
           }
         },
-        // { key: "SEPARATOR_6" },
-        // {
-        //   key: "CREATE_MODEL",
-        //   name: '创建并发布模型',
-        //   handler: async (e) => {
-        //     // console.log(e, "--------e-------")
-        //     const { key, name, isLeaf } = e.props.info;
-        //     if(isLeaf && name.substring(name.length-3) !== "zip"){
-        //       message.warning("只有zip压缩包可以创建并发布模型")
-        //       return
-        //     }
-        //     // this.setState({
-        //     //   cover: 'block'
-        //     // })
-        //     let packageName
-        //     // 获取当前notebook环境
-        //     let currentEnv = null;
-        //     await environmentAPI.getEnvironmentName()
-        //       .then(res => {
-        //         const data = res.data
-        //         currentEnv = data
-        //       })
-        //       .catch(err => {
-        //         console.log(err)
-        //       })
+        { key: "SEPARATOR_6" },
+        {
+          key: "CREATE_MODEL",
+          name: '创建并发布模型',
+          handler: async (e) => {
+            // console.log(e, "--------e-------")
+            const { key, name, isLeaf } = e.props.info;
+            if(isLeaf && name.substring(name.length-3) !== "zip"){
+              message.warning("只有zip压缩包可以创建并发布模型")
+              return
+            }
+            // this.setState({
+            //   cover: 'block'
+            // })
+            let packageName
+            // 获取当前notebook环境
+            let currentEnv = null;
+            await environmentAPI.getEnvironmentName()
+              .then(res => {
+                const data = res.data
+                currentEnv = data
+              })
+              .catch(err => {
+                console.log(err)
+              })
 
-        //     const modelFileName = isLeaf ? key : `${key}/`
-        //     const modelEnv = isLeaf ? null : `IDP:${currentEnv}`
-        //     if(isLeaf){
-        //       packageName = await createOrAddAModelOrVersionApi.getSuccessString({path:key}).then(res => res.data.packageName)
-        //     }
+            const modelFileName = isLeaf ? key : `${key}/`
+            const modelEnv = isLeaf ? null : `IDP:${currentEnv}`
+            if(isLeaf){
+              packageName = await createOrAddAModelOrVersionApi.getSuccessString({path:key}).then(res => res.data.packageName)
+            }
 
-        //     let category = null
-        //     await createOrAddAModelOrVersionApi.getCategory({})
-        //       .then(res => {
-        //         const { data } = res;
-        //         category = data
-        //       })
+            let category = null
+            await createOrAddAModelOrVersionApi.getCategory({})
+              .then(res => {
+                const { data } = res;
+                category = data
+              })
 
-        //     this.setState({
-        //       modelFile: {
-        //         string: packageName? packageName : modelFileName,
-        //         name: modelFileName,
-        //         category: category
-        //       },
-        //       modelEnv: modelEnv
-        //     })
+            this.setState({
+              modelFile: {
+                string: packageName? packageName : modelFileName,
+                name: modelFileName,
+              },
+              modelEnv: modelEnv,
+              category: category
+            })
 
-        //     this.changeCreateModelVisible(true)
-        //   }
-        // }
+            this.changeCreateModelVisible(true)
+          }
+        }
       ],
     }
   }
@@ -2183,51 +2220,57 @@ class WorkspaceLeft extends React.Component {
             flexFlow: 'column'
           }}
         >
-          <WorkspaceLeftTitle
-            addFolder={this.addFolder}
-            addFile={this.addFile}
-            handleIsFileTree={this.handleIsFileTree}
-            handleFileChange={this.handleFileChange}
-            loadTree={this.loadTree}
-          />
+          <div
+            id={'tour-file-management'}
+            style={{
+             height: document.body.clientHeight - 100,
+            }}
+          >
+            <WorkspaceLeftTitle
+              addFolder={this.addFolder}
+              addFile={this.addFile}
+              handleIsFileTree={this.handleIsFileTree}
+              handleFileChange={this.handleFileChange}
+              loadTree={this.loadTree}
+            />
 
-          <Spin spinning={this.state.spinning}>
-            <FileTree
-              fileTreeDragAble={this.state.fileTreeDragAble}
-              cutOrCopyKey={this.state.cutOrCopyKey}
-              onLoadData={this.onLoadData}
-              dropFileTree={this.dropFileTree}
-              ref={this.fileTreeRef}
-              selectedKeys={[this.state.selectedKey]}
-              setRoot={this.setRoot}
-              parentExpandedkey={this.state.expandedKeys}
-              onSelect={this.onSelect}
-              treeData={this.state.treeData}
-              dataSourceTreeData={this.state.dataSourceTreeData}
-              contextMenu={contextMenu}
-              clickNotebookState={this.clickNotebookState}
-              handleDeleteNodeKey={this.handleDeleteNodeKey} // 删除快捷键
-              getDataBaseListInfoMETHODS={this.getDataBaseListInfo}
-              getDataCloudListInfoMETHODS={this.loadFileList}
-              fileInfo={this.state.fileInfo}
-              unzpiDisabled={this.state.unzpiDisabled}
-              handlerCutFileKey={this.handlerCutFileKey}
-              handlerCopyFileKey={this.handlerCopyFileKey}
-              handlerStickFileKey={this.handlerStickFileKey}
-              updateUnzpiDisabled={this.updateUnzpiDisabled}
-            >
-              <FileTreeChildren
-                uploadFileList={this.state.uploadFileList}
-              />
-            </FileTree>
-          </Spin>
+            <Spin spinning={this.state.spinning}>
+              <FileTree
+                fileTreeDragAble={this.state.fileTreeDragAble}
+                cutOrCopyKey={this.state.cutOrCopyKey}
+                onLoadData={this.onLoadData}
+                dropFileTree={this.dropFileTree}
+                ref={this.fileTreeRef}
+                selectedKeys={[this.state.selectedKey]}
+                setRoot={this.setRoot}
+                parentExpandedkey={this.state.expandedKeys}
+                onSelect={this.onSelect}
+                treeData={this.state.treeData}
+                dataSourceTreeData={this.state.dataSourceTreeData}
+                contextMenu={contextMenu}
+                clickNotebookState={this.clickNotebookState}
+                handleDeleteNodeKey={this.handleDeleteNodeKey} // 删除快捷键
+                getDataBaseListInfoMETHODS={this.getDataBaseListInfo}
+                getDataCloudListInfoMETHODS={this.loadFileList}
+                fileInfo={this.state.fileInfo}
+                unzpiDisabled={this.state.unzpiDisabled}
+                handlerCutFileKey={this.handlerCutFileKey}
+                handlerCopyFileKey={this.handlerCopyFileKey}
+                handlerStickFileKey={this.handlerStickFileKey}
+                updateUnzpiDisabled={this.updateUnzpiDisabled}
+              >
+                <FileTreeChildren
+                  uploadFileList={this.state.uploadFileList}
+                />
+              </FileTree>
+            </Spin>
+          </div>
 
           <CollapseWorkspaceLeft
             hanClickDown={this.hanClickDown}
             handleClickShrink={this.handleClickShrink}
             siderWidth={this.state.siderWidth}
           />
-
           <AddFolderModal
             addFolder={this.state.visible.addFolder}
             submitAddFolder={this.submitAddFolder}

@@ -1,7 +1,8 @@
 import { Button, Col, Input, Row } from "antd"
 import Icons from "../../../components/Icons/Icons"
 import intl from "react-intl-universal"
-import { useState } from "react"
+import { useRef, useState } from "react"
+import { ResourceBar } from '../../notebook/topToolsBar/ResourceBar';
 
 interface Props {
   doRun: Function
@@ -58,7 +59,7 @@ export const TopToolBar: React.FC<Props> = (props: Props) => {
         <Col span={1} style={{ paddingLeft: '5px' }}>
           {stateButton()}
         </Col>
-        <Col span={23}>
+        <Col span={10}>
           <Input
             prefix={intl.get('STARTUP_PARAMETERS')}
             placeholder={intl.get('STARTUP_PARAMETERS_DESCRIPTION')}
@@ -67,6 +68,9 @@ export const TopToolBar: React.FC<Props> = (props: Props) => {
               setParameters(` ${e.target.value}`) 
             }}
           />
+        </Col>
+        <Col span={13} className="top-tool-bar">
+          <ResourceBar />
         </Col>
       </Row>
     </div>

@@ -1,9 +1,10 @@
 import { projectId, region, teamId } from '../store/cookie';
 import request from "./request";
-import { terminalPath } from './httpClient'
+import { terminalPath, terminalPath2 } from './httpClient'
 
 function getTerminal(options) {
-  let url = `${terminalPath}/pid?rows=${options.rows}&cols=${options.cols}&teamId=${teamId}&projectId=${projectId}`;
+  const { rows, cols, env } = options;
+  let url = `${terminalPath2}/${projectId}/pid?rows=${rows}&cols=${cols}&teamId=${teamId}&projectId=${projectId}&env=${env}`;
   return request.get(url);
 }
 

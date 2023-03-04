@@ -150,3 +150,37 @@ export function filterType(file, checkFile = '', fileMap = []) {
   }
   return { fileFlg, filetype }
 }
+
+/**
+ * 
+ */
+export function goAccountRouter() {
+  window.location.href = '/team/myAccount/personalInformation';
+}
+
+/*
+ * 判断视频文件
+ * @param {*} fileName 文件名称 xxx.xx
+ * @param {*} suffixs 文件后缀名数组
+ */
+function suffixWith(fileName: string, suffixs: Array<string>) {
+  const name = fileName.toLowerCase();
+  for (const suffix of suffixs) {
+    if (name.endsWith(suffix)) {
+      return true;
+    }
+  }
+  return false;
+}
+export function fileType(file: string) {
+  const video = ['.avi', '.wmv', '.mpg', '.mpeg', '.mov', '.rm', '.ram', '.swf', '.flv', '.mp4'];
+  const image = ['.bmp', '.dib', '.pcp', '.dif', '.wmf', '.jpg', '.jpeg', '.tif', '.eps', '.psd', '.cdr', '.iff', '.tga', '.pcd', '.mpt', '.png', '.webp'];
+
+  if (suffixWith(file, video)) {
+    return 'video';
+  } else if (suffixWith(file, image)) {
+    return 'image';
+  } else {
+    return 'other';
+  }
+}

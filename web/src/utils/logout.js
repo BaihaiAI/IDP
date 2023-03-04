@@ -1,9 +1,12 @@
 import cookie from "react-cookies";
 import { analysisUrl } from '../../config/auth';
+import { removeHistoryOpenProject } from '../store/cookie';
 
-export function logout() {
+export function logout( authUrl = true ) {
+
   const domain = window.location.host === "localhost:3000" ? "test.baihai.co" : window.location.host
   const primayDomain = window.location.host === "localhost:3000" ? "baihai.co" : window.location.host.substring(window.location.host.indexOf(".") + 1)
+
   cookie.remove("userId", { path: "/", domain: primayDomain })
   cookie.remove("userId", { path: "/", domain: domain })
   cookie.remove("userId", { path: "/", domain: "localhost" })
@@ -19,12 +22,15 @@ export function logout() {
   cookie.remove("majorVersionUpdate", { path: "/", domain: primayDomain })
   cookie.remove("majorVersionUpdate", { path: "/", domain: domain })
   cookie.remove("majorVersionUpdate", { path: "/", domain: "localhost" })
+  
+  cookie.remove("id_token", { path: "/", domain: primayDomain })
+  cookie.remove("id_token", { path: "/", domain: domain })
+  cookie.remove("id_token", { path: "/", domain: "localhost" })
 
   cookie.remove("region", { path: "/", domain: primayDomain })
   cookie.remove("region", { path: "/", domain: domain })
   cookie.remove("region", { path: "/", domain: "localhost" })
-  window.localStorage.removeItem("historyOpenProject")
-
+  
   window.localStorage.removeItem("historyOpenFile")
   window.localStorage.removeItem("avatar")
   window.localStorage.removeItem("permission_list")
@@ -41,6 +47,10 @@ export function logout() {
   cookie.remove("state", { path: "/", domain: domain })
   cookie.remove("state", { path: "/", domain: "localhost" })
 
+  cookie.remove("pluginTime", { path: "/", domain: primayDomain })
+  cookie.remove("pluginTime", { path: "/", domain: domain })
+  cookie.remove("pluginTime", { path: "/", domain: "localhost" })
+
   // 退出登录
-  analysisUrl()
+  authUrl && analysisUrl()
 }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import intl from "react-intl-universal";
 import { useUpdateEffect } from 'ahooks';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
@@ -13,7 +13,6 @@ import {
   contentUpdateCellSource
 } from '../../../../store/features/notebookSlice';
 
-import codemirror from "codemirror";
 import "codemirror/lib/codemirror";
 import "codemirror/keymap/sublime";
 import "codemirror/theme/xq-light.css";
@@ -26,7 +25,7 @@ import 'codemirror/mode/sql/sql';
 
 import { extraKeys } from '../../lib/extraKeys';
 import RightTopBar from '../cellTools/RightTopBar';
-import ToolImpl from '@/idp/lib/tool/impl/toolImpl';
+import sneltoets from '@idp/global/sneltoets';
 import './SqlCell.less'
 import DataSourceSelect from './DataSourceSelect';
 
@@ -74,8 +73,8 @@ export const SqlCell = (props) => {
   }, [source])
 
   useEffect(() => {
-    setHideInput(ToolImpl.collapseAllInput);
-  }, [ToolImpl.collapseAllInput]);
+    setHideInput(sneltoets.collapseAllInput);
+  }, [sneltoets.collapseAllInput]);
 
   useUpdateEffect(() => {
     // 强制刷新 Command + Enter
@@ -240,7 +239,7 @@ export const SqlCell = (props) => {
               mode: "text/x-mysql",
               keyMap: 'sublime',
               lineWrapping: true,
-              lineNumbers: ToolImpl.lineNumbers,
+              lineNumbers: sneltoets.lineNumbers,
               indentUnit: 4,  // 缩进的空格数
               addModeClass: true,
               autofocus: true,

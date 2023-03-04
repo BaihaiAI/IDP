@@ -19,7 +19,7 @@ function FileTreeChildren(props) {
     return (
       <List
         size="small"
-        dataSource={uploadFileList}
+        dataSource={uploadFileList.slice(0, 10)}
         locale={null}
         renderItem={(item) => (
           <List.Item key={item.key}>

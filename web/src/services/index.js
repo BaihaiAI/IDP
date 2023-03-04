@@ -10,8 +10,16 @@ import warenhouseApi from './warenhouseApi';
 import { manageApiPath } from './httpClient';
 import environmentApi from './environment';
 import projectApi from './projectApi';
+import developApi from './developApi';
+import loginApi from './loginApi';
+import modelServiceApi from './modelServiceApi';
+import feedbackApi from './feedbackApi';
+import pipelineOtherApi from './otherApi/pipeLine';
+import environmentAPI from './environment';
+import workspaceApi from './workspaceApi';
 import terminalApi from './terminalApi';
 import auditApi from './auditApi';
+import fileApi from "./fileApi"
 
 export {
     userInfoApi,
@@ -26,6 +34,14 @@ export {
     manageApiPath,
     environmentApi,
     projectApi,
+    developApi,
+    loginApi,
+    modelServiceApi,
+    feedbackApi,
+    pipelineOtherApi,
+    environmentAPI,
+    workspaceApi,
     terminalApi,
-    auditApi
+    auditApi,
+    fileApi
 }

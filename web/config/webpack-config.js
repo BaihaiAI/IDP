@@ -22,7 +22,6 @@ module.exports = {
             'idpUtils': path.resolve(__dirname, '../src/utils'),
             'idpStore': path.resolve(__dirname, '../src/store')
         };
-        process.env.NODE_ENV === 'dev' ? Object.assign(opt, { '@studio': path.resolve(__dirname, '../src/public-source.jsx') }) : Object.assign(opt, { '@studio': path.resolve(__dirname, '../dist_source') })
         return Object.assign(reset ? {} : { ...opt }, { ...options })
     },
     /**
@@ -53,51 +52,71 @@ module.exports = {
      * @param {*} useOpt
      * @returns 
      */
-    loadJsxOrTsxRules: function (options = {}, reset = false, useOpt = false) {
+    loadJsxOrTsxRules: function (option = {}, reset = false, useOpt = false, exclude = [/node_modules/, /extension/]) {
         let optRules = {};
         if (reset) {
-            optRules = options;
+            optRules = option;
         } else {
-            optRules = { test: /\.(j|t)sx?$/, use: useOpt ? useOpt : ['cache-loader', 'thread-loader', 'babel-loader'], exclude: /node_modules/ }
+            optRules = {
+                test: /\.(j|t)sx?$/, use: useOpt ? useOpt : ['cache-loader', 'thread-loader', {
+                    loader: 'babel-loader',
+                    options: {
+                        plugins: [
+                            '@babel/plugin-syntax-dynamic-import'
+                        ]
+                    }
+                }], exclude: exclude
+            }
         };
         return optRules;
     },
-    loadJsRules: function (options = {}, reset = false, useOpt = false) {
+    loadJsRules: function (option = {}, reset = false, useOpt = false, exclude = [/node_modules/, /extension/]) {
         let optRules = {};
         if (reset) {
-            optRules = options;
+            optRules = option;
         } else {
-            optRules = { test: /\.js$/, use: useOpt ? useOpt : ['babel-loader'], exclude: /node_modules/ }
+            optRules = {
+                test: /\.js$/, use: useOpt ? useOpt : [{
+                    loader: 'babel-loader',
+                    options: {
+                        plugins: [
+                            '@babel/plugin-syntax-dynamic-import'
+                        ]
+                    }
+                }], exclude: exclude
+            }
         };
         return optRules;
     },
-    loadUrlRules: function (options = {}, reset = false, useOpt = false) {
+    loadUrlRules: function (option = {}, reset = false, useOpt = false) {
         let optRules = {};
         if (reset) {
-            optRules = options;
+            optRules = option;
         } else {
             optRules = { test: /\.(png|jpe?g|gif|svg)(\?.*)?$/, use: useOpt ? useOpt : ['url-loader'] }
         };
         return optRules;
     },
-    loadCssRules: function (options = {}, reset = false, useOpt = false) {
+    loadCssRules: function (option = {}, reset = false, useOpt = false) {
         let optRules = {};
         if (reset) {
-            optRules = options;
+            optRules = option;
         } else {
-            optRules = { test: /\.css$/, use: useOpt ? useOpt : [{
-                loader: MiniCssExtractPlugin.loader,
-                options: {
-                    publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : `/child/idpStudio-idp`,
-                }
-            }, 'css-loader'] }
+            optRules = {
+                test: /\.css$/, use: useOpt ? useOpt : [{
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: process.env.NODE_ENV === 'dev' ? `//localhost:${rescriptsrc.devServer().port}` : `/child/idpStudio-idp`,
+                    }
+                }, 'css-loader']
+            }
         };
         return optRules;
     },
-    loadLessRules: function (options = {}, reset = false, useOpt = false) {
+    loadLessRules: function (option = {}, reset = false, useOpt = false) {
         let optRules = {};
         if (reset) {
-            optRules = options;
+            optRules = option;
         } else {
             optRules = {
                 test: /\.less$/,
@@ -123,10 +142,10 @@ module.exports = {
         };
         return optRules;
     },
-    loadModuleLessRules: function (options = {}, reset = false, useOpt = false) {
+    loadModuleLessRules: function (option = {}, reset = false, useOpt = false) {
         let optRules = {};
         if (reset) {
-            optRules = options;
+            optRules = option;
         } else {
             optRules = {
                 test: /\.module\.(less)$/,

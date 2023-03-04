@@ -1,1 +1,0 @@
-export const register_type_error_500 = '注册的类型未找到'

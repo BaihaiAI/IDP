@@ -13,7 +13,7 @@ import PubSub from "pubsub-js"
 import { useDispatch } from "react-redux"
 import PropTypes from "prop-types"
 import { updateKernelList, removeKernel, removeAllKernel } from "@/store/features/kernelSlice"
-
+import './FileTreeCollapse.less';
 
 const { Panel } = Collapse
 
@@ -37,7 +37,8 @@ function FileTreeCollapse(props) {
 
   /*kernel相关的逻辑 start*/
   const getKernelData = () => {
-    kernelApi.kernelState().then((response) => {
+    const pathname = window.location.pathname;
+    pathname.indexOf('workspace') > -1 && kernelApi.kernelState().then((response) => {
       setKernelData(response.data)
       dispatch(updateKernelList(response.data))
     })

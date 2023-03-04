@@ -46,7 +46,7 @@
 
 .header-container {
     display: flex;
-    
+
 }
 
 .logo-dropdown .ant-dropdown-arrow,
@@ -116,10 +116,12 @@
 
 .main-menu {
     background: #2C2F33 !important;
+
     li {
         margin: 0 !important;
     }
 }
+
 .ant-menu-sub {
     background: #2C2F33 !important;
 }
@@ -130,7 +132,56 @@
 
 .idp_account {
     color: rgba(255, 255, 255, 0.65) !important;
+
     &:hover {
         color: #fff !important;
     }
+}
+
+.project {
+    padding: 20px 45px 20px 24px;
+    background-color: #fff;
+    min-height: calc(100vh - 40px);
+
+    .project-title {
+        height: 18px;
+        font-size: 16px;
+        font-family: FZLTHJW--GB1-0, FZLTHJW--GB1;
+        font-weight: normal;
+        color: #333333;
+        line-height: 18px;
+        padding-bottom: 24px;
+        box-sizing: content-box;
+    }
+
+    .project-search-create {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+
+        .create-project-btn {
+            padding: 4px 8px;
+
+            >span {
+                &:not(span:first-of-type) {
+                    margin-left: 5px;
+                }
+            }
+        }
+    }
+}
+
+.add-or-update-project-modal,
+.git-clone-project-modal {
+
+    .ant-modal-header,
+    .ant-modal-body,
+    .ant-modal-footer {
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+}
+
+.ant-divider-horizontal {
+    margin: 0 !important;
 }

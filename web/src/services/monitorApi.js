@@ -1,5 +1,5 @@
 import { noteApiPath2, kernelApiPath,manageApiPath } from './httpClient';
-import { projectId, region, teamId } from '@/store/cookie';
+import { projectId, region, teamId } from '../store/cookie';
 import request from "./request";
 
 /**

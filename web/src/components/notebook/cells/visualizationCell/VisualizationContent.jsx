@@ -195,7 +195,7 @@ const  VisualizationContent = (props) => {
       })
       .then((res) => {
         const shareId = res.data
-        const url = `${window.location.origin}?shareId=${shareId}`
+        const url = `${window.location.origin}/studio?shareId=${shareId}`
         // const url = `${window.location.origin}?projectId=1&shareId=${shareId}`
         // const url = `localhost:3000?projectId=1&shareId=${shareId}`
         Modal.info({

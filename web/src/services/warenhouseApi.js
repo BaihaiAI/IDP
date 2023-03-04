@@ -1,5 +1,5 @@
 import { manageApiPath, modelApiPath, noteApiPath2 } from './httpClient';
-import { projectId, teamId, userId } from '@/store/cookie';
+import { projectId, teamId, userId } from '../store/cookie';
 import request from "./request"
 import axios from 'axios';
 
@@ -254,6 +254,8 @@ function uploadFile(formData){
 
 
 
+
+
 const warenhouseApi = {
   listOrSearchOrPagination,
   commonFilterList,
@@ -276,7 +278,7 @@ const warenhouseApi = {
   compression,
   copyModalToProject,
   uploadFile,
-  decompressFile
+  decompressFile,
 }
 
 

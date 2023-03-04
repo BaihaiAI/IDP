@@ -6,11 +6,14 @@ import './index.less';
 import globalData from "idp/global"
 import { observer } from "mobx-react"
 import Terminal from '@/idp/lib/terminal';
-import { Tooltip } from 'antd';
+import { message, Modal, Tooltip } from 'antd';
 
 import { selectActivePath } from '@/store/features/filesTabSlice';
 import { useSelector } from "react-redux";
 import intl from "react-intl-universal";
+import { ResourceModal } from '../../components/notebook/topToolsBar/ResourceModal';
+import clusterApi from '../../services/clusterApi';
+import resourceControl from '../../idp/global/resourceControl';
 
 function Workspace(props) {
   const iconTextArrays = {
@@ -24,6 +27,7 @@ function Workspace(props) {
     const openPathFile = Terminal.openFilePath;
 
     const [iconText, setIconText] = useState([iconTextArrays[1], iconTextArrays[2]]);
+  const [showResourceModal, setShowResourceModal] = useState(false);
 
     useEffect(() => {
         Terminal.setTerminalVisabled(true);
@@ -40,9 +44,44 @@ function Workspace(props) {
     }, []);
 
     const next = (next) => {
+      if (Terminal.next === 1) {  // 在关闭状态下点击时才需要判断机器有没有启动
+        resourceControl.getRuntimeStatus((waitPending, machineStatus, pendingDuration) => {
+          if (machineStatus === 'stopped') {
+            setShowResourceModal(true);
+          } else if (machineStatus === 'running') {
+            updateIconText(next);
+            Terminal.setTerminalVisabled(true);
+            Terminal.setNext(next);
+          } else if (machineStatus === 'pending') {
+            if (pendingDuration < 12) { // 等待时间小于12秒
+              message.info('资源申请中...');
+            } else {
+              Modal.confirm({
+                title: '系统可用资源不够，您可以点击“继续等待”按钮等待系统分配资源或者点击“取消”按钮调整资源配置重新申请资源',
+                maskClosable: false,
+                keyboard: false,
+                okText: '继续等待',
+                cancelText: '取消',
+                onOk: () => {
+                  resourceControl.setWaitPending(true);
+                },
+                onCancel: () => {
+                  clusterApi.runtimeStop().then((res) => {
+                    resourceControl.setMachineStatus('stopped');
+                    resourceControl.setWaitPending(false);
+                  })
+                }
+              });
+            }
+          } else {
+            message.info('资源申请中...');
+          }
+        });
+      } else {
         updateIconText(next);
         Terminal.setTerminalVisabled(true);
         Terminal.setNext(next);
+      }
     }
 
     const updateIconText = (next) => {
@@ -56,11 +95,11 @@ function Workspace(props) {
     }
 
     const terminal = () => {
-        let n = Terminal.next;
-        if (Terminal.next == 1) n = 2;
-        if (Terminal.next == 2) n = 1;
-        if (Terminal.next == 3) n = 1;
-        next(n);
+      let n = Terminal.next;
+      if (Terminal.next == 1) n = 2;
+      if (Terminal.next == 2) n = 1;
+      if (Terminal.next == 3) n = 1;
+      next(n);
     }
 
     const terminalTop = () => {
@@ -72,7 +111,7 @@ function Workspace(props) {
     }
 
     return (
-        <div className="workspace_main" style={{ height: '100%' }}>
+        <div className="workspace_main" /*style={{ height: '100%' }}*/>
             <div style={Terminal.terminalVisabled ? { height: Terminal.workspaceHeight - 95, width: '100%' } : { height: '100%', width: '100%' }}>
                 {
                     Terminal.next != 3 && <NoteBookTabContainer ref={notebookTabRef} />
@@ -108,6 +147,7 @@ function Workspace(props) {
                     </div>
                 </> : <> </>
             }
+            <ResourceModal visible={showResourceModal} onCancel={() => setShowResourceModal(false)} onFinish={() => setShowResourceModal(false)} />
         </div>
     )
 }

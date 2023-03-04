@@ -1,4 +1,4 @@
-import { projectId, teamId} from "@/store/cookie"
+import { projectId, teamId} from "../store/cookie"
 import {  noteApiPath2, manageApiPath } from './httpClient';
 import request from "./request"
 

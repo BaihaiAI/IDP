@@ -115,11 +115,13 @@ class Terminal {
     isOpenRightBar(openFilePath) {
         let rightOpenFlg = false;
         const openFile = openFilePath || this.openFilePath;
-        if (['ipynb', 'idpnb'].includes(openFile.slice(openFile.lastIndexOf(".") + 1))) {
-            rightOpenFlg = true;
-            this.rightSideWidth = 48;
-        } else {
-            this.rightSideWidth = 0;
+        if (openFile) {
+            if (['ipynb', 'idpnb'].includes(openFile.slice(openFile.lastIndexOf(".") + 1))) {
+                rightOpenFlg = true;
+                this.rightSideWidth = 48;
+            } else {
+                this.rightSideWidth = 0;
+            }
         }
         return rightOpenFlg
     }

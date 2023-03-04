@@ -6,6 +6,7 @@ export function showApproveConfirm() {
     title: '完成个人信息认证后才可以进行此操作',
     icon: <ExclamationCircleOutlined />,
     okText:"去认证",
+    cancelText: "取消",
     onOk() {
       window.location.href = '/team/myAccount/personalInformation'
     },
