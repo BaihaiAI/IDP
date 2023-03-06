@@ -87,6 +87,8 @@ fn handle_connection(stream: std::net::TcpStream, ctx: &Ctx) -> Result<(), Error
     let mut write_stream = stream.try_clone()?;
     let mut decoder = Decoder::new(BufReader::new(stream));
     loop {
+        // if stream is non-blocking IO, should sleep to prevent CPU busy-wait
+        std::thread::sleep(std::time::Duration::from_millis(20));
         let mut req_args = {
             // try reading from tcp stream
             let req = match decoder.decode() {

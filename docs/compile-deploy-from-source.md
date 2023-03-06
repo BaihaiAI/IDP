@@ -1,3 +1,10 @@
+<div align="right">
+
+  [English](compile-deploy-from-source.md) | [简体中文](compile-deploy-from-source_zh.md)
+
+</div>
+
+
 # Compile and Deploy IDP From Source
 
 ## System Requirements
