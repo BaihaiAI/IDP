@@ -9,7 +9,17 @@ module.exports = {
      * @returns 
      */
     getAlias: function (options, reset = false) {
-        let opt = {};
+        let opt = {
+          "@": path.resolve(__dirname, '../../src'),
+          "@assets": path.resolve(__dirname, '../../src/assets'),
+          "@components": path.resolve(__dirname, '../../src/components'),
+          '@idp': path.resolve(__dirname, '../../src/idp'),
+          "idpStudio": path.resolve(__dirname, '../../src'),
+          "idp": path.resolve(__dirname, '../../src/idp'),
+          'idpServices': path.resolve(__dirname, '../../src/services'),
+          'idpUtils': path.resolve(__dirname, '../../src/utils'),
+          'idpStore': path.resolve(__dirname, '../../src/store')
+        };
         return Object.assign(reset ? {} : { ...opt }, { ...options })
     },
     /**

@@ -28,7 +28,35 @@
         "noUnusedParameters": false,
         "removeComments": true,
         "emitDecoratorMetadata": true,
-        "paths": {}
+        "paths": {
+          "@/*": [
+            "../src/*"
+          ],
+          "@/assets/*": [
+            "../src/assets/*"
+          ],
+          "@components/*": [
+            "../src/components/*"
+          ],
+          "@idp/*": [
+            "../src/idp/*"
+          ],
+          "idpStudio/*": [
+            "../src/*"
+          ],
+          "idpServices/*": [
+            "../src/services/*"
+          ],
+          "idpUtils/*": [
+            "../src/utils/*"
+          ],
+          "idpStore/*": [
+            "../src/store/*"
+          ],
+          "idp/*": [
+            "../src/idp/*"
+          ]
+        }
     },
     "typeRoots": [
         "typings.d.ts",
