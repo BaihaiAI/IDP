@@ -10,9 +10,8 @@ common_model = { path = "../common/model" }
 common_tools = { path = "../common/common_tools", default-features = false }
 err = { path = "../common/err" }
 
-bb8-redis = { version = "0.12" }
-# lru = "0.8"
-#redis = { version = "0.21.5", features = ["tokio-comp"] }
+# bb8-redis = { version = "0.12" }
+redis = { version = "0.22", features = ["tokio-comp", "connection-manager"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.68"
 tokio = { version = "1.17.0", features = ["fs", "sync", "macros"] }

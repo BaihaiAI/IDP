@@ -24,6 +24,7 @@ def resource_account() -> str:
     """
     return socket.gethostname().split("-")[3]
 */
+/// team_id or executor(public user)
 pub static ACCOUNT: Lazy<String> = Lazy::new(|| {
     if !is_k8s() {
         return "1".to_string();
@@ -37,45 +38,96 @@ pub static ACCOUNT: Lazy<String> = Lazy::new(|| {
     account.to_string()
 });
 
-pub fn runtime_pod_svc(project_id: u64) -> String {
-    let region = &*REGION;
+pub static NAMESPACE: Lazy<String> = Lazy::new(|| {
+    if !is_k8s() {
+        return "default_k8s_namespace".to_string();
+    }
+    std::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/namespace").unwrap()
+});
+
+fn runtime_pod_id(project_id: u64) -> String {
     let account = &*ACCOUNT;
-    let pod_id = format!("{account}-{project_id}-runtime");
-    let platform = "idp-kernel";
-    format!("{platform}-{region}-{pod_id}-svc")
+    format!("{account}-{project_id}-runtime")
 }
 
-pub fn runtime_pod_is_running(project_id: u64) -> bool {
-    let addr = match std::net::ToSocketAddrs::to_socket_addrs(&format!(
-        "{}:{}",
-        runtime_pod_svc(project_id),
-        crate::spawner_port()
-    )) {
-        Ok(mut addrs) => {
-            if let Some(addr) = addrs.next() {
-                addr
+/*
+svc: idp-kernel-b-12345-100-runtime-svc
+pod: idp-kernel-b-12345-100-runtime-job-0
+container: idp-kernel-b-12345-100-runtime
+*/
+pub fn runtime_pod_container(project_id: u64) -> String {
+    let pod_id = runtime_pod_id(project_id);
+    let platform = "idp-kernel";
+    let region = &*REGION;
+    format!("{platform}-{region}-{pod_id}")
+}
+
+pub fn runtime_pod_svc(project_id: u64) -> String {
+    // these svc format DNS query is slow
+    // format!("{}-svc", runtime_pod_container(project_id))
+    format!(
+        "{}-svc.{}.svc.cluster.local",
+        runtime_pod_container(project_id),
+        &*NAMESPACE
+    )
+}
+
+pub fn runtime_pod_name(project_id: u64) -> String {
+    format!("{}-job-0", runtime_pod_container(project_id))
+}
+
+#[cfg(not)]
+pub async fn runtime_pod_is_running_by_health_check(project_id: u64) -> bool {
+    const TIMEOUT_MS: u64 = 500;
+    static CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
+        reqwest::Client::builder()
+            .timeout(std::time::Duration::from_millis(TIMEOUT_MS))
+            .build()
+            .unwrap()
+    });
+
+    let host = runtime_pod_svc(project_id);
+    let port = crate::spawner_port();
+    let url = format!("http://{host}:{port}/health_check");
+    match CLIENT.get(&url).send().await {
+        Ok(rsp) => {
+            if rsp.status() != 200 {
+                tracing::debug!("rsp.status() {}", rsp.status());
+                false
             } else {
-                return false;
+                true
             }
         }
-        Err(_) => return false,
-    };
-    let mut stream =
-        match std::net::TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(1000)) {
-            Ok(stream) => stream,
-            Err(_) => return false,
-        };
-    use std::io::Write;
-    if stream.write_all(b"GET /health_check HTTP/1.1\n").is_err() {
-        return false;
+        Err(err) => {
+            tracing::debug!("{url} timeout_ms={TIMEOUT_MS} {err}");
+            false
+        }
     }
-    true
-    // let mut buf = [0; 128];
-    // use std::io::Read;
-    // if stream.read(&mut buf).is_err() {
-    // return false;
-    // }
-    // buf.starts_with(b"HTTP/1.1 200")
+}
+
+#[cfg(not)]
+pub fn runtime_pod_is_running_sync(project_id: u64) -> bool {
+    const TIMEOUT_MS: u64 = 2000;
+    let host = runtime_pod_svc(project_id);
+    let port = crate::spawner_port();
+    let url = format!("http://{host}:{port}/health_check");
+    match ureq::get(&url)
+        .timeout(std::time::Duration::from_millis(TIMEOUT_MS))
+        .call()
+    {
+        Ok(rsp) => {
+            if rsp.status() != 200 {
+                tracing::warn!("rsp.status() {}", rsp.status());
+                false
+            } else {
+                true
+            }
+        }
+        Err(err) => {
+            tracing::warn!("{url} timeout_ms={TIMEOUT_MS} {err}");
+            false
+        }
+    }
 }
 
 pub fn tenant_cluster_header_k8s_svc() -> String {

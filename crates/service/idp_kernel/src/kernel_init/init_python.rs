@@ -103,6 +103,24 @@ kernel_helper.init_ipython_display()",
     )
     .unwrap();
 
+    let startup_folder_path = format!(
+        "/store/{}/projects/{}/startup",
+        header.team_id, header.project_id
+    );
+    let startup_folder_path = std::path::Path::new(&startup_folder_path);
+    if let Ok(startup_folder) = std::fs::read_dir(startup_folder_path) {
+        for file in startup_folder.into_iter().flatten() {
+            let abs_path = startup_folder_path.join(file.path());
+            if abs_path.is_file() {
+                if let Ok(content) = std::fs::read_to_string(&abs_path) {
+                    if let Err(err) = py.run(&content, None, None) {
+                        tracing::error!("{abs_path:?} {err}");
+                    }
+                }
+            }
+        }
+    }
+
     #[cfg(not)]
     if !business::kubernetes::is_k8s() {
         if let Ok(baihai_matplotlib_backend) = pyo3::types::PyModule::from_code(

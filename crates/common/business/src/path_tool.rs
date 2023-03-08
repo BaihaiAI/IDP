@@ -20,6 +20,7 @@ use once_cell::sync::Lazy;
 
 use crate::business_term::ProjectFolder;
 use crate::business_term::ProjectId;
+use crate::business_term::StoreModelFolder;
 use crate::business_term::TeamFolder;
 use crate::business_term::TeamId;
 use crate::business_term::UserId;
@@ -436,4 +437,34 @@ pub fn get_study_objective_fun_path(
         "/store/{}/projects/{}/hpopt/study_objective_fun/{}/{}",
         team_id, project_id, db_name, study_id
     )
+}
+
+const STORAGE_MODEL_BASE: &str = "/store_model";
+
+pub async fn get_store_model_file_path(team_id: i64, project_id: i32, location: &str) -> PathBuf {
+    let path = format!(
+        "{STORAGE_MODEL_BASE}/{}/{team_id}/projects/{project_id}/models/{location}",
+        StoreModelFolder::FILES.inner()
+    );
+    std::path::Path::new(&path).to_path_buf()
+}
+
+pub async fn get_store_deploy_model_file_path(service_id: i32) -> PathBuf {
+    let path = format!("/store/tmp/models/{service_id}",);
+    std::path::Path::new(&path).to_path_buf()
+}
+
+pub async fn get_store_model_dist_path(service_id: i32) -> String {
+    format!("/store_model/deploy_model_files/{service_id}/")
+}
+
+pub async fn get_store_model_dist_path_tmp(service_id: i32) -> String {
+    format!("/store_model_execute/deploy_model_files/{service_id}/")
+}
+
+pub async fn get_deploy_requirement_path(service_id: i32) -> PathBuf {
+    get_store_deploy_model_file_path(service_id)
+        .await
+        .join("model")
+        .join("requirements.txt")
 }

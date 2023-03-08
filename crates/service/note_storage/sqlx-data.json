@@ -1,0 +1,101 @@
+{
+  "db": "PostgreSQL",
+  "0d3efde08825a6d859ccdc5a8890b29f92771107faa502b0afdcc98b5c30c623": {
+    "describe": {
+      "columns": [
+        {
+          "name": "status",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "nodes_status",
+          "ordinal": 1,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "end_time",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "select status, nodes_status, end_time from idp_model_job_instance where job_instance_id=$1 for share"
+  },
+  "5fc964271456cc6d2c64905b225607c01ef1698f6af65f4b3d8eef607f19b441": {
+    "describe": {
+      "columns": [
+        {
+          "name": "run_node_type",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "select run_node_type from idp_model_job_instance where job_instance_id=$1 limit 1 for share"
+  },
+  "7dbf164b07c5ad38633207382c06d4a206625ad8b1d3728a22979fb2c92616a8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Varchar",
+          "Jsonb",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "update idp_model_job_instance\n        set status=$2,nodes_status=$3,end_time=$4\n        where job_instance_id=$1"
+  },
+  "9891adb25e46af4d9925714c8715879eb81eddeeeacf0565577721f100f91dcf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "job_instance_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Varchar",
+          "Int8",
+          "Int4",
+          "Int8",
+          "Jsonb",
+          "Jsonb",
+          "Jsonb",
+          "Jsonb",
+          "Varchar",
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "insert into idp_model_job_instance (job_id,job_name,team_id,project_id,user_id,nodes,edges,cron_config,runtime_config,run_type,status,run_node_type)\n        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)\n        RETURNING job_instance_id\n        "
+  }
+}

@@ -18,9 +18,5 @@ use serde::Serialize;
 pub enum Mimetype {
     Image,
     Text,
-    /// num_cells is used in write_large_on_nfs, to prevent cell lose
-    Notebook {
-        num_cells: usize,
-    },
-    // Unknown,
+    Notebook, // Unknown,
 }

@@ -1,7 +1,7 @@
 @echo on
 
 set arch=x64
-set release_version=v1.0.0
+set release_version=v1.1.0
 set dir=idp-studio-%release_version%-win-%arch%
 
 mkdir %dir%\bin

@@ -1,2 +1,5 @@
 [files]
 extend-exclude = ["Cargo.lock", "web", "typescript-lsp"]
+
+[default.extend-words]
+equipments = "equipments"

@@ -53,7 +53,7 @@ pub struct ExecuteCodeReq {
 #[derive(Deserialize, Debug)]
 #[cfg_attr(test, derive(serde::Serialize))]
 #[serde(tag = "cellType", content = "meta")]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum CellTypeMeta {
     Code {},
     Sql(SqlCell),
@@ -84,13 +84,17 @@ pub enum CellTypeMeta {
         chart: std::collections::HashMap<String, String>,
         show_table: Option<String>,
     },
+    DataExploration {
+        df_name: String,
+    },
 }
 
 #[derive(Deserialize, Debug)]
 #[cfg_attr(test, derive(serde::Serialize))]
 #[serde(rename_all = "camelCase")]
 pub struct SqlCell {
-    pub uid: String,
+    // team_id deprecated
+    // pub uid: String,
     pub df_name: Option<String>,
     pub data_source: String,
 }

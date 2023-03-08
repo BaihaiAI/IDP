@@ -118,7 +118,7 @@ pub async fn load_cell(
     let ftp_path = format!("/{}/share.ipynb", share_id);
     let ftp_session_path = format!("/{}/share.session", share_id);
     let path = format!("/shared/{}/share.ipynb", share_id);
-    let abs_path = path_tool::get_store_full_path(team_id, project_id as u64, &path);
+    let abs_path = path_tool::get_store_full_path(team_id, project_id, &path);
 
     let abs_path = abs_path.to_str().unwrap();
     if let Err(msg) = download_from_ftp(ftp_path, abs_path.to_string()) {

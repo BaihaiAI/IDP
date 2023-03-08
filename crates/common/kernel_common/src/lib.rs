@@ -21,6 +21,8 @@ pub mod message;
 pub mod spawn_kernel_process;
 // #[cfg(feature = "fifo")]
 // pub mod transport;
+pub mod kubernetes_client;
+pub mod runtime_pod_status;
 pub mod typedef;
 
 pub use business;
@@ -33,6 +35,7 @@ pub use message::Message;
 pub struct KernelInfo {
     pub ip: std::net::Ipv4Addr,
     pub pid: u32,
+    // current is team_id+project_id
     pub pod_id: String,
     pub header: Header,
 }

@@ -34,6 +34,7 @@ pub async fn upload_file_handler(
     let mut file_path = None;
     let mut team_id = None;
     let mut project_id = None;
+    let mut uuid = None;
 
     let mut _filename = "".to_string();
     let mut _ext = "";
@@ -57,40 +58,45 @@ pub async fn upload_file_handler(
                 "filePath" => file_path = Some(data),
                 "teamId" => team_id = Some(data),
                 "projectId" => project_id = Some(data),
+                "uuid" => uuid = Some(data),
                 _ => {}
             }
         };
     }
 
-    if datafile == None
-        || total == None
-        || index == None
-        || file_path == None
-        || project_id == None
-        || file_name == None
+    if datafile.is_none()
+        || total.is_none()
+        || index.is_none()
+        || file_path.is_none()
+        || project_id.is_none()
+        || file_name.is_none()
+        || uuid.is_none()
     {
         let mut none_fields = vec![];
 
-        if datafile == None {
+        if datafile.is_none() {
             none_fields.push("datafile");
         }
-        if total == None {
+        if total.is_none() {
             none_fields.push("total");
         }
-        if index == None {
+        if index.is_none() {
             none_fields.push("index");
         }
-        if file_name == None {
+        if file_name.is_none() {
             none_fields.push("name");
         }
-        if file_path == None {
+        if file_path.is_none() {
             none_fields.push("file_path");
         }
-        if team_id == None {
+        if team_id.is_none() {
             none_fields.push("team_id");
         }
-        if project_id == None {
+        if project_id.is_none() {
             none_fields.push("project_id");
+        }
+        if project_id.is_none() {
+            none_fields.push("uuid");
         }
         let none_fields_str = none_fields.join(",");
         return Err(ErrorTrace::new(&format!(
@@ -99,7 +105,8 @@ pub async fn upload_file_handler(
         )));
     }
 
-    let file_path = file_path.unwrap_or_else(|| "".to_string());
+    let file_path = file_path.unwrap_or_default();
+    let uuid = uuid.unwrap_or_default();
     let datafile = datafile.unwrap_or_default();
     let index = index.unwrap_or_default().parse::<u64>()? - 1;
     let total = total.unwrap_or_default().parse::<u64>()?;
@@ -116,9 +123,16 @@ pub async fn upload_file_handler(
     abs_list_path.push(crate::business_::path_tool::get_relative_path(Path::new(
         &file_path,
     )));
-    abs_list_path.push(Path::new(&file_name.unwrap()));
-
-    let out_path = abs_list_path.clone();
+    let file_name = file_name.unwrap();
+    abs_list_path.push(Path::new(&file_name));
+    let store_parent_dir = business::path_tool::store_parent_dir();
+    let tmp_path = format!(
+        "{}/store/tmp/{}_{}_{}",
+        store_parent_dir.to_str().unwrap(),
+        uuid,
+        &file_path.replace('/', "_"),
+        &file_name
+    );
 
     tracing::info!("abs_list_path: {:?}", abs_list_path);
     tracing::info!("index: {index}, total: {total}, project_id: {project_id}");
@@ -127,8 +141,8 @@ pub async fn upload_file_handler(
     file_writer
         .send((
             FileChunk {
-                file_dir: abs_list_path.to_str().unwrap().to_string(),
-                file_idx: index as u64,
+                file_dir: tmp_path.clone(),
+                file_idx: index,
                 total_chunk: total,
                 file_data: datafile.to_vec(),
             },
@@ -140,9 +154,16 @@ pub async fn upload_file_handler(
     if n == -1 {
         return Err(ErrorTrace::new("upload file error"));
     }
-    Ok(if n as u64 == total as u64 {
+    Ok(if n as u64 == total {
+        tokio::fs::create_dir_all(
+            &abs_list_path
+                .parent()
+                .unwrap_or(&std::path::PathBuf::from("/")),
+        )
+        .await?;
+        tokio::fs::rename(tmp_path, abs_list_path).await?;
         "over".to_string()
     } else {
-        format!("path: {}, index: {}", out_path.to_str().unwrap(), n)
+        format!("path: {}, index: {}", abs_list_path.to_str().unwrap(), n)
     })
 }

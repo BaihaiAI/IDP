@@ -86,6 +86,10 @@ impl DiffCell {
             }
             CellType::Sql => DiffCell::Sql(DiffSqlCell::from_cell(cell, idx, colored)),
             CellType::Visualization => DiffCell::Vis(DiffVisCell::from_cell(cell, idx, colored)),
+            CellType::DataExploration => DiffCell::Code(DiffCodeCell {
+                idx,
+                lines: Vec::new(),
+            }),
         }
     }
 
@@ -163,7 +167,7 @@ impl DiffMarkdownCell {
         }
     }
 
-    pub fn set_lines(&mut self, lines: Vec<DiffLine>) {
+    pub(crate) fn set_lines(&mut self, lines: Vec<DiffLine>) {
         self.lines = lines;
     }
 }

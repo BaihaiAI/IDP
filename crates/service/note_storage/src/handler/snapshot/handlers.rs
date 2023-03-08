@@ -103,12 +103,11 @@ pub async fn snapshot_restore(
     match list.into_iter().find(|item| item.id == id) {
         Some(snap) => {
             let notebook = serde_json::from_str::<Notebook>(&snap.content)?;
-            #[cfg(feature = "redis")]
             redis_cache
                 .snapshot_restore(path, notebook, project_id)
                 .await?;
-            #[cfg(not(feature = "redis"))]
-            redis_cache.update_notebook(path, notebook).await?;
+            // #[cfg(not(feature = "redis"))]
+            // redis_cache.update_notebook(path, notebook).await?;
             Ok(super::models::SnapshotRestoreRes {
                 id: id.to_string(),
                 label: snap.label,

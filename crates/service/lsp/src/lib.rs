@@ -692,7 +692,7 @@ async fn send_to_lsp(
             // because lsp will count char error, blame that "must have a Content-Length header"
             // writeln!(stdin, "{}", headed_msg).expect("base write msg into lsp failed"); -- for std::process::ChildStdin
             if let Err(msg) = stdin.write(headed_msg.as_bytes()).await {
-                error!("write msg into lsp failed: {}", msg);
+                error!(headed_msg, "write msg into lsp failed: {}", msg);
                 break;
             }
         }

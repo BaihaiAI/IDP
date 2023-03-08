@@ -32,7 +32,8 @@ pub async fn put_cell(
     }): Json<PartialUpdateCellReq>,
 ) -> Result<Rsp<()>, ErrorTrace> {
     if cells.is_empty() {
-        return Err(ErrorTrace::new("cells is empty"));
+        // no cell to update
+        return Ok(Rsp::success(()));
     }
     if !(path.ends_with(".ipynb") || path.ends_with(".idpnb")) {
         return Err(ErrorTrace::new("path is not a ipynb"));

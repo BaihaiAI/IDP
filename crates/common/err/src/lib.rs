@@ -67,7 +67,6 @@ impl<E: std::error::Error + 'static> From<E> for ErrorTrace {
     }
 }
 
-#[cfg(feature = "axum")]
 impl axum::response::IntoResponse for ErrorTrace {
     fn into_response(self) -> axum::response::Response {
         tracing::warn!("{self:#?}");

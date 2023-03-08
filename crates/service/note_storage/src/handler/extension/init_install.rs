@@ -94,7 +94,7 @@ pub async fn init_install_handler(
     let recommended_config_path = recommended_extensions_path.join("extensions_config.json");
 
     let mut recommended_content = super::get_extensions_config(recommended_config_path).await?;
-
+    let mut installed_content = Vec::new();
     for content in recommended_content
         .iter_mut()
         .filter(|content| match nav_type {
@@ -114,9 +114,10 @@ pub async fn init_install_handler(
             installed_extensions_path, content.name, content.version
         );
         content.url = Some(url);
+        installed_content.push(content.to_owned());
     }
 
-    let content_str = serde_json::to_string(&recommended_content)?;
+    let content_str = serde_json::to_string(&installed_content)?;
     let mut f = tokio::fs::File::create(extension_config_path).await?;
     f.write_all(content_str.as_bytes()).await?;
 

@@ -10,7 +10,9 @@ default = []
 [dependencies]
 once_cell = "1.0"
 os_utils = { path = "../os_utils", default-features = false }
+# serde = { version = "1.0", features = ["derive"] }
 tracing = "0.1.29"
+# ureq = "2.0"
 
 [target.'cfg(windows)'.dependencies]
 fs_extra = "1.2.0"

@@ -149,8 +149,10 @@ COPY --from=builder /idp-note/dist/kernel_py39 /root/IDPStudio/bin/
 COPY --from=builder /idp-note/dist/kernel_py310 /root/IDPStudio/bin/
 COPY --from=builder /idp-note/dist/license_generator /root/IDPStudio/bin/
 COPY --from=builder /idp-note/dist/README.md /root/IDPStudio/
-COPY docker_build/baihai_aid-2.0-py3-none-any.whl /root/IDPStudio/
-RUN pip install /root/IDPStudio/baihai_aid-2.0-py3-none-any.whl
+RUN set -x && \
+    S3_BASE_URL=http://baihai.cn-bj.ufileos.com/baihai-lib/baihai_aid && \
+    FILENAME=baihai_aid-$(curl --silent "$S3_BASE_URL/VERSION.txt")-py3-none-any.whl && \
+    pip install "$S3_BASE_URL/$FILENAME" --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 FROM base as debug
 # copy files to /root/IDPStudio

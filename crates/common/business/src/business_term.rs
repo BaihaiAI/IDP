@@ -56,3 +56,17 @@ impl ProjectFolder {
         self.0
     }
 }
+
+#[derive(Debug)]
+pub struct StoreModelFolder(&'static str);
+
+impl StoreModelFolder {
+    pub const FILES: Self = Self("model_files");
+    pub const INPUT: Self = Self("model_inputs");
+    pub const OUTPUT: Self = Self("model_outputs");
+    pub const DEPLOY: Self = Self("deploy_model_files");
+    #[inline]
+    pub(crate) const fn inner(&self) -> &'static str {
+        self.0
+    }
+}

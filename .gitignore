@@ -7,16 +7,15 @@
 
 # rust
 .cargo/config.toml
-/target
+target
 Cargo.lock
+.env
 
 __pycache__
 
 dist
+*.whl
 *.tar.gz
-/*.whl
-/*.zip
+*.zip
 
-kernel_manage.db
-crates/service/kernel_manage/kernel_manage.db
-cursors
+scripts/update*

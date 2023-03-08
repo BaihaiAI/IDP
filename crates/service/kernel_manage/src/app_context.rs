@@ -36,14 +36,17 @@ pub struct AppContext {
     pub kernel_ws_conn_take: mpsc::Sender<(Inode, oneshot::Sender<Option<KernelWsConn>>)>,
 
     pub kernel_entry_ops_tx: mpsc::Sender<KernelEntryOps>,
+
+    pub interrupt_creating_pod:
+        Arc<RwLock<std::collections::HashMap<Inode, tokio::sync::broadcast::Sender<()>>>>,
     // pub kernel_entry_get: mpsc::Sender<(Inode, oneshot::Sender<Option<Arc<KernelEntry>>>)>,
     // pub kernel_entry_delete: mpsc::Sender<Inode>,
     // pub kernel_entry_insert: mpsc::Sender<KernelEntry>,
     #[cfg(not)]
     pub execute_record_db: sled::Db,
+    // pub runtime_pod_status
 }
 
-#[derive(Debug)]
 pub enum KernelEntryOps {
     Get(Inode, oneshot::Sender<Option<Arc<KernelEntry>>>),
     GetAll(oneshot::Sender<Vec<Arc<KernelEntry>>>),
@@ -56,14 +59,15 @@ pub enum KernelEntryOps {
     },
 }
 
-impl KernelEntryOps {
-    fn variant(&self) -> &'static str {
-        match self {
-            KernelEntryOps::Get(_, _) => "Get",
-            KernelEntryOps::GetAll(_) => "GetAll",
-            KernelEntryOps::Delete(_) => "Delete",
-            KernelEntryOps::Insert { .. } => "Insert",
-        }
+impl std::fmt::Debug for KernelEntryOps {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let content = match self {
+            Self::Get(_, _) => "Get",
+            Self::GetAll(_) => "GetAll",
+            Self::Delete(_) => "Delete",
+            Self::Insert { .. } => "Insert",
+        };
+        f.write_str(content)
     }
 }
 
@@ -160,6 +164,7 @@ impl AppContext {
             kernel_ws_conn_take: kernel_ws_conn_take_tx,
             kernel_ws_conn_insert: kernel_ws_conn_insert_tx,
             kernel_entry_ops_tx,
+            interrupt_creating_pod: Arc::new(RwLock::new(std::collections::HashMap::new())),
             #[cfg(not)]
             execute_record_db: sled_kv_db,
         }
@@ -170,7 +175,7 @@ async fn kernel_entry_ops_handler(
     mapping: Arc<RwLock<HashMap<u64, Arc<KernelEntry>>>>,
     op: KernelEntryOps,
 ) {
-    let op_fmt = op.variant().to_string();
+    let op_fmt = format!("{op:?}");
     let start = std::time::Instant::now();
     match op {
         KernelEntryOps::Get(inode, tx) => {

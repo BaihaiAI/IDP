@@ -16,8 +16,8 @@ use super::prelude::*;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct KernelListReq {
-    project_id: ProjectId,
+pub struct ProjectIdQueryString {
+    pub project_id: ProjectId,
 }
 
 #[derive(serde::Serialize, Debug)]
@@ -30,11 +30,9 @@ pub struct KernelListItem {
 }
 
 pub async fn kernel_list(
-    ctx: AppContext,
-    req: Request<Body>,
-) -> Result<Resp<Vec<KernelListItem>>, Error> {
-    let req = serde_urlencoded::from_str::<KernelListReq>(req.uri().query().unwrap_or_default())?;
-
+    State(ctx): State<AppContext>,
+    Query(req): Query<ProjectIdQueryString>,
+) -> Result<Rsp<Vec<KernelListItem>>, Error> {
     let mut ret = Vec::new();
     let (tx, rx) = tokio::sync::oneshot::channel();
     ctx.kernel_entry_ops_tx
@@ -55,9 +53,9 @@ pub async fn kernel_list(
             .await
             .map_err(|_| ErrorTrace::new("KernelOperate::GetState panicked at recv error"))?;
         let state = match kernel_state {
-            State::Idle => "idle",
-            State::Running(_) => "busy",
-            State::Paused { .. } => "pause",
+            KernelState::Idle => "idle",
+            KernelState::Running(_) => "busy",
+            KernelState::Paused { .. } => "pause",
         };
         let kernel_state = KernelListItem {
             state: state.to_string(),
@@ -67,5 +65,5 @@ pub async fn kernel_list(
         ret.push(kernel_state);
     }
 
-    Ok(Resp::success(ret))
+    Ok(Rsp::success(ret))
 }

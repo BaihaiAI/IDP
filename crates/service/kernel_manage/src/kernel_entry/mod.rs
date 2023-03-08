@@ -32,7 +32,7 @@ use kernel_common::spawn_kernel_process::SpawnKernel;
 use kernel_common::typedef::CellId;
 use kernel_common::Header;
 use kernel_common::KernelInfo;
-use kernel_state::State;
+use kernel_state::KernelState;
 use prelude::*;
 use tracing::debug;
 
@@ -87,11 +87,25 @@ impl KernelEntry {
             })?;
         let header = header.clone();
         let resource = resource.clone();
-        kernel_common::spawn_kernel_process::req_submitter_spawn_kernel(SpawnKernel {
-            header: header.clone(),
-            resource: resource.clone(),
-        })
-        .await?;
+        let mut interrupt_rx = ctx
+            .interrupt_creating_pod
+            .write()
+            .await
+            .entry(header.inode())
+            .or_insert(tokio::sync::broadcast::channel(1).0)
+            .subscribe();
+        let res = tokio::select! {
+            res = kernel_common::spawn_kernel_process::spawn_kernel(SpawnKernel {
+                header: header.clone(),
+                resource: resource.clone(),
+            }) => {
+                res
+            },
+            _ = interrupt_rx.recv() => {
+                return Err(Error::new("Stop all"));
+            }
+        };
+        res?;
         #[cfg(feature = "fifo")]
         let kernel_info = KernelInfo { pid, ..kernel_info };
 
@@ -115,7 +129,7 @@ impl KernelEntry {
                         header.pipeline_opt.is_some()
                     );
                 }
-                if retry == 65 {
+                if retry == 40 {
                     return Err(Error::new("kernel ws connect timeout"));
                 }
             }
@@ -186,25 +200,22 @@ impl KernelEntry {
 
             debug!("after write to kernel, time cost = {:?}", start.elapsed());
 
-            let state = State::Idle;
+            let state = KernelState::Idle;
             let pending_req = std::collections::VecDeque::<kernel_common::Message>::new();
 
             let shutdown_idle_interval_minute =
                 match std::env::var("SHUTDOWN_IDLE_KERNEL_DURATION_MINUTE") {
-                    Ok(val) => val,
+                    Ok(val) => val
+                        .parse::<u64>()
+                        .expect("parse env SHUTDOWN_IDLE_KERNEL_DURATION_MINUTE"),
                     Err(_) => {
                         if header.pipeline_opt.is_some() {
-                            "10".to_string()
+                            10
                         } else {
-                            "120".to_string()
+                            30
                         }
                     }
                 };
-            let shutdown_idle_interval_minute = shutdown_idle_interval_minute
-                .parse::<u64>()
-                .unwrap_or_else(|_| {
-                    panic!("{shutdown_idle_interval_minute} parse to minute error")
-                });
             let shutdown_idle_interval_duration =
                 std::time::Duration::from_secs(shutdown_idle_interval_minute * 60);
 
@@ -251,7 +262,7 @@ pub struct KernelCtx {
     // #[cfg(feature = "fifo")]
     // req_to_kernel: tokio::fs::File,
     kernel_ws_conn: KernelWsConn,
-    state: State,
+    state: KernelState,
     pending_req: std::collections::VecDeque<kernel_common::Message>,
     broadcast_output_to_all_ws_write: tokio::sync::broadcast::Sender<kernel_common::Message>,
     header: Header,
@@ -279,7 +290,7 @@ impl KernelCtx {
     }
 
     async fn send_req_to_kernel(&mut self, req: kernel_common::Message) {
-        self.update(State::Running(req.header.cell_id.clone()));
+        self.update(KernelState::Running(req.header.cell_id.clone()));
         self.header.cell_id = req.header.cell_id.clone();
         if let Err(err) = self.kernel_ws_conn.req.send(req).await {
             tracing::error!("{err}");
@@ -311,6 +322,13 @@ impl KernelCtx {
             };
         }
 
+        let msg = kernel_common::Message {
+            header: self.header.clone(),
+            content: kernel_common::Content::ShutdownKernel {},
+        };
+        if let Err(err) = self.broadcast_output_to_all_ws_write.send(msg) {
+            tracing::error!("{err}");
+        };
         tracing::info!("<-- shutdown");
     }
 }

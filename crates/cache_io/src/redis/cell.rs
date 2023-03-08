@@ -15,7 +15,6 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use bb8_redis::redis;
 use common_model::entity::cell::Cell;
 use err::ErrorTrace;
 use redis::AsyncCommands;
@@ -42,7 +41,13 @@ impl CacheService {
         let path = path.as_ref().to_str().unwrap();
         let key = ipynb_key(path, project_id);
         let mut conn = self.pool.get().await?;
-        let cell_option = conn.hget::<_, _, Option<String>>(key, cell_id).await?;
+        let cell_option = match conn.hget::<_, _, Option<String>>(&key, cell_id).await {
+            Ok(x) => x,
+            Err(_err) => {
+                tracing::error!("key={key} cell_id={cell_id} hget fail");
+                return Err(ErrorTrace::new("redis hget cell fail"));
+            }
+        };
 
         // If cell's cache is empty,try to load it into the cache.
         match cell_option {
@@ -88,25 +93,6 @@ impl CacheService {
         self.synchronize_notebook_if_not_exists(&path, project_id)
             .await?;
         let path = path.as_ref().to_str().unwrap();
-
-        /*
-        let key = ipynb_key(path, project_id);
-        if let Some(base_info) = base_info {
-            let mut base_info_obj = match serde_json::from_str::<BaseInfo>(&base_info) {
-                Ok(obj) => obj,
-                Err(err) => {
-                    tracing::error!("wrong base_info json_str {base_info} in {path}");
-                    return Err(ErrorTrace::from(err));
-                }
-            };
-            let key = ipynb_key(path, project_id);
-            self.pool
-                .get()
-                .await?
-                .hset(key, "base", serde_json::to_string(&base_info_obj).unwrap())
-                .await?;
-        }
-        */
 
         let cell_id = if let Some(cell_id) = cell.id() {
             cell_id
@@ -263,7 +249,15 @@ impl CacheService {
         let key = ipynb_key(path.to_str().unwrap(), project_id);
         self.synchronize_notebook_if_not_exists(&path, project_id)
             .await?;
-        self.pool.get().await?.hdel(&key, cell_id).await?;
+        let hdel_rsp = self
+            .pool
+            .get()
+            .await?
+            .hdel::<_, _, u32>(&key, cell_id)
+            .await?;
+        if hdel_rsp == 0 {
+            return Err(ErrorTrace::new("cell id not found, can't delete cell"));
+        }
         self.send_persist_redis_to_fs_signal(&path, key, project_id)
             .await;
 

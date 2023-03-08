@@ -14,8 +14,11 @@
 
 use super::prelude::*;
 
-pub async fn resume(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Error> {
-    let inode = inode_from_query_string(req)?;
+pub async fn resume(
+    State(ctx): State<AppContext>,
+    Query(req): Query<InodeReq>,
+) -> Result<Rsp<()>, Error> {
+    let inode = req.inode;
     let kernel_opt = ctx.get_kernel_by_inode(inode).await?;
     let kernel = match kernel_opt {
         Some(kernel) => kernel,
@@ -31,7 +34,7 @@ pub async fn resume(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Err
         .send(KernelOperate::GetState(tx))
         .await?;
     let state = rx.await?;
-    if !matches!(state, State::Paused { .. }) {
+    if !matches!(state, KernelState::Paused { .. }) {
         return Err(Error::new("only paused kernel can resume"));
     }
 
@@ -94,5 +97,5 @@ pub async fn resume(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Err
         }
     }
 
-    Ok(Resp::success(()))
+    Ok(Rsp::success(()))
 }

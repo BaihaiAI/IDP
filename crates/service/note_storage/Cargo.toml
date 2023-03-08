@@ -4,10 +4,6 @@ license.workspace = true
 name = "note_storage"
 version.workspace = true
 
-[features]
-default = ["redis"]
-redis = []
-
 [dependencies]
 business = { path = "../../common/business" }
 cache_io = { path = "../../cache_io" }
@@ -15,22 +11,28 @@ common_model = { path = "../../common/model" }
 common_tools = { path = "../../common/common_tools" }
 err = { path = "../../common/err" }
 kernel_common = { path = "../../common/kernel_common" }
+# kubernetes_client = { path = "../../kubernetes_client" }
 license_generator = { path = "../../license_generator" }
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }
 serde_helper = { path = "../../common/serde_helper" }
-test_runner = { path = "../../test_runner" }
+# test_runner = { path = "../../test_runner" }
 
+async-stream = "0.3.4"
 axum = { version = "0.6", features = ["multipart", "headers"] }
 axum-macros = "0.3"
-base64 = { version = "0.20" }
-chrono = "0.4.23"
+base64.workspace = true
+chrono = { version = "0.4.23", features = ["serde"] }
+cron-parser = "0.7.10"
+csv = "1.1"
 encoding_rs = "0.8"
 flate2 = "1.0"
 futures = "0.3"
+futures-util = "0.3"
 json-structural-diff = { version = "0.1.0", features = ["colorize"] }
 lazy_static = "1.4.0"
 mime_guess = "2.0.4"
+once_cell = "1.0"
 regex = "1.6"
 reqwest = { version = "0.11", default-features = false, features = [
     "rustls-tls",
@@ -44,10 +46,13 @@ sqlx = { version = "0.6.0", default-features = false, features = [
     "runtime-tokio-rustls",
     "postgres",
     "macros",
+    "chrono",
+    "json",
+    "offline",
 ] }
-ssh2 = "0.9.3" # vendored-openssl
+ssh2 = { version = "0.9.3", features = ["vendored-openssl"] }
 str-utils = "0.1.5"
-suppaftp = "4.2.0"
+suppaftp = "5.0"
 tar = { version = "0.4", default-features = false }
 tokio = { version = "1.0.1", features = [
     "fs",
@@ -55,13 +60,15 @@ tokio = { version = "1.0.1", features = [
     "rt-multi-thread",
     "macros",
 ] }
-tokio-util = { version = "0.7", features = ["io", "codec"] }
-toml = "0.5.8"
-tower-http = { version = "0.3", default-features = false, features = [
+tokio-util = { version = "0.7", features = ["io", "codec", "compat"] }
+tokio_schedule = "0.3.0"
+toml.workspace = true
+tower-http = { version = "0.4", default-features = false, features = [
     "compression-gzip",
 ] }
 tracing = "0.1.29"
 tree_magic = "0.2.3"
+url = "2.3.1"
 urlencoding = "2.1"
 uuid = { version = "1.1", features = ["serde", "v4"] }
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
@@ -84,6 +91,8 @@ tokio = { version = "1.0.1", features = [
 ] }
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
+[target.'cfg(target_os = "linux")'.dependencies]
+nix = "0.26.1"
 
 [build-dependencies]
 git_version = { path = "../../common/git_version" }

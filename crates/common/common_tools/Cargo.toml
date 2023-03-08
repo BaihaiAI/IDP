@@ -15,8 +15,9 @@ business = { path = "../business" }
 common_model = { path = "../model" }
 
 axum = { version = "0.6", features = ["headers"], optional = true }
-base64 = { version = "0.20" }
+base64.workspace = true
 chrono = { version = "0.4.23", optional = true }
+cron-parser = "0.7.10"
 encoding_rs = "0.8"
 err = { path = "../err" }
 serde_json = "1.0.68"

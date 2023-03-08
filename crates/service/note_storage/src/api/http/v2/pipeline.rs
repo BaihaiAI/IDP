@@ -270,6 +270,19 @@ pub async fn export_as_helper(
     Ok(())
 }
 
+#[tokio::test]
+#[ignore]
+async fn test_validate_ipynb() {
+    logger::init_logger();
+    // dbg!(std::env::current_dir());
+    let abs_path = "/tmp/a.ipynb";
+    let tmp_dir = "/tmp".to_string();
+    let validate_output_path = make_validate_ipynb(tmp_dir, abs_path.to_string())
+        .await
+        .unwrap();
+    nbconvert("", "html", &validate_output_path).await.unwrap();
+}
+
 pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<String, ErrorTrace> {
     tracing::info!("make_validate_ipynb: real_path={real_path}");
     let filename_str = escape_path_as_string(real_path.clone());
@@ -284,7 +297,7 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
     for mut cell in nb.cells.iter_mut() {
         cell.execution_time = None;
         if matches!(cell.cell_type, CellType::Code) && cell.execution_count.is_none() {
-            cell.execution_count = Some(9999);
+            cell.execution_count = Some(999);
         }
         // markdown cell outputs field was remove in next iter
         // if cell.cell_type == CellType::Markdown {
@@ -316,7 +329,15 @@ pub async fn make_validate_ipynb(tmp_dir: String, real_path: String) -> Result<S
                 //  "execution_count": 12,
                 //  "metadata": {},
                 //  "output_type": "execute_result"
-                if !kvs.contains_key("execution_count") {
+                let mut is_display_data = false;
+                if let Some(output_type) = kvs.get("output_type") {
+                    if let Some(output_type) = output_type.as_str() {
+                        if output_type == "display_data" {
+                            is_display_data = true;
+                        }
+                    }
+                }
+                if !kvs.contains_key("execution_count") && !is_display_data {
                     kvs.insert("execution_count".to_string(), json!(9999_i64));
                 }
 

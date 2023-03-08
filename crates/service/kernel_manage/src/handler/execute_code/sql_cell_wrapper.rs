@@ -30,12 +30,13 @@ pub fn sql2python(sql_cell: &SqlCell, req: &ExecuteCodeReq) -> String {
     }
     tracing::debug!("data_source is  {}, treat as real data source", data_source);
 
-    let team_id = &sql_cell.uid;
+    // let team_id = &sql_cell.uid;
+    let team_id = &*business::kubernetes::ACCOUNT;
     // find postgres connection config by `req.region + "-" + &uid`
     format!(
         "{df_name} = __import__('baihai_aid').run_sql('{}', '{}', '''{} ''', '{}', '{}')\n{df_name}",
         team_id,
-        req.region.clone(),
+        req.region,
         sql,
         data_source,
         req.header.project_id,

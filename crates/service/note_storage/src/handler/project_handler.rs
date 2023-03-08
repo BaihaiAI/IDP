@@ -15,6 +15,7 @@
 use std::path::Path;
 
 use axum::extract::Multipart;
+use business::business_term::ProjectId;
 use business::path_tool;
 use common_model::service::rsp::Rsp;
 use common_tools::io_tool::file_writer::FileChunk;
@@ -22,7 +23,9 @@ use common_tools::io_tool::file_writer::FileSender;
 use tracing::info;
 use tracing::instrument;
 
+use crate::api_model::project::GitConfig;
 use crate::api_model::project::ProjectDtoStr;
+use crate::api_model::project::ProjectReq;
 use crate::api_model::project::ProjectRet;
 use crate::api_model::project::ProjectType;
 use crate::common::error::ErrorTrace;
@@ -215,6 +218,11 @@ pub async fn create_project_children_dir_one_by_one(
 #[instrument]
 pub async fn delete(team_id: u64, project_id: u64) -> Result<Rsp<()>, err::ErrorTrace> {
     info!("access project delete function .......");
+    let rsp = reqwest::ClientBuilder::new().build()?.delete(format!("http://localhost:8082/api/v2/idp-note-rs/runtime/delete_project_hook?projectId={project_id}")).send().await?.text().await?;
+    if rsp != "ok" {
+        return Err(ErrorTrace::new(&rsp));
+    }
+
     // let ret = delete_project_from_db_by_api(project_id.to_string()).await;
 
     let project_path_ = path_tool::project_root(team_id, project_id);
@@ -408,19 +416,19 @@ pub async fn new_project(
     //upload file by project_id
     if need_upload_file {
         //upload the zip file
-        if datafile == None || total == None || index == None || file_name == None {
+        if datafile.is_none() || total.is_none() || index.is_none() || file_name.is_none() {
             let mut none_fields = vec![];
 
-            if datafile == None {
+            if datafile.is_none() {
                 none_fields.push("datafile");
             }
-            if total == None {
+            if total.is_none() {
                 none_fields.push("total");
             }
-            if index == None {
+            if index.is_none() {
                 none_fields.push("index");
             }
-            // if file_name == None {
+            // if file_name.is_none() {
             //     none_fields.push("name");
             // }
 
@@ -449,7 +457,7 @@ pub async fn new_project(
         let mut abs_list_path = base_path.clone();
         // abs_list_path.push(store_path::get_relative_path(Path::new(&file_path)));
         abs_list_path.push(crate::business_::path_tool::get_relative_path(Path::new(
-            &file_name.clone().unwrap_or_else(|| "".to_string()),
+            &file_name.clone().unwrap_or_default(),
         )));
 
         // let out_path = abs_list_path.clone();
@@ -464,7 +472,7 @@ pub async fn new_project(
             .send((
                 FileChunk {
                     file_dir: abs_list_path.to_str().unwrap_or("").to_string(),
-                    file_idx: index as u64,
+                    file_idx: index,
                     total_chunk: total,
                     file_data: datafile.to_vec(),
                 },
@@ -483,7 +491,7 @@ pub async fn new_project(
     let ret_code = do_project_business(
         team_id,
         project_id_global.clone(),
-        file_name.unwrap_or_else(|| "".to_string()),
+        file_name.unwrap_or_default(),
         project_dto_str_obj,
     )
     .await?
@@ -718,5 +726,103 @@ pub async fn ray_chown_fix_one_time(pg_pool: sqlx::PgPool) -> Result<Rsp<()>, Er
         // }
     }
 
+    Ok(Rsp::success(()))
+}
+
+pub async fn new_project_v2(project_req: ProjectReq) -> Result<String, ErrorTrace> {
+    // let creator_id  = project_req.creator;
+    let team_id = project_req.team_id;
+    let project_id = project_req.project_id;
+    let project_type = project_req.project_type;
+
+    let git_config = if project_req.git_config.is_some() {
+        project_req.git_config.unwrap()
+    } else {
+        GitConfig::new()
+    };
+
+    //do project business by project_type
+    let ret_code = do_project_business_v2(team_id, project_id, project_type, git_config)
+        .await?
+        .code;
+
+    tracing::debug!("ret_business success ret_code:{:?}", ret_code);
+
+    if parse_return_success_code(ret_code) {
+        Ok("success".to_string())
+    } else {
+        Err(ErrorTrace::new(PROJECT_CREATE_FINAL_FAIL_MSG).code(PROJECT_CREATE_FINAL_FAIL_CODE))
+    }
+}
+
+pub async fn do_project_business_v2(
+    team_id: u64,
+    project_id: ProjectId,
+    project_type: ProjectType,
+    git_config: GitConfig,
+) -> Result<Rsp<()>, err::ErrorTrace> {
+    tracing::debug!("-->project_id={:?}", project_id);
+
+    let project_path_ = path_tool::project_root(team_id, project_id);
+    let project_root_path = std::path::Path::new(&project_path_);
+
+    tracing::debug!("project_root_path: {:?}", project_root_path);
+
+    // create project root Path if needed
+    tokio::fs::create_dir(project_root_path.to_path_buf()).await?;
+
+    // create all children directories.
+    create_project_children_dir_one_by_one(team_id, project_id).await?;
+    // tracing::debug!("create_project_children_dir_one_by_one ret={:?}", ret);
+
+    let project_work_path = path_tool::get_store_path(
+        team_id,
+        project_id,
+        business::business_term::ProjectFolder::NOTEBOOKS,
+    );
+
+    // project_type
+    tracing::debug!("project_type: {:?}", project_type);
+    match project_type {
+        ProjectType::Git => {
+            tracing::debug!("ProjectType git  ........");
+            let git_url = git_config.git_url;
+            let git_info = git_config.git_info;
+
+            tracing::debug!("git_url: {:?}", git_url);
+            tracing::debug!("git_info: {:?}", git_info);
+
+            git_service::git_clone(
+                git_url,
+                git_info,
+                project_work_path.display().to_string(),
+                project_id,
+            )
+            .await?;
+
+            tracing::info!("ProjectType::Git create file project success!");
+        }
+        ProjectType::File => {
+            // todo: upload dir from website
+            if !project_root_path.join("notebooks").join(".git").exists() {
+                std::process::Command::new("git")
+                    .arg("init")
+                    .arg(".")
+                    .current_dir(project_root_path.join("notebooks"))
+                    .spawn()?
+                    .wait()?;
+            }
+            tracing::info!("ProjectType::File create file project success!");
+        }
+        ProjectType::Default => {
+            std::process::Command::new("git")
+                .arg("init")
+                .arg(".")
+                .current_dir(project_root_path.join("notebooks"))
+                .spawn()?
+                .wait()?;
+            tracing::info!("ProjectType::Default create default project success!");
+        }
+    };
     Ok(Rsp::success(()))
 }

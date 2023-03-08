@@ -36,5 +36,5 @@ pub async fn kernel_list(ctx: AppContext) -> Response<Body> {
     for (k, v) in &*ctx.inode_kernel_mapping.read().await {
         ret.insert(k.to_string(), DebugKernelEntry::from_kernel(v));
     }
-    Resp::success(ret).to_hyper()
+    Rsp::success(ret).to_hyper()
 }

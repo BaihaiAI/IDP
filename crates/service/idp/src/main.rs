@@ -22,12 +22,6 @@ mod cli_args;
 mod gateway;
 mod spawn_all_services;
 
-const BAIHAI_AID_FILENAME: &str = "baihai_aid-2.0-py3-none-any.whl";
-const BAIHAI_AID: &[u8] = include_bytes!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../../docker_build/baihai_aid-2.0-py3-none-any.whl"
-));
-
 #[tokio::main]
 async fn main() {
     let args = <cli_args::CliArgs as clap::Parser>::parse();
@@ -60,15 +54,29 @@ async fn main() {
     // preheat lazy static var
     business::path_tool::store_parent_dir();
 
-    std::fs::write(BAIHAI_AID_FILENAME, BAIHAI_AID).unwrap();
-    std::process::Command::new("pip3")
+    let baihai_aid_version =
+        reqwest::get("http://baihai.cn-bj.ufileos.com/baihai-lib/baihai_aid/VERSION.txt")
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+    let baihai_aid_version = baihai_aid_version.trim_end();
+    let filename = format!("baihai_aid-{baihai_aid_version}-py3-none-any.whl");
+    let mut cmd = std::process::Command::new("python3");
+    cmd.arg("-m")
+        .arg("pip")
         .arg("install")
-        .arg(BAIHAI_AID_FILENAME)
-        .arg("--quiet")
-        .spawn()
-        .unwrap()
-        .wait()
-        .unwrap();
+        .arg(format!(
+            "http://baihai.cn-bj.ufileos.com/baihai-lib/baihai_aid/{filename}"
+        ))
+        // .arg("--quiet")
+        .arg("--timeout")
+        .arg("3")
+        .arg("--index-url")
+        .arg("https://pypi.tuna.tsinghua.edu.cn/simple");
+    tracing::info!("cmd = {cmd:?}");
+    cmd.spawn().unwrap().wait().unwrap();
 
     let gateway_exe_path = std::env::current_exe().unwrap();
     let exe_parent_dir = gateway_exe_path.parent().unwrap();
