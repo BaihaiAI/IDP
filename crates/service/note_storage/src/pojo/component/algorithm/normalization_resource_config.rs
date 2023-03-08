@@ -1,4 +1,4 @@
-// Copyright 2022 BaihaiAI, Inc.
+// Copyright 2023 BaihaiAI, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//!
-//! This file is about to be deprecated.
-//! This file is about to be deprecated.
-//! For the structure definition of api model, please write it to the corresponding file under crates/model/api_model mod
-//!
+use serde::Deserialize;
+
+/**
+ * Copyright @baihai 2021
+ * User: Zhang Qike
+ * Date: 2023/1/18
+ * Time: 15:28
+ * To change this template use Preferences | Editor | File and Code Templates | Rust File
+ */
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NormalizationResourceConfig {
+    pub cpu: String,
+}

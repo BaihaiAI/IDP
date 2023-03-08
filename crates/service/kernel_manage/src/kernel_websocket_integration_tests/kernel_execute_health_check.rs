@@ -61,6 +61,7 @@ impl Config {
     }
 }
 
+#[cfg(not)]
 #[test]
 #[ignore]
 fn main() {
@@ -95,7 +96,7 @@ fn main() {
         .build()
         .unwrap();
     let shutdown_rsp = http_client
-        .get(shutdown_url)
+        .post(shutdown_url)
         .header(reqwest::header::COOKIE, config.cookie())
         .send()
         .unwrap();

@@ -67,16 +67,16 @@ pub fn spawn_all_services(args: &CliArgs) {
     }
     let nodejs_path = nodejs_path.unwrap_or_else(|| Path::new("node").to_path_buf());
     tracing::info!("nodejs_path = {nodejs_path:?}");
-    let mut cmd = std::process::Command::new(&nodejs_path);
-    cmd.arg("--version");
-    let output = cmd.output().unwrap_or_else(|_| panic!("err on {cmd:?}"));
-    assert!(output.status.success(), "nodejs --version err");
-    if String::from_utf8_lossy(&output.stdout).trim_end() < "v16.0.0" {
-        tracing::warn!(
-            "nodejs version {} < 16",
-            String::from_utf8_lossy(&output.stdout)
-        );
-    }
+    // let mut cmd = std::process::Command::new(&nodejs_path);
+    // cmd.arg("--version");
+    // let output = cmd.output().unwrap_or_else(|_| panic!("err on {cmd:?}"));
+    // assert!(output.status.success(), "nodejs --version err");
+    // if String::from_utf8_lossy(&output.stdout).trim_end() < "v16.0.0" {
+    //     tracing::warn!(
+    //         "nodejs version {} < 16",
+    //         String::from_utf8_lossy(&output.stdout)
+    //     );
+    // }
     std::env::set_var("NODE_BIN", &nodejs_path);
     if exe_parent_dir
         .join("lsp")

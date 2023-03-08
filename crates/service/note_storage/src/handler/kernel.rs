@@ -26,7 +26,7 @@ pub struct ShutdownKernelByDirReq {
 pub async fn shutdown_by_dir_path_api(
     Json(shutdown_kernel_by_dir_req): Json<ShutdownKernelByDirReq>,
 ) -> Result<Rsp<()>, IdpGlobalError> {
-    shutdown_by_dir_path(
+    shutdown_by_project_id_and_kernel_idpnb_starts_with_path(
         shutdown_kernel_by_dir_req.project_id,
         shutdown_kernel_by_dir_req.dir_path,
     )
@@ -34,22 +34,23 @@ pub async fn shutdown_by_dir_path_api(
     Ok(Rsp::success(()))
 }
 
-pub async fn shutdown_by_dir_path(
+pub async fn shutdown_by_project_id_and_kernel_idpnb_starts_with_path(
     project_id: ProjectId,
-    dir_path: String,
+    kernel_idpnb_starts_with_path: &str,
 ) -> Result<(), ErrorTrace> {
-    let dir_path = if dir_path.starts_with('/') {
-        dir_path
+    let kernel_idpnb_starts_with_path = if kernel_idpnb_starts_with_path.starts_with('/') {
+        kernel_idpnb_starts_with_path.to_string()
     } else {
-        format!("/{}", dir_path)
+        format!("/{}", kernel_idpnb_starts_with_path)
     };
-    let dir_path = urlencoding::encode(&dir_path);
+    let dir_path = urlencoding::encode(&kernel_idpnb_starts_with_path);
     let url = format!(
         "http://127.0.0.1:{}/api/v1/execute/kernel/shutdown_all?projectId={project_id}&path={dir_path}",
         business::kernel_manage_port()
     );
     tracing::info!("--> shutdown_by_dir_path, url = {url}");
-    reqwest::get(url).await?;
+    let rsp = reqwest::get(url).await?;
+    assert!(rsp.status().is_success());
     Ok(())
 }
 

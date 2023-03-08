@@ -167,7 +167,7 @@ const ChatGPT = (props) => {
     setData([{
       id: `${new Date().getTime()}`,
       user: 'chatbox',
-      text: '欢迎使用chatGPT，系统默认密钥因为使用人数较多，使用可能会受限，您可通过右上角设置使用自己的密钥。',
+      text: '欢迎使用chatGPT，请先通过右上角设置自己的密钥。',
     }]);
     const chatGPTAppKey = cookie.load('chatGPTAppKey');
     if (chatGPTAppKey) {

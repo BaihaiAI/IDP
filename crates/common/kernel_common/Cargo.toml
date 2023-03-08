@@ -15,14 +15,16 @@ err = { path = "../err" }
 serde_helper = { path = "../serde_helper" }
 
 # libc = { version = "0.2", optional = true }
-base64 = "0.20"
+base64.workspace = true
 reqwest = { version = "0.11", default-features = false, features = [
     "rustls-tls",
     "json",
     "blocking",
+    "stream",
 ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tokio = { version = "1.0", features = ["time"] }
 tracing = "0.1"
 
 [dev-dependencies]

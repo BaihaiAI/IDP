@@ -45,9 +45,9 @@ Then open http://localhost:3000 with your browser.
 ### Start IDP with pre-built binary
 
 - [Windows x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-win-x64.zip)
-- [macOS arm64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-arm64.tar.gz)
+- [macOS arm64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.1.0-darwin-arm64.tar.gz)
 - [macOS x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-darwin-x64.tar.gz)
-- [Linux x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.0.0-linux-x64.tar.gz)
+- [Linux x86_64](https://baihai.cn-bj.ufileos.com/package/idp-studio-v1.1.0-linux-x64.tar.gz)
 
 For example start IDP with pre-built binary in Linux, require Python 3.7 and up (CPython and PyPy)
 

@@ -15,22 +15,51 @@
 use axum::extract::Json;
 use common_model::Rsp;
 use err::ErrorTrace;
+use serde::Deserialize;
+use serde::Serialize;
+use tracing::info;
 
-use super::workspace::compress::WorkspacePathRto;
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TokenReq {
+    api_key: String,
+    api_secret: String,
+}
+
+#[derive(Deserialize)]
+struct TokenRsp {
+    // code: i32,
+    // msg: String
+    result: TokenRspResult,
+}
+
+#[derive(Deserialize)]
+struct TokenRspResult {
+    token: String,
+}
+
+#[derive(serde::Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PublishModelReq {
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    team_id: u64,
+    // #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    project_id: u64,
+    path: String,
+    code: String,
+    tag: String,
+}
 
 // TODO this API upload file to sftp, maybe 504 gateway timeout
-pub async fn publish_model(Json(payload): Json<WorkspacePathRto>) -> Result<Rsp<()>, ErrorTrace> {
+pub async fn publish_model(Json(req): Json<PublishModelReq>) -> Result<Rsp<()>, ErrorTrace> {
     // crate::business_::path_tool:
-    let abs_path = business::path_tool::get_store_full_path(
-        payload.team_id.parse().unwrap(),
-        payload.project_id,
-        payload.path,
-    );
+    let abs_path = business::path_tool::get_store_full_path(req.team_id, req.project_id, req.path);
     if !abs_path.exists() {
         return Err(ErrorTrace::new("path not exist"));
     }
 
-    let config_str = std::fs::read_to_string("/etc/publish_third_party_model_platform.toml")?;
+    let config_str =
+        std::fs::read_to_string("/opt/config/publish_third_party_model_platform.toml")?;
     let config = toml::de::from_str::<ThirdPartyPlatformConfig>(&config_str)?;
 
     // step 1. upload file to sftp, get sftp path
@@ -47,28 +76,33 @@ pub async fn publish_model(Json(payload): Json<WorkspacePathRto>) -> Result<Rsp<
     let api_base_url = config.api_base_url;
     let token_rsp = client
         .post(format!("{api_base_url}/token"))
-        .json(&serde_json::json!({
-            "apiKey": config.api_key,
-            "apiSecret": config.api_secret
-        }))
+        .json(&TokenReq {
+            api_key: config.api_key,
+            api_secret: config.api_secret,
+        })
         .send()
         .await?
-        .json::<serde_json::Value>()
+        .json::<TokenRsp>()
         .await?;
-    // assert!(token_rsp["code"], 0);
-    let token = token_rsp["result"]["token"].as_str().unwrap();
-    client
-        .post(format!("{api_base_url}/token"))
+    let token = token_rsp.result.token;
+    let rsp = client
+        .post(format!("{api_base_url}/algorithm/version/notify"))
         .header("Authorization", token)
         .json(&serde_json::json!({
-            "code": config.api_code,
+            "code": req.code,
             "type": 3,
             "path": sftp_path,
-            "tag": config.api_image_tag,
+            "tag": req.tag,
             "protocolType": 1
         }))
         .send()
         .await?;
+    let rsp_status = rsp.status();
+    if !rsp_status.is_success() {
+        return Err(ErrorTrace::new(&format!("notify fail {rsp_status}")));
+    }
+    let rsp_text = rsp.text().await?;
+    info!("notify rsp {rsp_status} {rsp_text}");
 
     Ok(Rsp::success_without_data())
 }
@@ -81,17 +115,16 @@ struct ThirdPartyPlatformConfig {
     api_base_url: String,
     api_key: String,
     api_secret: String,
-    api_code: String,
-    api_image_tag: String,
+    // each different model has different code and tag
+    // api_code: String,
+    // api_image_tag: String,
 }
 
-// TODO tokio spawn_blocking
 /// assert input abs_path exist
 fn upload_file_to_sftp(
     abs_path: &str,
     config: ThirdPartyPlatformConfig,
 ) -> Result<String, ErrorTrace> {
-    use std::io::Read;
     use std::io::Write;
     use std::net::TcpStream;
 
@@ -110,8 +143,7 @@ fn upload_file_to_sftp(
         .unwrap()
         .to_str()
         .unwrap();
-    let mut file_content_to_upload = Vec::new();
-    std::fs::File::open(abs_path)?.read_to_end(&mut file_content_to_upload)?;
+    let file_content_to_upload = std::fs::read(abs_path)?;
     let mut f = sftp.create(std::path::Path::new(filename))?;
     f.write_all(&file_content_to_upload)?;
     let sftp_abs_path = sftp.realpath(std::path::Path::new(filename))?;

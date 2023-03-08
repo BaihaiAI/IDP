@@ -131,6 +131,7 @@ pub enum CellType {
     Sql,
     Markdown,
     Visualization,
+    DataExploration,
 }
 
 #[derive(Serialize, Deserialize)]

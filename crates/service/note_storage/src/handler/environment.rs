@@ -14,7 +14,12 @@
 
 use axum::extract::Query;
 use axum::extract::State;
+use axum::routing::get;
+use axum::routing::on;
+use axum::routing::post;
+use axum::routing::MethodFilter;
 use axum::Json;
+use axum::Router;
 use cache_io::CacheService;
 use cache_io::CloneState;
 use common_model::service::rsp::Rsp;
@@ -29,6 +34,16 @@ use crate::api_model::TeamIdQueryString;
 use crate::app_context::AppContext;
 use crate::common::error::IdpGlobalError;
 use crate::handler;
+
+pub fn environment_apis_route(ctx: AppContext) -> Router {
+    Router::new()
+        .route("/list", get(conda_env_list))
+        .route("/clone", post(clone))
+        .route("/clone/state", get(clone_state))
+        .route("/current", get(current_env))
+        .route("/switch", on(MethodFilter::PUT, switch_environment))
+        .with_state(ctx)
+}
 
 /// return process_id of `conda create`
 pub async fn clone(
@@ -119,7 +134,8 @@ pub async fn switch_environment(
     info!("switch_environment to {target_env}");
 
     // close all kernels in this project.
-    handler::kernel::shutdown_by_dir_path(project_id, "".to_string()).await?;
+    handler::kernel::shutdown_by_project_id_and_kernel_idpnb_starts_with_path(project_id, "")
+        .await?;
 
     // get current env to compare
     let origin_env = business::path_tool::project_conda_env(team_id, project_id);

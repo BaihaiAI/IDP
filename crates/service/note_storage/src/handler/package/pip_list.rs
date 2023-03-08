@@ -56,7 +56,7 @@ pub async fn pip_list_(py_path: String) -> std::io::Result<Vec<PackageInfo>> {
         .arg("list")
         .arg("--format")
         .arg("freeze");
-    tracing::info!("cmd = {cmd:?}");
+    tracing::debug!("cmd = {cmd:?}");
     let output = cmd.output().await?;
     tracing::debug!(
         "--- pip_list after pip list command, time cost = {:?}",

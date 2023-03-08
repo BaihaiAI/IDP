@@ -13,92 +13,55 @@
 // limitations under the License.
 
 #![deny(unused_crate_dependencies)]
-#![feature(custom_test_frameworks)]
-#![test_runner(test_runner::run_tests)]
+// #![feature(custom_test_frameworks)]
+// #![test_runner(test_runner::run_tests)]
 
-use std::collections::HashMap;
-use std::sync::Arc;
+use chrono::Utc;
+use tokio_schedule as _;
+use tokio_schedule::every;
+use tokio_schedule::Job;
 
-use handler::package::search::get_package_map;
-use sqlx::Pool;
-use sqlx::Postgres;
-use test_runner as _;
-use tokio::sync::Mutex;
-pub mod utils;
-use utils::db_utils::init_pg_connect_pool;
-
+use crate::handler::deploy_prod_service::check_model_batch_service_handler;
+use crate::handler::deploy_prod_service::check_model_service;
 use crate::handler::extension::get_extension;
+use crate::service::schedule::schedule_service::check_visual_modeling_job_handler;
+
 mod api;
 pub(crate) mod api_model;
 mod app_context;
 pub(crate) mod business_;
 pub(crate) mod common;
-mod dataobj;
 mod handler;
+pub(crate) mod pojo;
 mod route;
+pub(crate) mod service;
 pub(crate) mod status_code;
 
 pub async fn main() {
     let reload_log_level_handle = logger::init_logger();
-    // clap::Command::new(env!("CARGO_PKG_NAME"))
-    // .version(env!("VERSION"))
-    // .get_matches();
+    // clap::Command::new(env!("CARGO_PKG_NAME")).version(env!("VERSION")).get_matches();
     let args = std::env::args().collect::<Vec<_>>();
     if args.len() == 2 && args[1] == "--version" {
         println!("{}", env!("VERSION"));
         return;
     }
+    license_verify();
 
     if business::kubernetes::is_k8s() {
-        match license_generator::verify_license(
-            license_generator::DEFAULT_LICENSE_PUBLIC_KEY_PATH,
-            license_generator::DEFAULT_LICENSE_PATH,
-        ) {
-            Ok(license) => {
-                let expire_timestamp = license.expire_timestamp;
-                tokio::spawn(async move {
-                    loop {
-                        let timestamp = tokio::task::spawn_blocking(|| {
-                            license_generator::get_timestamp_from_internet()
-                        })
-                        .await
-                        .unwrap();
-                        if timestamp > expire_timestamp {
-                            tracing::error!("license expire, exit...");
-                            std::process::exit(1);
-                        }
-                        tokio::time::sleep(std::time::Duration::from_secs(3600)).await;
-                    }
-                });
+        let every_1_minutes = every(1).minutes().at(0).in_timezone(&Utc).perform(move || {
+            tracing::info!("Every 1 minutes at 0'th second");
+            let pg_para = crate::app_context::DB_POOL.clone();
+            async move {
+                check_visual_modeling_job_handler(&pg_para).await;
+                check_model_batch_service_handler(&pg_para).await;
+                check_model_service(&pg_para).await;
             }
-            Err(err) => {
-                tracing::error!("verify_license fail, exit... {err}");
-                std::process::exit(1);
-            }
-        }
-    }
-
-    // tokio::spawn(sum_project_disk(rb.clone()));
-
-    // let path = Path::new("/opt/config/config.toml");
-    let project_info_map = Arc::new(Mutex::new(HashMap::<String, HashMap<String, String>>::new()));
-    let pg_option: Option<Pool<Postgres>> = if business::kubernetes::is_k8s() {
-        tokio::spawn(get_package_map(project_info_map.clone(), true));
-        let pg_pool = init_pg_connect_pool().await;
-        Some(pg_pool)
-    } else {
-        tokio::spawn(get_package_map(project_info_map.clone(), false));
-        None
-    };
-
-    tracing::debug!("pg_option->{:#?}", pg_option);
-    if business::kubernetes::is_k8s() {
+        });
+        tokio::spawn(every_1_minutes);
         tokio::spawn(get_extension::get_extension());
     }
 
-    let app =
-        route::init_router(project_info_map.clone(), pg_option, reload_log_level_handle).await;
-
+    let app = route::init_router(reload_log_level_handle).await;
     let address = std::net::SocketAddr::from((
         std::net::Ipv4Addr::UNSPECIFIED,
         business::note_storage_port(),
@@ -107,4 +70,36 @@ pub async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+fn license_verify() {
+    if !business::kubernetes::is_k8s() {
+        return;
+    }
+    match license_generator::verify_license(
+        license_generator::DEFAULT_LICENSE_PUBLIC_KEY_PATH,
+        license_generator::DEFAULT_LICENSE_PATH,
+    ) {
+        Ok(license) => {
+            let expire_timestamp = license.expire_timestamp;
+            tokio::spawn(async move {
+                loop {
+                    let timestamp = tokio::task::spawn_blocking(|| {
+                        license_generator::get_timestamp_from_internet()
+                    })
+                    .await
+                    .unwrap();
+                    if timestamp > expire_timestamp {
+                        tracing::error!("license expire, exit...");
+                        std::process::exit(1);
+                    }
+                    tokio::time::sleep(std::time::Duration::from_secs(3600)).await;
+                }
+            });
+        }
+        Err(err) => {
+            tracing::error!("verify_license fail, exit... {err}");
+            std::process::exit(1);
+        }
+    }
 }

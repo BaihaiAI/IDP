@@ -34,14 +34,19 @@ Error (criu/sk-unix.c:871): unix: Can't dump half of stream unix connection.
 Error (criu/cr-dump.c:1788): Dumping FAILED.
 ```
 */
-pub async fn pause(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Error> {
-    let inode = inode_from_query_string(req)?;
+pub async fn pause(
+    State(ctx): State<AppContext>,
+    Query(req): Query<InodeReq>,
+) -> Result<Rsp<()>, Error> {
+    let inode = req.inode;
     let kernel_opt = ctx.get_kernel_by_inode(inode).await?;
     let kernel = match kernel_opt {
         Some(kernel) => kernel,
         None => {
             // kernel not start but request cell_state on ipynb open
-            return Err(Error::new("kernel not found"));
+            return Ok(Rsp::success(())
+                .code(ErrorTrace::CODE_WARNING)
+                .message("kernel not found"));
         }
     };
 
@@ -51,14 +56,47 @@ pub async fn pause(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Erro
         .send(KernelOperate::GetState(tx))
         .await?;
     let state = rx.await.unwrap();
-    if !matches!(state, State::Running(_) | State::Idle) {
+    if !matches!(state, KernelState::Running(_) | KernelState::Idle) {
         return Err(Error::new("only running or idle kernel can pause"));
     }
 
     let ip = kernel.kernel_info.ip;
     let pid = kernel.kernel_info.pid;
     let dir = criu_dump_dir(ip, pid);
-    _ = std::fs::create_dir_all(&dir);
+    tokio::fs::create_dir_all(&dir).await?;
+    if !business::kubernetes::is_k8s() {
+        let check = tokio::process::Command::new("sudo")
+            .arg("criu")
+            .arg("check")
+            // .arg("--all")
+            .output()
+            .await?;
+        if !check.status.success() {
+            return Err(Error::new("criu check exit code fail").code(500));
+        }
+        let stdout = String::from_utf8_lossy(&check.stdout);
+        if !stdout.contains("good") {
+            return Err(Error::new("criu check not good").code(500));
+        }
+        let mut cmd = tokio::process::Command::new("sudo");
+        cmd.arg("criu")
+            .arg("dump")
+            .arg("--shell-job")
+            .arg("--tcp-established")
+            .arg("--ghost-limit")
+            .arg("10485760")
+            // unix: External socket is used. Consider using --ext-unix-sk option.
+            // unix: Can't dump half of stream unix connection
+            // .arg("--ext-unix-sk")
+            // .arg("-v4")
+            .arg("-t")
+            .arg(pid.to_string())
+            .current_dir(dir);
+        tracing::info!("cmd = {cmd:?}");
+        let output = cmd.spawn()?.wait().await?;
+        dbg!(output);
+        return Err(Error::new("pause failed").code(500));
+    }
 
     let project_id = kernel.header.project_id;
     let resp = reqwest::get(format!(
@@ -71,15 +109,7 @@ pub async fn pause(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Erro
     }
 
     // tracing::info!("prepare to criu dump pid {} to dir {}", pid, dir);
-    // let mut cmd = tokio::process::Command::new("criu");
-    // cmd.arg("dump")
-    //     .arg("--shell-job")
-    //     .arg("--tcp-established")
-    //     .arg("-t")
-    //     .arg(pid.to_string())
-    //     .current_dir(dir);
-    // tracing::info!("cmd = {cmd:?}");
-    // let output = cmd.output().await?;
+
     // if !output.status.success() {
     //     tracing::error!(
     //         "criu dump fail stdout:\n{}",
@@ -126,5 +156,5 @@ pub async fn pause(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Erro
         }
     }
 
-    Ok(Resp::success(()))
+    Ok(Rsp::success(()))
 }

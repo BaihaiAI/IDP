@@ -27,7 +27,7 @@ pub async fn spawn_tensorboard_process(
         .arg("--port")
         .arg(port.to_string())
         .arg("--logdir")
-        .arg(&log_dir)
+        .arg(log_dir)
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit())
         .kill_on_drop(true);

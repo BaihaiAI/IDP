@@ -15,7 +15,8 @@
 use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
-use tokio::io::AsyncWriteExt;
+
+use crate::handler::extension::write_file_lock;
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -60,8 +61,8 @@ pub async fn uninstall_handler(
     content.retain(|extension| extension.name != name);
 
     let data = serde_json::to_string(&content)?;
-    let mut f = tokio::fs::File::create(extensions_config_path).await?;
-    f.write_all(data.as_bytes()).await?;
+
+    write_file_lock(extensions_config_path, data).await?;
 
     Ok(Rsp::success_without_data())
 }

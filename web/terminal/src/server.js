@@ -2,7 +2,8 @@ const express = require("express");
 const expressWs = require("express-ws");
 const pty = require("node-pty");
 const os = require("os");
-const execSync = require('child_process').execSync
+const execSync = require('child_process').execSync;
+const bodyParser = require('body-parser');
 
 const isWin32 = os.platform() === "win32";
 const shell = isWin32 ? "powershell.exe" : "bash";
@@ -69,8 +70,10 @@ app.all("*", function (req, res, next) {
     res.header("Access-Control-Allow-Methods", "*");
     next();
 });
+// 解析 application/json
+app.use(bodyParser.json());
 //服务端初始化
-app.get("/api/v1/terminal/pid", (req, res) => {
+app.get("/api/v2/terminal/:projectId/pid", (req, res) => {
   try {
     let term = nodeEnvBind(req);
     term = checkTerm(term, req);
@@ -92,7 +95,7 @@ app.get("/api/v1/terminal/pid", (req, res) => {
   res.end();
 });
 
-app.ws("/api/v1/terminal/socket/:pid", (ws, req) => {
+app.ws("/api/v2/terminal/:projectId/socket/:pid", (ws, req) => {
     const pid = parseInt(req.params.pid);
     const term = termMap.get(pid);
     term.on("data", function (data) {
@@ -117,6 +120,21 @@ app.ws("/api/v1/terminal/socket/:pid", (ws, req) => {
         term.kill();
         termMap.delete(pid);
     });
+});
+
+// 给chatGPT发送消息
+app.post(`/api/v1/terminal/chatGPT/sendMsg`, (req, res) => {
+  res.setHeader('Content-type', 'application/octet-stream');
+  try {
+    console.log(req);
+    const { text } = req.body;
+    res.write('请先通过右上角设置自己的密钥');
+    res.end();
+  } catch (error) {
+    console.log(`${new Date()} /chatGPT/sendMsg failed ${error}`);
+    res.write(`${error}`);
+    res.end();
+  }
 });
 
 try {

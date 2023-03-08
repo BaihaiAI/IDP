@@ -30,10 +30,6 @@ pub fn dns_resolve(hostname: &str) -> std::net::Ipv4Addr {
             }
         }
     }
-    eprintln!(
-        "[{}:{}:dns_resolve]: DNS resolve {hostname} failed, use localhost",
-        file!(),
-        line!()
-    );
+    eprintln!("[dns_resolve]: DNS resolve {hostname} failed, use localhost",);
     std::net::Ipv4Addr::LOCALHOST
 }

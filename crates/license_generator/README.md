@@ -27,7 +27,8 @@ openssl 1.1:
 
 ```
 openssl genrsa -out rsa2048-priv.pem
-openssl rsa -in rsa2048-priv.pem -pubout -out rsa2048-pub.pem
+# 不支持 -pubout 参数生成的公钥格式
+openssl rsa -in rsa2048-priv.pem -RSAPublicKey_out -out rsa2048-pub.pem
 ```
 
 openssl 3.0:

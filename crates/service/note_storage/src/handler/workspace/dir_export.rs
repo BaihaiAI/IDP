@@ -94,7 +94,7 @@ async fn dir_export_(
         info!("root export, exclude_export_path:{}", exclude_export_path);
 
         //must be "$exclude_export_path" it works well. $exclude_export_path does not work
-        let mut cmd = std::process::Command::new("zip");
+        let mut cmd = tokio::process::Command::new("zip");
         cmd.current_dir(project_path)
             .arg("-q")
             .arg("-r")
@@ -103,7 +103,7 @@ async fn dir_export_(
             .arg("-x")
             .arg(exclude_export_path);
         tracing::info!("cmd = {cmd:?}");
-        let output = cmd.output()?;
+        let output = cmd.output().await?;
         if !output.status.success() {
             return Err(ErrorTrace::new(&String::from_utf8_lossy(&output.stderr)));
         }
@@ -134,14 +134,14 @@ async fn dir_export_(
         let org_export_path = abs_export_path.parent().unwrap();
 
         // (cd $org_export_path;zip -q -r $generate_filename $file_name) {
-        let mut cmd = std::process::Command::new("zip");
-        cmd.current_dir(&org_export_path)
+        let mut cmd = tokio::process::Command::new("zip");
+        cmd.current_dir(org_export_path)
             .arg("-q")
             .arg("-r")
             .arg(&generate_filename)
             .arg(file_name);
         tracing::info!("cmd = {cmd:#?}, current_dir = {org_export_path:?}");
-        let output = cmd.output()?;
+        let output = cmd.output().await?;
         if !output.status.success() {
             return Err(ErrorTrace::new(&String::from_utf8_lossy(&output.stderr)));
         }

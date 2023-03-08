@@ -93,7 +93,12 @@ pub async fn share_cell_(
             }
             // let inode = file_tool::get_inode_from_path(&notebook_full_path).await?;
             let session_file = session_file_path(team_id, project_id, &browser_path);
-            if let Err(msg) = upload_to_ftp(session_file, format!("/{}/share.session", share_id)) {
+            let aim_path = format!("/{}/share.session", share_id);
+            if let Err(msg) =
+                tokio::task::spawn_blocking(move || upload_to_ftp(session_file, aim_path))
+                    .await
+                    .unwrap()
+            {
                 return Err(ErrorTrace::new(&msg));
             }
             Ok(Rsp::success(share_id))

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 pub mod content;
+pub mod deploy;
+pub mod deploy_prod_service;
 pub mod environment;
 pub mod extension;
 pub mod git_service;
@@ -30,4 +32,5 @@ pub mod snapshot;
 pub mod state;
 pub mod team_handler;
 pub mod tensorboard;
+pub mod visual_modeling;
 pub mod workspace;

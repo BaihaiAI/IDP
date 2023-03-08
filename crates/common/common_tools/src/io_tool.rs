@@ -27,7 +27,6 @@ pub mod file_writer {
     pub type FileSender = mpsc::Sender<Req>;
 
     pub fn init() -> (FileState, mpsc::Receiver<Req>) {
-        mpsc::channel::<Req>(200);
         let (writer_sender, writer_receiver) = mpsc::channel(200);
 
         let state = FileState {
@@ -126,7 +125,7 @@ pub mod file_writer {
                 keys.push_back(file_chunk.file_dir.clone());
 
                 let f_name = PathBuf::from(file_chunk.file_dir.clone());
-                tokio::fs::create_dir_all(&f_name.parent().unwrap_or(&PathBuf::from("/"))).await?;
+                // tokio::fs::create_dir_all(&f_name.parent().unwrap_or(&PathBuf::from("/"))).await?;
                 tokio::fs::File::create(&f_name).await?;
                 chunks_map.get_mut(&file_chunk.file_dir).unwrap()
             }

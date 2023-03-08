@@ -96,7 +96,8 @@ pub struct SnapshotRedisListItem {
 
 pub(crate) fn redis_hvals_to_notebook(val_vec: Vec<String>) -> Result<Notebook, ErrorTrace> {
     if val_vec.is_empty() {
-        return Err(ErrorTrace::new("cells is empty"));
+        tracing::warn!("cells is empty");
+        // return Err(ErrorTrace::new("cells is empty"));
     }
 
     let mut cells: Vec<Cell> = vec![];

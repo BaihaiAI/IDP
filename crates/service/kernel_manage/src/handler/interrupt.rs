@@ -14,14 +14,23 @@
 
 use super::prelude::*;
 
-pub async fn interrupt(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Error> {
-    let inode = inode_from_query_string(req)?;
+pub async fn interrupt(
+    State(ctx): State<AppContext>,
+    Query(req): Query<InodeReq>,
+) -> Result<Rsp<()>, ErrorTrace> {
+    let inode = req.inode;
     let kernel_opt = ctx.get_kernel_by_inode(inode).await?;
     let kernel = match kernel_opt {
         Some(kernel) => kernel,
         None => {
+            // check runtime pod status first?
             // kernel not start but request cell_state on ipynb open
-            return Err(Error::new("kernel not found"));
+            if let Some(tx) = ctx.interrupt_creating_pod.read().await.get(&inode) {
+                if let Err(err) = tx.send(()) {
+                    tracing::error!("{err}");
+                }
+            }
+            return Ok(Rsp::success(()).message("interrupt creating pod"));
         }
     };
 
@@ -31,10 +40,10 @@ pub async fn interrupt(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, 
         .send(KernelOperate::GetState(tx))
         .await?;
     let state = rx.await?;
-    if matches!(state, State::Idle) {
-        return Ok(Resp::success(()));
+    if matches!(state, KernelState::Idle) {
+        return Ok(Rsp::success(()));
     }
-    if !matches!(state, State::Running(_)) {
+    if !matches!(state, KernelState::Running(_)) {
         return Err(Error::new(&format!(
             "only running kernel can interrupt, current state is {state:?}"
         )));
@@ -44,5 +53,5 @@ pub async fn interrupt(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, 
         .kernel_operate_tx
         .send(KernelOperate::Interrupt)
         .await?;
-    Ok(Resp::success(()))
+    Ok(Rsp::success(()))
 }

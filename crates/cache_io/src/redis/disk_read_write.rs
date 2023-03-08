@@ -14,11 +14,12 @@
 
 use std::path::Path;
 
-use bb8_redis::redis::AsyncCommands;
 use common_model::entity::notebook::Notebook;
 use common_tools::file_tool;
 use err::ErrorTrace;
 use err::Result;
+use redis::AsyncCommands;
+use tracing::warn;
 
 use super::CacheService;
 use crate::keys::ipynb_key;
@@ -39,19 +40,19 @@ impl CacheService {
         // notebook_disk_data.set_path(&path);
         let key = ipynb_key(path, project_id);
         // base information is put into the cache
-        let mut conn = self.pool.get().await?;
-        // whole of cells store to redis cache if exists(not empty)
 
         if notebook_disk_data.cells.is_empty() {
-            return Err(ErrorTrace::new("notebook on fs cells is empty"));
+            warn!("{path:?} on cells is empty");
+            return Ok(notebook_disk_data);
         }
 
         let cells_tuple_vec = notebook_cells_to_redis_hvals(&notebook_disk_data);
+        let mut conn = self.pool.get().await?;
         conn.hset_multiple(&key, &cells_tuple_vec).await?;
         //Set the expiration time. fixme: This place seems to sometimes fail to set the expiration time
         conn.expire(&key, crate::IPYNB_CACHE_TTL).await?;
         let cell_ids = cells_tuple_vec.into_iter().map(|x| x.0).collect::<Vec<_>>();
-        tracing::info!("after hset {cell_ids:?}");
+        tracing::info!("after hmset num_cells={}", cell_ids.len());
 
         // ??? redis->fs, why write back here?
         // self.send_persist_redis_to_fs_signal(&path, key, Mimetype::Notebook, project_id).await;
@@ -88,17 +89,16 @@ impl CacheService {
             // common_tools::file_tool::write_notebook_to_disk(&path, &notebook).await?;
             // is_send_signal = false;
         }
+        if notebook.cells.is_empty() {
+            return Ok(());
+        }
 
         let key = ipynb_key(path.as_ref().to_str().unwrap(), project_id);
         //require delete cache data
         let mut conn = self.pool.get().await?;
         conn.del(&key).await?;
 
-        let key = ipynb_key(path.as_ref().to_str().unwrap(), project_id);
         // whole of cells store to redis cache if exists(not empty)
-        if notebook.cells.is_empty() {
-            return Err(ErrorTrace::new(&format!("cell is empty {key}")));
-        }
 
         //The expiration time should be reset to the maximum time.
         let cells_tuple_vec = notebook_cells_to_redis_hvals(&notebook);

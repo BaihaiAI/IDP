@@ -16,7 +16,7 @@ use super::prelude::*;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct Req {
+pub struct Req {
     // #[serde(deserialize_with = "kernel_common::de_u64_from_str")]
     team_id: TeamId,
     project_id: ProjectId,
@@ -24,22 +24,21 @@ struct Req {
     // #[serde(deserialize_with = "kernel_common::de_u64_from_str")]
     // inode: u64,
 }
-pub fn vars(req: Request<Body>) -> Result<Resp<String>, Error> {
-    let req = serde_urlencoded::from_str::<Req>(req.uri().query().unwrap_or_default())?;
+pub async fn vars(Query(req): Query<Req>) -> Result<Rsp<String>, Error> {
     let vars_path =
         business::path_tool::vars_file_path(req.team_id, req.project_id, &req.file_path);
-    let meta = match std::fs::metadata(&vars_path) {
+    let meta = match tokio::fs::metadata(&vars_path).await {
         Ok(meta) => meta,
         Err(err) => {
             if !matches!(err.kind(), std::io::ErrorKind::NotFound) {
                 tracing::error!("{vars_path} {err}");
             }
-            return Ok(Resp::success("[]".to_string()));
+            return Ok(Rsp::success("[]".to_string()));
         }
     };
     if meta.len() > 500 * 1024 * 1024 {
         return Err(Error::new("vars file too large skip loading").code(Error::CODE_WARNING));
     }
 
-    Ok(Resp::success(std::fs::read_to_string(vars_path)?))
+    Ok(Rsp::success(tokio::fs::read_to_string(vars_path).await?))
 }

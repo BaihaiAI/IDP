@@ -21,8 +21,11 @@ pub(crate) mod app_context;
 pub(crate) mod error;
 pub(crate) mod handler;
 pub(crate) mod kernel_entry;
-pub(crate) mod resp;
+// pub(crate) mod resp;
+// pub(crate) mod route_hyper;
 pub(crate) mod route;
+use std::net::SocketAddr;
+
 pub(crate) use app_context::AppContext;
 pub(crate) use error::Error;
 #[cfg(test)]
@@ -39,10 +42,17 @@ pub async fn main() {
         return;
     }
 
+    let bind_addr = SocketAddr::from((
+        std::net::Ipv4Addr::UNSPECIFIED,
+        business::kernel_manage_port(),
+    ));
+    axum::Server::bind(&bind_addr)
+        // .serve(route::route().into_make_service_with_connect_info::<SocketAddr>())
+        .serve(route::route().into_make_service())
+        .await
+        .unwrap();
+    /*
     let ctx = app_context::AppContext::new();
-    // kernel_manage::app_context::restore_ctx_from_disk(&ctx).await;
-    // tokio::spawn(kernel_manage::app_context::dump_ctx_to_disk_task(ctx.clone(),));
-    // tokio::spawn(kernel_manage::dmesg_monitor::dmesg_watcher(ctx.clone()));
     let service = hyper::service::make_service_fn(move |addr: &hyper::server::conn::AddrStream| {
         let remote_addr = addr.remote_addr();
         // clone once to service
@@ -50,17 +60,14 @@ pub async fn main() {
         async move {
             Ok::<_, std::convert::Infallible>(hyper::service::service_fn(move |req| {
                 // clone again to let closure outlive main thread
-                crate::route::service_route(ctx.clone(), req, remote_addr)
+                crate::route_hyper::service_route(ctx.clone(), req, remote_addr)
             }))
         }
     });
     let server = hyper::Server::bind(
-        &(
-            std::net::Ipv4Addr::UNSPECIFIED,
-            business::kernel_manage_port(),
-        )
-            .into(),
+        &bind_addr,
     )
     .serve(service);
     server.await.unwrap();
+    */
 }

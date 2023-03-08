@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// pub static mut CELL_ID: String = String::new();
-
 use kernel_common::Content;
 
 impl super::KernelApp {

@@ -7,5 +7,7 @@ version.workspace = true
 [dependencies]
 business = { path = "../../common/business" }
 err = { path = "../../common/err" }
+logger = { path = "../../common/logger" }
 
 resp = "1.0.3"
+tracing = "0.1"

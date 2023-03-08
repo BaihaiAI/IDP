@@ -61,7 +61,10 @@ pub async fn delete_file_or_dir(
 
     let only_pipeline_support = false;
     let res = dir_recursive_load(team_id, project_id, path.clone(), only_pipeline_support).await;
-    crate::handler::kernel::shutdown_by_dir_path(project_id, path.clone()).await?;
+    crate::handler::kernel::shutdown_by_project_id_and_kernel_idpnb_starts_with_path(
+        project_id, &path,
+    )
+    .await?;
     let meta = std::fs::metadata(&abs_path)?;
     if meta.is_file() {
         tokio::fs::remove_file(&abs_path).await?;

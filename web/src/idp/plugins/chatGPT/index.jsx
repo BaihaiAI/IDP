@@ -17,7 +17,7 @@ const rightSide = {
   weight: 6
 }
 
-if (process.env.REACT_APP_VERSION === 'SAAS') {
+if (process.env.REACT_APP_VERSION === 'SAAS' || Boolean(process.env.NODE_OPEN)) {
   globalData.register(RegisterApi.right_side_api, {
     rightSide,
     id: `${configJson.fileName}/${configJson.entry}`,

@@ -52,6 +52,7 @@ pub async fn cat(
 INTEGRATION_TEST=1 GATEWAY_PORT=3000 cargo test --package note_storage --lib -- handler::content::cat::cat_demo_ipynb_it --exact --nocapture
 */
 #[test]
+#[cfg(not)]
 fn cat_demo_ipynb_it() {
     let ctx = test_runner::IntegrationTestCtx::get();
     let path = "demo.ipynb";

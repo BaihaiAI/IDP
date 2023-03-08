@@ -33,28 +33,30 @@ pub struct Req {
 }
 
 #[derive(serde::Serialize, Debug)]
-pub struct Rsp {
+pub struct ShutdownRsp {
     kernel: String,
     inode: String,
 }
 
+// #[axum_macros::debug_handler]
 pub async fn post_shutdown_or_restart(
-    ctx: AppContext,
-    req: Request<Body>,
-) -> Result<Resp<Rsp>, Error> {
-    let req = de_hyper_body::<Req>(req).await?;
+    State(ctx): State<AppContext>,
+    Json(req): Json<Req>,
+) -> Result<Rsp<ShutdownRsp>, Error> {
+    // let req = de_hyper_body::<Req>(req).await?;
     shutdown_or_restart(ctx, req).await
 }
 
+#[cfg(not)]
 pub async fn get_shutdown_or_restart(
     ctx: AppContext,
     req: Request<Body>,
-) -> Result<Resp<Rsp>, Error> {
+) -> Result<Rsp<ShutdownRsp>, ErrorTrace> {
     let req = serde_urlencoded::from_str::<Req>(req.uri().query().unwrap_or_default())?;
     shutdown_or_restart(ctx, req).await
 }
 
-pub async fn shutdown_or_restart(ctx: AppContext, req: Req) -> Result<Resp<Rsp>, Error> {
+pub async fn shutdown_or_restart(ctx: AppContext, req: Req) -> Result<Rsp<ShutdownRsp>, Error> {
     let team_id = req.team_id;
     let header = kernel_common::Header {
         path: req.path.clone(),
@@ -76,14 +78,14 @@ pub async fn shutdown_or_restart(ctx: AppContext, req: Req) -> Result<Resp<Rsp>,
         }
         None => {
             if !req.restart {
-                return Err(Error::new("inode not found, maybe kernel has shutdown"));
+                return Err(ErrorTrace::new("already shutdown").code(ErrorTrace::CODE_WARNING));
             }
             req.resource.unwrap_or_default()
         }
     };
 
     if !req.restart {
-        return Ok(Resp::success(Rsp {
+        return Ok(Rsp::success(ShutdownRsp {
             kernel: "".to_string(),
             inode: inode.to_string(),
         }));
@@ -107,7 +109,7 @@ pub async fn shutdown_or_restart(ctx: AppContext, req: Req) -> Result<Resp<Rsp>,
         })
         .await?;
 
-    Ok(Resp::success(Rsp {
+    Ok(Rsp::success(ShutdownRsp {
         kernel: "".to_string(),
         inode: inode.to_string(),
     }))
@@ -115,7 +117,7 @@ pub async fn shutdown_or_restart(ctx: AppContext, req: Req) -> Result<Resp<Rsp>,
 
 #[derive(serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct ShutdownAllReq {
+pub struct ShutdownAllReq {
     project_id: ProjectId,
     #[serde(default)]
     path: String,
@@ -124,11 +126,11 @@ struct ShutdownAllReq {
 
 // - switch env shutdown kernel, path is ""
 // - move/delete folder shutdown kernel, path is folder path
-pub async fn shutdown_all(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Error> {
-    let req = serde_urlencoded::from_str::<ShutdownAllReq>(req.uri().query().unwrap_or_default())?;
-    // serde_urlencoded lib contains url decode
-    // req.path = urlencoding::decode(&req.path)?.to_string();
-    tracing::info!("shutdown_all {req:#?}");
+pub async fn shutdown_all(
+    State(ctx): State<AppContext>,
+    Query(req): Query<ShutdownAllReq>,
+) -> Result<Rsp<()>, Error> {
+    tracing::debug!("shutdown_all {req:#?}");
     let is_shutdown_all_idle_kernel = match req.state {
         Some(state) => {
             if state != "idle" {
@@ -170,20 +172,22 @@ pub async fn shutdown_all(ctx: AppContext, req: Request<Body>) -> Result<Resp<()
             .await?;
     }
     debug!("<-- shutdown_all");
-    Ok(Resp::success(()).message("success"))
+    Ok(Rsp::success(()).message("success"))
 }
 
 #[derive(serde::Deserialize)]
-struct CoreDumpReportReq {
+pub struct CoreDumpReportReq {
     // ip: std::net::Ipv4Addr,
     // pid: u32,
     pod_id: String,
     reason: String,
 }
 
-pub async fn core_dumped_report(ctx: AppContext, req: Request<Body>) -> Result<Resp<()>, Error> {
-    let req =
-        serde_urlencoded::from_str::<CoreDumpReportReq>(req.uri().query().unwrap_or_default())?;
+pub async fn core_dumped_report(
+    State(ctx): State<AppContext>,
+    Query(req): Query<CoreDumpReportReq>,
+) -> Result<Rsp<()>, Error> {
+    // let req = serde_urlencoded::from_str::<CoreDumpReportReq>(req.uri().query().unwrap_or_default())?;
     let (tx, rx) = tokio::sync::oneshot::channel();
     ctx.kernel_entry_ops_tx
         .send(KernelEntryOps::GetAll(tx))
@@ -198,7 +202,7 @@ pub async fn core_dumped_report(ctx: AppContext, req: Request<Body>) -> Result<R
                 .send(KernelOperate::GetState(tx))
                 .await?;
             let state = rx.await?;
-            if matches!(state, State::Paused(_)) {
+            if matches!(state, KernelState::Paused(_)) {
                 continue;
             }
             kernel
@@ -207,7 +211,7 @@ pub async fn core_dumped_report(ctx: AppContext, req: Request<Body>) -> Result<R
                     core_dumped_reason: Some(req.reason),
                 })
                 .await?;
-            return Ok(Resp::success(()).message("success"));
+            return Ok(Rsp::success(()).message("success"));
         }
     }
     Err(ErrorTrace::new("core dump kernel not found"))

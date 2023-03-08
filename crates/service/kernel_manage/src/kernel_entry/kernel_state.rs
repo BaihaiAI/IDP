@@ -16,19 +16,19 @@ use kernel_common::typedef::CellId;
 // use os_utils::resource_usage::sysinfo;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub enum State {
+pub enum KernelState {
     Idle,
     Running(CellId),
     /// paused running cell_id
     Paused(Option<CellId>),
 }
 
-impl State {
+impl KernelState {
     pub fn is_idle(&self) -> bool {
-        matches!(self, State::Idle)
+        matches!(self, KernelState::Idle)
     }
     pub fn is_busy(&self) -> bool {
-        matches!(self, State::Running(_))
+        matches!(self, KernelState::Running(_))
     }
 }
 
@@ -37,7 +37,7 @@ pub struct StateWrapper {
     pub notebook_path: String,
     pub inode: String,
     pub header: kernel_common::Header,
-    pub state: State,
+    pub state: KernelState,
     // pub sys: sysinfo::System,
     // pub gpu_device_count: u32,
 }
@@ -71,7 +71,7 @@ impl StateWrapper {
         let is_busy = self.state.is_busy();
         let pid = <sysinfo::Pid as sysinfo::PidExt<_>>::from_u32(self.pid);
         if !sysinfo::SystemExt::refresh_process(&mut self.sys, pid)
-            && !matches!(self.state, State::Paused { .. })
+            && !matches!(self.state, KernelState::Paused { .. })
         {
             tracing::warn!(
                 "kernel not paused but {:?} pid not found in /proc",
@@ -118,9 +118,9 @@ impl StateWrapper {
                         inode: Some(inode),
                         status: Some(
                             match state {
-                                State::Idle => "idle",
-                                State::Running(_) => "busy",
-                                State::Paused { .. } => "paused",
+                                KernelState::Idle => "idle",
+                                KernelState::Running(_) => "busy",
+                                KernelState::Paused { .. } => "paused",
                             }
                             .to_string(),
                         ),
@@ -143,7 +143,7 @@ impl StateWrapper {
                 // tracing::debug!("after post to pg {:?}", start.elapsed());
             }
         });
-        if matches!(self.state, State::Paused { .. }) {
+        if matches!(self.state, KernelState::Paused { .. }) {
             tracing::info!("state is paused");
         } else if cfg!(not(feature = "tcp")) {
             let mut retry = 0;

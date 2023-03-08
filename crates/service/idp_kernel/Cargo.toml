@@ -15,14 +15,14 @@ kernel_common = { path = "../../common/kernel_common", default-features = false 
 logger = { path = "../../common/logger" }
 os_utils = { path = "../../common/os_utils" }
 
-base64 = "0.20"
+base64.workspace = true
 crossbeam-channel = "0.5"
 libc = "0.2"
-pyo3 = "0.17"
+pyo3 = "0.18"
 serde_json = "1.0"
 tracing = "0.1"
 urlencoding = "2.1"
-ws-tool = { version = "0.6", default-features = false, features = ["sync"] }
+ws-tool = { version = "0.7", default-features = false, features = ["sync"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser"] }
