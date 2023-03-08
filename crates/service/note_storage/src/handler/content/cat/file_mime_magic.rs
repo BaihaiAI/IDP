@@ -17,7 +17,6 @@ use std::path::Path;
 use cache_io::CacheService;
 use common_model::enums::mime::Mimetype;
 use err::ErrorTrace;
-use tokio::io::AsyncReadExt;
 use tracing::debug;
 use tracing::error;
 
@@ -69,10 +68,10 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
 ) -> Result<CatRspBody, ErrorTrace> {
     let path = path.as_ref();
     if mime_type_str.starts_with("image") || mime_type_str == "application/x-riff" {
-        let mut buf = Vec::new();
-        let mut f = tokio::fs::File::open(&path).await?;
-        f.read_to_end(&mut buf).await?;
-        return Ok(CatRspBody::Text(base64::encode(buf)));
+        return Ok(CatRspBody::Text(base64::Engine::encode(
+            &base64::prelude::BASE64_STANDARD,
+            tokio::fs::read(path).await?,
+        )));
     }
     let file_ext = match path.extension() {
         Some(ext) => ext.to_str().unwrap(),
@@ -101,14 +100,22 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
             }
             return Ok(CatRspBody::Text(stdout));
         }
-        return Ok(CatRspBody::Zip(
-            super::get_zip_file_list::preview_zip_file_list(&path.to_path_buf())?,
-        ));
+        let path_ = path.to_path_buf();
+        let zip_nodes = tokio::task::spawn_blocking(move || {
+            super::get_zip_file_list::preview_zip_file_list(&path_)
+        })
+        .await
+        .unwrap()?;
+        return Ok(CatRspBody::Zip(zip_nodes));
     }
     if mime_type_str == "application/gzip" {
-        return Ok(CatRspBody::Zip(
-            super::get_zip_file_list::preview_gzip_file_list(&path.to_path_buf())?,
-        ));
+        let path_ = path.to_path_buf();
+        let zip_nodes = tokio::task::spawn_blocking(move || {
+            super::get_zip_file_list::preview_gzip_file_list(&path_)
+        })
+        .await
+        .unwrap()?;
+        return Ok(CatRspBody::Zip(zip_nodes));
     }
 
     if mime_type_str == "application/x-ipynb+json" || file_ext == "ipynb" || file_ext == "idpnb" {
@@ -120,6 +127,12 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
     if std::fs::metadata(path)?.len() > 10 * 1024 * 1024 {
         return Err(ErrorTrace::new("file too large(>10 MB)").code(ErrorTrace::CODE_WARNING));
     }
+
+    if mime_type_str == "application/x-tar" || mime_type_str == "application/oct-stream" {
+        return Err(ErrorTrace::new(&format!("{mime_type_str} is unsupported"))
+            .code(ErrorTrace::CODE_WARNING));
+    }
+
     // if file not a ipynb, we assume it's a text, otherwise read to UTF-8 garbled binary
     /*
     if mime_type_str.starts_with("text")
@@ -128,22 +141,27 @@ pub async fn cat_file_content_by_mime<P: AsRef<Path>>(
         || mime_type_str.contains("application/x-shellscript")
         || mime_type_str.contains("json")
     */
-    let mut buf = Vec::new();
-    let mut f = tokio::fs::File::open(&path).await?;
-    f.read_to_end(&mut buf).await?;
 
-    match String::from_utf8(buf.clone()) {
+    match tokio::fs::read_to_string(path).await {
         Ok(text) => Ok(CatRspBody::Text(text)),
-        Err(_) => {
-            // gb18030 is superset of gbk contains all chinese char
-            let (text, _encoding, has_error) = encoding_rs::GB18030.decode(&buf);
-            if has_error {
-                Err(
-                    ErrorTrace::new(&format!("unsupported mimetype {mime_type_str}"))
-                        .code(ErrorTrace::CODE_WARNING),
-                )
+        Err(err) => {
+            if err.kind() == std::io::ErrorKind::InvalidData {
+                // gb18030 is superset of gbk contains all chinese char
+                // 99% file is utf-8, if gpk we read twice no performance lose
+                let content = tokio::fs::read(path).await?;
+                let (text, _encoding, has_error) = encoding_rs::GB18030.decode(&content);
+                if has_error {
+                    let (text, _encoding, has_error) = encoding_rs::ISO_8859_5.decode(&content);
+                    if has_error {
+                        Err(ErrorTrace::new("unsupported encoding").code(ErrorTrace::CODE_WARNING))
+                    } else {
+                        Ok(CatRspBody::Text(text.to_string()))
+                    }
+                } else {
+                    Ok(CatRspBody::Text(text.to_string()))
+                }
             } else {
-                Ok(CatRspBody::Text(text.to_string()))
+                Err(ErrorTrace::new(&format!("{err} {path:?}")))
             }
         }
     }
@@ -180,15 +198,11 @@ fn test_file_mime_type() {
         ("1.webp", Mimetype::Image),
         ("empty.sh", Mimetype::Text),
         ("bash.sh", Mimetype::Text),
-        ("1.ipynb", Mimetype::Notebook { num_cells: 0 }),
-        ("bounding-box.idpnb", Mimetype::Notebook { num_cells: 0 }),
-        ("image-augmentation.idpnb", Mimetype::Notebook {
-            num_cells: 0,
-        }),
-        ("image-augmentation.json", Mimetype::Notebook {
-            num_cells: 0,
-        }),
-        ("invalid.idpnb", Mimetype::Notebook { num_cells: 0 }),
+        ("1.ipynb", Mimetype::Notebook),
+        ("bounding-box.idpnb", Mimetype::Notebook),
+        ("image-augmentation.idpnb", Mimetype::Notebook),
+        ("image-augmentation.json", Mimetype::Notebook),
+        ("invalid.idpnb", Mimetype::Notebook),
     ] {
         let path = test_cases_dir.join(filename);
         assert!(path.exists(), "{path:?} not exist");
@@ -235,7 +249,7 @@ pub fn find_mimetype<P: AsRef<Path>>(path: P) -> Result<(Mimetype, String), Erro
         None => "",
     };
     if mime_type_str == "application/x-ipynb+json" || file_ext == "ipynb" || file_ext == "idpnb" {
-        return Ok((Mimetype::Notebook { num_cells: 0 }, mime_type_str));
+        return Ok((Mimetype::Notebook, mime_type_str));
     };
 
     if mime_type_str.starts_with("text")

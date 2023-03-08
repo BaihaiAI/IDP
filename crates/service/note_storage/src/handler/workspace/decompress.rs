@@ -43,11 +43,11 @@ pub async fn unzip(
         extract_to,
     }): Json<DecompressReq>,
 ) -> Result<Rsp<()>, ErrorTrace> {
-    let abs_path = business::path_tool::get_store_full_path(team_id, project_id, &path);
+    let abs_path = business::path_tool::get_store_full_path(team_id, project_id, path);
     let extract_to = match extract_to {
         Some(extract_to) => {
             let extract_to =
-                business::path_tool::get_store_full_path(team_id, project_id, &extract_to);
+                business::path_tool::get_store_full_path(team_id, project_id, extract_to);
             let meta = extract_to.metadata()?;
             if !meta.is_dir() {
                 return Err(ErrorTrace::new("extractTo not a dir"));
@@ -58,11 +58,11 @@ pub async fn unzip(
     };
     let mime = get_mime_type(&abs_path)?;
     if mime == "application/zip" {
-        extract_zip(abs_path, extract_to)?;
+        tokio::task::spawn_blocking(|| extract_zip(abs_path, extract_to)).await??;
         return Ok(Rsp::success(()));
     }
     if mime == "application/gzip" {
-        extract_gzip(abs_path, extract_to)?;
+        tokio::task::spawn_blocking(|| extract_gzip(abs_path, extract_to)).await??;
         return Ok(Rsp::success(()));
     }
     Err(ErrorTrace::new("not a zip archive").code(ErrorTrace::CODE_WARNING))
@@ -98,6 +98,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
             }
         };
         let mut outpath = extract_to.join(outpath);
+        #[cfg(not)]
         {
             let comment = file.comment();
             if !comment.is_empty() {
@@ -111,7 +112,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
                 fs::create_dir(&outpath)?;
             }
         } else {
-            info!(
+            tracing::debug!(
                 "File {} extracted to \"{}\" ({} bytes)",
                 i,
                 outpath.display(),
@@ -119,7 +120,7 @@ fn extract_zip(abs_path: PathBuf, extract_to: PathBuf) -> Result<(), ErrorTrace>
             );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p)?;
+                    fs::create_dir_all(p)?;
                 }
             }
             if outpath.exists() {

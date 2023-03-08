@@ -52,3 +52,10 @@ pub fn get_unused_port() -> libc::in_port_t {
         addr.sin_port
     }
 }
+
+pub fn get_timestamp() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}

@@ -50,7 +50,7 @@ struct Req {
 pub fn find_notebook_cell_id_execute_record(
     _ctx: AppContext,
     req: Request<Body>,
-) -> Result<Resp<Vec<ExecuteRecord>>, Error> {
+) -> Result<Rsp<Vec<ExecuteRecord>>, Error> {
     #[cfg(not)]
     let req = serde_urlencoded::from_str::<Req>(req.uri().query().unwrap_or_default())?;
 
@@ -67,5 +67,5 @@ pub fn find_notebook_cell_id_execute_record(
         }
     }
 
-    Ok(Resp::success(ret))
+    Ok(Rsp::success(ret))
 }

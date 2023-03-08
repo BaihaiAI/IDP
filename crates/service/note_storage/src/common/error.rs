@@ -18,17 +18,7 @@ use std::fmt::Formatter;
 use common_model::service::rsp::Rsp;
 pub use err::ErrorTrace;
 
-/// defined the global error that service need to return.
-
-#[cfg(not)]
-mod status {
-    pub const INVALID_REQUEST_PARAM_ERROR_CODE: u32 = 51_002_002;
-    pub const INVALID_REQUEST_PARAM_ERROR_MSG: &str = "invalid request parameter!";
-    pub const UNDEFINED_ERROR_CODE: u32 = 51_001_002;
-}
-
 #[derive(Debug)]
-// #[allow(deprecated)]
 // #[deprecated]
 pub enum IdpGlobalError {
     NoteError(String),

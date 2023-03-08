@@ -14,10 +14,9 @@
 
 use std::path::Path;
 
-use bb8_redis::redis::AsyncCommands;
 use common_model::entity::notebook::Notebook;
-use err::ErrorTrace;
 use err::Result;
+use redis::AsyncCommands;
 use tracing::debug;
 
 use super::CacheService;
@@ -79,22 +78,13 @@ impl CacheService {
         // get cache
         let key = ipynb_key(path.as_ref().to_str().unwrap(), project_id);
         let mut conn = self.pool.get().await?;
-        let mut hvals = conn.hvals::<_, Vec<String>>(&key).await?;
-
-        // Cache does not exist.Load from disk and put into cache
-        if hvals.is_empty() {
-            // Sync data from disk to cache
+        let key_not_exist_in_redis = conn.exists::<_, u32>(&key).await? == 0;
+        if key_not_exist_in_redis {
             self.synchronize_notebook(&path, project_id).await?;
-
-            // Get the cache again copy it to empty val
-            hvals = conn.hvals(&key).await?;
-            // debug_assert!(!hvals.is_empty());
-
-            if hvals.is_empty() {
-                return Err(ErrorTrace::new(
-                    "panicked notebook cells still empty after read from fs to redis",
-                ));
-            }
+        }
+        let hvals = conn.hvals::<_, Vec<String>>(&key).await?;
+        if hvals.is_empty() {
+            tracing::warn!("no cells or cells is empty");
         }
 
         let notebook = crate::redis_hvals_to_notebook(hvals)?;
@@ -114,7 +104,6 @@ impl CacheService {
 
         if val_vec.is_empty() {
             debug!("cache is_empty!read notebook from disk");
-            //Sync data from disk to cache
             self.synchronize_notebook(&path, project_id).await?;
         }
         Ok(())

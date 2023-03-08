@@ -91,7 +91,9 @@ async fn handle_(
             uri_rewrite_lsp(&mut req);
             proxy_pass(req, client_ip, args.lsp_port).await
         }
-        _ if req_path.starts_with("/a/api/v1/terminal") => {
+        _ if req_path.starts_with("/a/api/v1/terminal")
+            || req_path.starts_with("/a/api/v2/terminal") =>
+        {
             uri_rewrite_remove_region(&mut req);
             proxy_pass(req, client_ip, args.terminal_port).await
         }

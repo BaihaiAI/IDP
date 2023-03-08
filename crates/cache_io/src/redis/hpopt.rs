@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bb8_redis::redis::AsyncCommands;
-use bb8_redis::redis::RedisWrite;
-use bb8_redis::redis::ToRedisArgs;
 use business::business_term::ProjectId;
 use err::ErrorTrace;
 use err::Result;
+use redis::AsyncCommands;
+use redis::RedisWrite;
+use redis::ToRedisArgs;
 
 use crate::CacheService;
 use crate::OptimizeState;

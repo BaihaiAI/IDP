@@ -21,10 +21,9 @@ use std::net::TcpStream;
 use kernel_common::Content;
 use kernel_init::py_stdin::IS_WAITING_INPUT_REPLY;
 use tracing::error;
-use ws_tool::codec::WsStringCodec;
+use ws_tool::codec::StringCodec;
 use ws_tool::errors::WsError;
 use ws_tool::frame::OpCode;
-use ws_tool::stream::WsStream;
 
 // #[cfg(test)]
 // mod test_kernel;
@@ -44,7 +43,7 @@ pub fn main() {
 fn kernel_manage_ws_connect(
     pod_id: String,
     header: kernel_common::Header,
-) -> WsStringCodec<WsStream<TcpStream>> {
+) -> StringCodec<TcpStream> {
     // let team_id = header.team_id;
     // if ipynb path contains chinese, must encoding it
     let json_str = serde_json::to_string(&kernel_common::KernelInfo {
@@ -73,7 +72,7 @@ fn kernel_manage_ws_connect(
     /*
     match ws_tool::ClientBuilder::new(&url)
         .header(kernel_common::KernelInfo::HTTP_HEADER, &ascii_json_str)
-        .connect(WsStringCodec::check_fn)
+        .connect(StringCodec::check_fn)
     {
         Ok(stream) => {
             return stream;
@@ -83,15 +82,15 @@ fn kernel_manage_ws_connect(
             let url = url.replace(&team_id.to_string(), "executor");
             ws_tool::ClientBuilder::new(&url)
                 .header(kernel_common::KernelInfo::HTTP_HEADER, ascii_json_str)
-                .connect(WsStringCodec::check_fn)
+                .connect(StringCodec::check_fn)
                 .expect(&url)
         }
     }
     */
-    ws_tool::ClientBuilder::new(&url)
+    ws_tool::ClientBuilder::new()
         .header(kernel_common::KernelInfo::HTTP_HEADER, ascii_json_str)
-        .connect(WsStringCodec::check_fn)
-        .expect(&url)
+        .connect(url.parse().expect(&url), StringCodec::check_fn)
+        .unwrap()
 }
 
 pub fn main(args: Vec<String>) {
@@ -107,28 +106,18 @@ pub fn main(args: Vec<String>) {
         return;
     }
 
-    #[cfg(not)]
-    if business::kubernetes::is_k8s() && cfg!(target_os = "linux") {
-        _ = std::fs::create_dir("/store/cores");
-        std::process::Command::new("sudo")
-            .arg("bash")
-            .arg("-c")
-            .arg(
-                "echo '/store/core_dumped/core_dumped.%h.%e.%p.%t' > /proc/sys/kernel/core_pattern",
-            )
-            .spawn()
-            .expect("sudo bash spawn error")
-            .wait()
-            .expect("set core_pattern");
-    }
+    std::env::set_var(
+        "SPARK_LOCAL_HOSTNAME",
+        os_utils::network::dns_resolve(&os_utils::get_hostname()).to_string(),
+    );
 
     let header_str = if args[1].starts_with('{') {
         // is json
         args[1].clone()
     } else {
         // is base64
-        let header_str =
-            base64::decode(&args[1]).unwrap_or_else(|_| panic!("base64 decode {}", args[1]));
+        let header_str = base64::Engine::decode(&base64::prelude::BASE64_STANDARD, &args[1])
+            .unwrap_or_else(|_| panic!("base64 decode {}", args[1]));
         String::from_utf8(header_str).expect("String::from_utf8")
     };
     tracing::info!("header_str = {header_str}");

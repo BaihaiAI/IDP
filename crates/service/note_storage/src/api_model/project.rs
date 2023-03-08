@@ -68,6 +68,15 @@ pub struct GitInfoObj {
     pub password: Option<String>,
     pub token: Option<String>,
 }
+impl GitInfoObj {
+    pub fn new() -> Self {
+        GitInfoObj {
+            username: Some("".to_string()),
+            password: Some("".to_string()),
+            token: Some("".to_string()),
+        }
+    }
+}
 
 #[derive(Debug, serde::Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -76,3 +85,39 @@ pub enum ProjectType {
     File,
     Default,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectReq {
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    pub team_id: u64,
+    #[serde(deserialize_with = "serde_helper::de_u64_from_str")]
+    pub creator: u64,
+    pub project_id: business::business_term::ProjectId,
+    pub project_type: ProjectType,
+    pub git_config: Option<GitConfig>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GitConfig {
+    pub git_url: String,
+    pub git_info: GitInfoObj,
+}
+impl GitConfig {
+    pub fn new() -> Self {
+        GitConfig {
+            git_url: "".to_string(),
+            git_info: GitInfoObj::new(),
+        }
+    }
+}
+
+// impl Default for GitConfig {
+//     fn default() -> Self {
+//         GitConfig {
+//             git_url: "".to_string(),
+//             git_info: GitInfoObj::default()
+//         }
+//     }
+// }

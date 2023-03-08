@@ -18,6 +18,7 @@ use err::ErrorTrace;
 
 use super::models::InstalledExtensionResp;
 use super::models::ListReq;
+use super::read_file_lock;
 
 pub async fn installed_list(
     Query(req): Query<ListReq>,
@@ -31,6 +32,7 @@ pub async fn installed_list_handler(
     team_id: u64,
     user_id: u64,
 ) -> Result<Rsp<Vec<InstalledExtensionResp>>, ErrorTrace> {
+    tracing::info!("run installed_list api, {team_id} : {user_id}");
     let extensions_path = business::path_tool::user_extensions_path(team_id, user_id);
     let extension_config_path =
         std::path::Path::new(&extensions_path).join("extensions_config.json");
@@ -63,14 +65,10 @@ pub async fn installed_list_handler(
 async fn get_installed_extensions_config(
     extension_config_path: std::path::PathBuf,
 ) -> Result<Vec<InstalledExtensionResp>, ErrorTrace> {
-    let jdata = match tokio::fs::read_to_string(&extension_config_path).await {
-        Ok(jdata) => jdata,
-        Err(err) => {
-            let path = extension_config_path;
-            tracing::error!("{err},path:{:?}", path);
-            return Err(ErrorTrace::new("extension config no exist"));
-        }
-    };
+    let jdata = read_file_lock(&extension_config_path).await?;
+    if jdata.is_empty() {
+        return Err(ErrorTrace::new("extension_config.json is empty").code(400));
+    }
     match serde_json::from_str::<Vec<InstalledExtensionResp>>(&jdata) {
         Ok(mut content) => {
             for x in content.iter_mut() {
@@ -79,9 +77,9 @@ async fn get_installed_extensions_config(
             content.sort();
             Ok(content)
         }
-        Err(_) => {
-            let empty: Vec<InstalledExtensionResp> = Vec::new();
-            Ok(empty)
+        Err(err) => {
+            tracing::error!("serde_json fail,err:{err}");
+            Err(ErrorTrace::new("serde json extension path failed"))
         }
     }
 }

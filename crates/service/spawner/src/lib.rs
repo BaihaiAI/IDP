@@ -12,17 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod check_pod_idle;
 mod handler;
 mod route;
 
 pub async fn main() {
+    let args = std::env::args().collect::<Vec<_>>();
+    if args.len() == 2 && args[1] == "--version" {
+        println!("{}", env!("VERSION"));
+        return;
+    }
     logger::init_logger();
     tracing::info!("--> spawner::main");
+    check_pod_idle::spawn_check_pod_idle_thread();
     let app = route::init_router();
-    let address =
+    let addr =
         std::net::SocketAddr::from((std::net::Ipv4Addr::UNSPECIFIED, business::spawner_port()));
-    axum::Server::bind(&address)
+    let listener = std::net::TcpListener::bind(addr).unwrap_or_else(|_| panic!("bind {addr} fail"));
+    tracing::info!("after spawner bind {addr}");
+    axum::Server::from_tcp(listener)
+        .expect("axum::Server::from_tcp")
         .serve(app.into_make_service())
         .await
-        .unwrap();
+        .expect("axum serve");
 }

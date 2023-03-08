@@ -19,7 +19,8 @@ use common_model::service::rsp::Rsp;
 use common_tools::cookies_tools::get_cookie_value_by_team_id;
 use common_tools::io_tool::file_writer::FileState;
 
-use crate::api_model::project::ProjectId;
+// use err::ErrorTrace;
+use crate::api_model::project::{ProjectId, ProjectReq};
 use crate::handler::project_handler;
 
 // #[axum_macros::debug_handler]
@@ -39,7 +40,6 @@ pub async fn delete(
     tracing::debug!("access project delete api");
     let id = payload.id;
 
-    // let team_id = 0u64;
     let team_id = get_cookie_value_by_team_id(cookies);
     project_handler::delete(team_id, id).await
 }
@@ -50,4 +50,9 @@ pub async fn ray_chown_fix_one_time(
 ) -> Result<Rsp<()>, ErrorTrace> {
     tracing::debug!("access ray_chown_fix_one_time api");
     project_handler::ray_chown_fix_one_time(pg_pool).await
+}
+
+pub async fn new_v2(Json(project_req): Json<ProjectReq>) -> Result<Rsp<String>, err::ErrorTrace> {
+    let rsp = project_handler::new_project_v2(project_req).await?;
+    Ok(Rsp::success(rsp))
 }

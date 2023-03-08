@@ -34,7 +34,7 @@ async fn parse_req(req: Request<Body>) -> Result<(String, PipReq), Error> {
     Ok((py_path, req))
 }
 
-pub async fn pip_install(req: Request<Body>) -> Result<Resp<()>, Error> {
+pub async fn pip_install(req: Request<Body>) -> Result<Rsp<()>, Error> {
     let (py_path, req) = parse_req(req).await?;
     let package_name = req.package_name;
     let version = req.version;
@@ -46,7 +46,7 @@ pub async fn real_install(
     py_path: String,
     package_name: String,
     version: String,
-) -> Result<Resp<()>, Error> {
+) -> Result<Rsp<()>, Error> {
     // business::team_id_tool::create_team_linux_user_if_not_exist(team_id);
     // let linux_username = business::team_id_tool::team_id_to_user_name(team_id);
 
@@ -71,10 +71,10 @@ pub async fn real_install(
         tracing::error!("command not success");
         return Err(Error::new(&stderr));
     }
-    Ok(Resp::success(()))
+    Ok(Rsp::success(()))
 }
 
-pub async fn pip_uninstall(req: Request<Body>) -> Result<Resp<()>, Error> {
+pub async fn pip_uninstall(req: Request<Body>) -> Result<Rsp<()>, Error> {
     // let team_id = team_id_from_cookie(&req)?;
     let (py_path, req) = parse_req(req).await?;
     // business::team_id_tool::create_team_linux_user_if_not_exist(team_id);
@@ -97,5 +97,5 @@ pub async fn pip_uninstall(req: Request<Body>) -> Result<Resp<()>, Error> {
         tracing::error!("command not success");
         return Err(Error::new(&stderr));
     }
-    Ok(Resp::success(()))
+    Ok(Rsp::success(()))
 }

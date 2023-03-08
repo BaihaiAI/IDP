@@ -20,7 +20,7 @@ use tokio::sync::mpsc::Sender;
 use super::kernel_operate::KernelOperate;
 use super::KernelCtx;
 use crate::app_context::KernelEntryOps;
-use crate::handler::prelude::State;
+use crate::handler::prelude::KernelState;
 
 pub async fn kernel_main_loop(
     mut kernel_ctx: KernelCtx,
@@ -39,7 +39,7 @@ pub async fn kernel_main_loop(
                 kernel_ctx.handle_kernel_execute_resp(resp).await;
             }
             Some(req) = req_receiver.recv() => {
-                if matches!(kernel_ctx.state, State::Idle) || matches!(req.content, kernel_common::Content::InputReply { .. }) {
+                if matches!(kernel_ctx.state, KernelState::Idle) || matches!(req.content, kernel_common::Content::InputReply { .. }) {
                     kernel_ctx.send_req_to_kernel(req).await;
                 } else {
                     // tracing::debug!("kernel is busy push cur req to pending: {:?}", req.header);
@@ -48,8 +48,7 @@ pub async fn kernel_main_loop(
                 // debug!("after req_receiver.recv() {:?}", start.elapsed());
             }
             Some(kernel_operate) = kernel_operate_rx.recv() => {
-                let is_break = kernel_ctx.handle_kernel_operate(kernel_operate).await;
-                if is_break {
+                if kernel_ctx.handle_kernel_operate(kernel_operate).await.is_break() {
                     break;
                 }
             },
@@ -87,7 +86,7 @@ pub async fn kernel_main_loop(
 
 impl KernelCtx {
     fn handle_shutdown_idle_kernel_callback(&self) -> bool {
-        if !matches!(self.state, State::Idle) {
+        if !matches!(self.state, KernelState::Idle) {
             return false;
         }
         let now = std::time::SystemTime::now()

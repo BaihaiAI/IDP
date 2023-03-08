@@ -47,8 +47,8 @@ pub struct Resource {
 impl Default for Resource {
     fn default() -> Self {
         Self {
-            memory: 0.9,
-            num_cpu: 0.9,
+            memory: 1.0,
+            num_cpu: 1.0,
             num_gpu: 0,
             priority: 3,
             pod_id: None,
@@ -224,10 +224,15 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         // bash fork+exec new process to start kernel, prevent defunct after ptrace by criu
         // .arg(format!("(sleep 0; {idp_kernel_path} $0) &"))
         // .stdout(unsafe { std::process::Stdio::from_raw_fd(log_fd) })
-        .arg(base64::encode(serde_json::to_string(&header).unwrap()))
+        .arg(base64::Engine::encode(
+            &base64::prelude::BASE64_STANDARD,
+            serde_json::to_string(&header).unwrap(),
+        ))
         .arg(pod_id.to_string())
         .current_dir(working_directory);
     command.stdin(Stdio::null());
+    // command.stdout(Stdio::null());
+    // command.stderr(Stdio::null());
     let mut env = std::collections::HashMap::new();
     env.insert(
         "MPLBACKEND",
@@ -272,9 +277,11 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
         command.env(k, v);
     }
     let mut child = command.spawn()?;
+    // #[cfg(not)]
     std::thread::Builder::new()
         .name("wait_kernel".to_string())
         .spawn(move || {
+            use std::os::unix::process::ExitStatusExt;
             /*
             let Ok(exit_status) = child.wait() else {
                 panic!("");
@@ -283,13 +290,13 @@ pub fn spawn_kernel_process(header: Header) -> Result<(), ErrorTrace> {
             let exit_status = child.wait().expect("wait kernel child process");
             // let mut reason = format!("{}", exit_status);
             #[cfg(unix)]
-            if let Some(signal) = std::os::unix::process::ExitStatusExt::signal(&exit_status) {
+            if let Some(signal) = exit_status.signal() {
                 let err_msg = if signal == 9 {
                     // /sys/fs/cgroup/user.slice/user-1000.slice/memory.current
                     // dbg!(std::fs::read_to_string("/sys/fs/cgroup/memory/memory.limit_in_bytes").unwrap());
-                    "kernel was Out Of Memory".to_string()
+                    "kill by signal 9 maybe out of memory".to_string()
                 } else {
-                    format!("kernel was kill by signal {signal}")
+                    format!("kill by signal {signal}")
                 };
                 error!("{err_msg}");
                 report_core_dumped_to_kernel_manage(pod_id, &err_msg);
@@ -332,7 +339,7 @@ fn report_core_dumped_to_kernel_manage(pod_id: u64, reason: &str) {
     }
 }
 
-pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
+pub async fn spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
     tracing::info!("--> spawn_kernel_process_tcp");
     if !business::kubernetes::is_k8s() {
         spawn_kernel_process(arg.header)?;
@@ -340,7 +347,6 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
     }
 
     if arg.header.pipeline_opt.is_some() {
-        dbg!(&arg.header.pipeline_opt);
         spawn_pipeline_kernel(arg).await
     } else {
         spawn_non_pipeline_kernel(arg).await
@@ -348,11 +354,27 @@ pub async fn req_submitter_spawn_kernel(arg: SpawnKernel) -> Result<(), ErrorTra
 }
 
 async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
+    #[derive(serde::Deserialize)]
+    struct PodStatusRsp {
+        data: crate::runtime_pod_status::PodStatusRsp,
+    }
+
     let client = reqwest::ClientBuilder::new()
-        .timeout(std::time::Duration::from_secs(75))
+        .timeout(std::time::Duration::from_secs(55))
         .build()?;
     let project_id = arg.header.project_id;
-    if !business::kubernetes::runtime_pod_is_running(project_id) {
+    let runtime_pod_status_url = format!(
+        "http://127.0.0.1:8082/api/v2/idp-note-rs/runtime/status?projectId={project_id}&teamId={}",
+        arg.header.team_id
+    );
+    let pod_status = reqwest::get(&runtime_pod_status_url)
+        .await?
+        .json::<PodStatusRsp>()
+        .await?
+        .data
+        .status;
+    let pod_not_ready = !pod_status.is_running();
+    if pod_not_ready {
         let url = "http://127.0.0.1:9240/cluster/runtime/start".to_string();
         let resp = match client
             .post(&url)
@@ -377,13 +399,34 @@ async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
         };
         let http_status_code = resp.status();
         if !http_status_code.is_success() {
+            #[derive(serde::Deserialize)]
+            struct Rsp {
+                message: String,
+            }
             // can't return pid 0, if use pid 0 then shutdown kernel would shutdown kernel_manage process group
-            let rsp = resp.text().await?;
+            let rsp = resp.json::<Rsp>().await?.message;
             return Err(ErrorTrace::new(&format!("submitter rsp fail {rsp}")));
         }
     }
-    if !business::kubernetes::runtime_pod_is_running(project_id) {
-        std::thread::sleep(std::time::Duration::from_millis(500));
+
+    let mut pod_not_found_count = 0;
+    for _ in 0..(10u64.pow(6)) {
+        let pod_status = reqwest::get(&runtime_pod_status_url)
+            .await?
+            .json::<PodStatusRsp>()
+            .await?
+            .data
+            .status;
+        if pod_status.is_running() {
+            break;
+        }
+        if !pod_status.is_creating_or_running() {
+            pod_not_found_count += 1;
+            if pod_not_found_count > 3 {
+                return Err(ErrorTrace::new("runtime close unexpected when creating"));
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
     }
 
     let start_kernel_url = format!(
@@ -391,21 +434,40 @@ async fn spawn_non_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
         business::kubernetes::runtime_pod_svc(project_id),
         business::spawner_port()
     );
-    let rsp = client
-        .post(start_kernel_url)
-        .json(&arg.header)
-        .send()
-        .await?;
-    if !rsp.status().is_success() {
-        return Err(ErrorTrace::new("spawner rsp fail"));
+    for retry in 0..1000 {
+        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+        info!("start_kernel req {retry}");
+        let rsp = match client
+            .post(&start_kernel_url)
+            .json(&arg.header)
+            .send()
+            .await
+        {
+            Ok(x) => x,
+            Err(err) => {
+                // TCP connection refused
+                error!("{err}");
+                continue;
+            }
+        };
+        let status = rsp.status().as_u16();
+        if rsp.status().is_success() {
+            return Ok(());
+        }
+        // gateway forward request to pod fail
+        if status == 503 {
+            continue;
+        } else {
+            error!("{status}");
+            return Err(ErrorTrace::new("spawn kernel request fail"));
+        }
     }
-
-    Ok(())
+    Err(ErrorTrace::new("spawn kernel request timeout "))
 }
 
 async fn spawn_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
     let url = format!("http://127.0.0.1:{}/start_kernel", 9240);
-    let timeout_secs = 75;
+    let timeout_secs = 55;
     let client = reqwest::ClientBuilder::new()
         .timeout(std::time::Duration::from_secs(timeout_secs))
         .build()?;
@@ -413,7 +475,9 @@ async fn spawn_pipeline_kernel(arg: SpawnKernel) -> Result<(), ErrorTrace> {
         Ok(resp) => resp,
         Err(err) => {
             if err.is_timeout() {
-                return Err(ErrorTrace::new("request to submitter timeout"));
+                return Err(ErrorTrace::new(
+                    "request to submitter spawn pipeline kernel timeout",
+                ));
             }
             return Err(ErrorTrace::new(&err.to_string()));
         }

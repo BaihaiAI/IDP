@@ -12,21 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::ops::ControlFlow;
+
 use kernel_common::typedef::CellId;
 use kernel_common::Content;
 use kernel_common::Message;
 use tokio::sync::oneshot;
 use tracing::error;
 
-use super::kernel_state::State;
+use super::kernel_state::KernelState;
 
 #[derive(Debug)]
 pub enum KernelOperate {
     Interrupt,
     Shutdown { core_dumped_reason: Option<String> },
 
-    GetState(oneshot::Sender<State>),
-    GetPendingReq(oneshot::Sender<(Vec<CellId>, State)>),
+    GetState(oneshot::Sender<KernelState>),
+    GetPendingReq(oneshot::Sender<(Vec<CellId>, KernelState)>),
 
     Pause,
     Resume,
@@ -34,10 +36,13 @@ pub enum KernelOperate {
 
 impl super::KernelCtx {
     // return whether break loop
-    pub async fn handle_kernel_operate(&mut self, kernel_operate: KernelOperate) -> bool {
+    pub async fn handle_kernel_operate(
+        &mut self,
+        kernel_operate: KernelOperate,
+    ) -> ControlFlow<(), ()> {
         let kernel_operate_str = format!("{kernel_operate:?}");
         let start = std::time::Instant::now();
-        let mut is_break = false;
+        let mut is_break = ControlFlow::Continue(());
         match kernel_operate {
             KernelOperate::Interrupt => {
                 tracing::info!("kernel_manage send InterruptRequest");
@@ -62,12 +67,12 @@ impl super::KernelCtx {
                 tracing::info!("KernelOperate::Shutdown");
                 if let Some(core_dumped_reason) = core_dumped_reason {
                     let running_cell_id = match self.state {
-                        State::Running(ref cell_id) => cell_id.clone(),
+                        KernelState::Running(ref cell_id) => cell_id.clone(),
                         _ => self.header.cell_id.clone(),
                     };
                     self.core_dumped_cell_id = Some((running_cell_id, core_dumped_reason))
                 }
-                is_break = true;
+                is_break = ControlFlow::Break(());
             }
             KernelOperate::GetState(tx) => {
                 // if client cancel req, receiver in handler would drop by hyper
@@ -86,24 +91,24 @@ impl super::KernelCtx {
                 }
             }
             KernelOperate::Pause => match self.state {
-                State::Idle => {
-                    self.update(State::Paused(None));
+                KernelState::Idle => {
+                    self.update(KernelState::Paused(None));
                 }
-                State::Running(ref cell_id) => {
+                KernelState::Running(ref cell_id) => {
                     let cell_id = cell_id.clone();
-                    self.update(State::Paused(Some(cell_id)));
+                    self.update(KernelState::Paused(Some(cell_id)));
                 }
                 _ => {
                     tracing::error!("invalid state");
                 }
             },
             KernelOperate::Resume => match self.state {
-                State::Paused(ref running_cell_id_opt) => match running_cell_id_opt {
+                KernelState::Paused(ref running_cell_id_opt) => match running_cell_id_opt {
                     Some(cell_id) => {
                         let cell_id = cell_id.clone();
-                        self.update(State::Running(cell_id));
+                        self.update(KernelState::Running(cell_id));
                     }
-                    None => self.update(State::Idle),
+                    None => self.update(KernelState::Idle),
                 },
                 _ => {
                     tracing::error!("invalid state");

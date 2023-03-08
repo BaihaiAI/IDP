@@ -19,4 +19,8 @@ pub fn init_router() -> axum::Router {
             axum::routing::post(crate::handler::start_kernel::start_kernel),
         )
         .route("/health_check", axum::routing::get(|| async { "" }))
+        .route(
+            "/shutdown_hook",
+            axum::routing::post(crate::check_pod_idle::shutdown_hook),
+        )
 }

@@ -7,7 +7,7 @@ version.workspace = true
 [features]
 default = ["tcp"]
 #fifo = ["kernel_common/fifo", "kernel_common/spawn"]
-tcp = ["dep:reqwest"]
+tcp = []
 
 [dependencies]
 business = { path = "../../common/business" }
@@ -17,19 +17,18 @@ kernel_common = { path = "../../common/kernel_common" }
 logger = { path = "../../common/logger" }
 serde_helper = { path = "../../common/serde_helper" }
 
-# chrono = { version = "0.4.23", features = ["serde"] }
+# hyper = { version = "0.14", features = ["server", "tcp", "http1"] }
+# hyper-tungstenite = "0.9"
+axum = { version = "0.6", features = ["ws", "headers"] }
+# axum-macros = "0.3"
 futures-util = "0.3"
-hyper = { version = "0.14", features = ["server", "tcp", "http1"] }
-hyper-tungstenite = "0.9"
 lru = "0.9"
 reqwest = { version = "0.11", default-features = false, features = [
     "rustls-tls",
     "json",
-], optional = true }
+] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_urlencoded = "0.7"
-# sled = "0.34"
 tokio = { version = "1.0", features = [
     "macros",
     "rt-multi-thread",
@@ -39,8 +38,8 @@ tokio = { version = "1.0", features = [
 tracing = "0.1"
 urlencoding = "2.1"
 
-[dev-dependencies]
-toml = "0.5"
+# [dev-dependencies]
+# toml.workspace = true
 # idp_kernel = { path = "../idp_kernel" }
 
 [build-dependencies]

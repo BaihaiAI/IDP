@@ -15,10 +15,10 @@
 use axum::extract::Query;
 use common_model::Rsp;
 use err::ErrorTrace;
-use tokio::io::AsyncWriteExt;
 
 use super::models::ExtensionReq;
 use crate::handler::extension::models::ExtensionResp;
+use crate::handler::extension::write_file_lock;
 
 pub async fn install(Query(req): Query<ExtensionReq>) -> Result<Rsp<String>, ErrorTrace> {
     install_handler(req.team_id, req.user_id, &req.name, &req.version).await
@@ -61,8 +61,8 @@ pub async fn install_handler(
     contents.push(new_extension_config);
 
     let data = serde_json::to_string(&contents).unwrap();
-    let mut f = tokio::fs::File::create(extensions_config_path).await?;
-    f.write_all(data.as_bytes()).await?;
+
+    write_file_lock(extensions_config_path, data).await?;
 
     Ok(Rsp::success(url))
 }

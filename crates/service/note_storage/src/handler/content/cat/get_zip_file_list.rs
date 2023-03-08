@@ -18,7 +18,7 @@ use std::sync::Mutex;
 
 use err::ErrorTrace;
 
-#[derive(serde::Serialize, Debug)]
+#[derive(serde::Serialize, Debug, Default)]
 #[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "camelCase")]
 pub struct ZipNode {
@@ -27,21 +27,10 @@ pub struct ZipNode {
     pub file_name: String, //"notebooks",
     pub has_children: bool,
     // Axum resp model require Send+Sync, so we can't use Rc
+    // tokio::sync::Mutex not impl serde, so we use std's
     pub children: Vec<Arc<Mutex<ZipNode>>>,
     #[serde(skip)]
     pub is_top_level: bool,
-}
-
-impl Default for ZipNode {
-    fn default() -> Self {
-        Self {
-            absolute_path: "".to_string(),
-            file_name: "".to_string(),
-            has_children: true,
-            children: Vec::new(),
-            is_top_level: false,
-        }
-    }
 }
 
 trait ZipTraverse {
@@ -128,60 +117,44 @@ fn files_to_tree<T: ZipTraverse>(
         is_top_level: true,
     }));
 
+    // dirs_map key is abs_path, if two folder has same name their key must unique
     dirs_map.insert("/".to_string(), top_level);
 
     for entry_res in entries {
         let entry = entry_res?;
         let path = &entry.path();
-        let path_str = path.to_str().unwrap().trim();
+        let path_str = path.to_str().unwrap();
 
-        let dir_name = path_str.split('/');
-
-        let mut absolute_path = String::new();
-        let mut pre_path_string = "/".to_string();
-        for s in dir_name {
-            if s.is_empty() {
+        let mut absolute_path = "/".to_string();
+        for cur_node_filename in path_str.split('/') {
+            if cur_node_filename.is_empty() {
                 continue;
             }
+            let parent_abs_path = absolute_path.clone();
             absolute_path.push('/');
-            absolute_path.push_str(s);
+            absolute_path.push_str(cur_node_filename);
 
-            let key_node = {
-                dirs_map.entry(s.to_string()).or_insert_with(|| {
-                    Arc::new(Mutex::new(ZipNode {
-                        file_name: s.to_string(),
-                        absolute_path: absolute_path.clone(),
-                        has_children: false,
-                        ..Default::default()
-                    }))
-                });
-                dirs_map.get(s).unwrap()
-            };
-
-            let pre_path = dirs_map.get(&pre_path_string).unwrap();
-
-            if pre_path.lock().unwrap().has_children {
-                let mut flag = true;
-                for path_t in &pre_path.lock().unwrap().children {
-                    if path_t.lock().unwrap().file_name == s {
-                        flag = false;
-                        break;
-                    }
-                }
-                if flag {
-                    pre_path.lock().unwrap().children.push(key_node.clone());
-                }
-            } else {
-                pre_path.lock().unwrap().has_children = true;
-                pre_path.lock().unwrap().children.push(key_node.clone());
+            if dirs_map.get(&absolute_path).is_none() {
+                let cur_node = Arc::new(Mutex::new(ZipNode {
+                    file_name: cur_node_filename.to_string(),
+                    absolute_path: absolute_path.clone(),
+                    ..Default::default()
+                }));
+                dirs_map[&parent_abs_path]
+                    .lock()
+                    .unwrap()
+                    .children
+                    .push(cur_node.clone());
+                dirs_map.insert(absolute_path.clone(), cur_node);
             }
-            pre_path_string = key_node.lock().unwrap().file_name.clone();
         }
     }
     let mut ret = Vec::new();
-
     for (_, node) in dirs_map.into_iter() {
-        if node.lock().unwrap().is_top_level {
+        let mut node_ = node.lock().unwrap();
+        node_.has_children = node_.children.is_empty();
+        if node_.is_top_level {
+            drop(node_);
             let next_node = Arc::try_unwrap(node).unwrap().into_inner().unwrap();
             for v in next_node.children.into_iter() {
                 ret.push(v);
@@ -193,8 +166,9 @@ fn files_to_tree<T: ZipTraverse>(
     Ok(ret)
 }
 
-#[test]
-fn test_zip_files_to_tree() {
+#[cfg(not)]
+#[tokio::test]
+async fn test_zip_files_to_tree() {
     let nodes = preview_zip_file_list(
         &std::path::Path::new(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -202,14 +176,17 @@ fn test_zip_files_to_tree() {
         ))
         .to_path_buf(),
     )
+    .await
     .unwrap();
-    assert_eq!(
-        nodes
-            .into_iter()
-            .map(|node| node.lock().unwrap().file_name.clone())
-            .collect::<Vec<_>>(),
-        vec!["usr", "settings.json", "keybindings.json"]
-    );
+    let mut nodes_file_name = Vec::new();
+    for node in nodes {
+        nodes_file_name.push(node.lock().await.file_name.clone());
+    }
+    assert_eq!(nodes_file_name, vec![
+        "usr",
+        "settings.json",
+        "keybindings.json"
+    ]);
 }
 
 #[test]

@@ -102,7 +102,7 @@ pub enum Content {
     // kernel_state is unused
     // KernelState { state: String },
     Duration {
-        code: String,
+        // code: String,
         run_at: u64,
         duration: u32,
     },
@@ -113,6 +113,8 @@ pub enum Content {
         message: String,
     },
     StartKernel {},
+    // when runtime pod shutdown, would send ShutdownKernel to frontend
+    ShutdownKernel {},
     Pong {
         client_id: u128,
     },
@@ -160,7 +162,7 @@ impl Content {
                 }));
             }
             Content::Error(err) => {
-                let err = serde_json::to_value(&err).unwrap();
+                let err = serde_json::to_value(err).unwrap();
                 let mut map = err.as_object().unwrap().to_owned();
                 map.insert(
                     "output_type".to_string(),

@@ -13,10 +13,27 @@
 // limitations under the License.
 
 fn main() {
+    #[cfg(target_os = "macos")]
+    check_macos_python_is_python3();
     println!("cargo:rustc-env=VERSION={}", git_version::version());
     // if crates dir change, run git version to fetch commit hash again
     println!(
         "cargo:rerun-if-changed={}",
         concat!(env!("CARGO_MANIFEST_DIR"), "/../../")
     );
+}
+
+#[cfg(target_os = "macos")]
+fn check_macos_python_is_python3() {
+    fn get_command_output(command: &str, arg: &str) -> String {
+        let output = std::process::Command::new(command)
+            .arg(arg)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{command} {arg}");
+        String::from_utf8(output.stdout).unwrap()
+    }
+    if get_command_output("python", "--version") != get_command_output("python3", "--version") {
+        panic!("python --version and python3 --version is different! can't run in macos");
+    }
 }

@@ -35,7 +35,6 @@ use crate::handler::prelude::team_id_from_cookie;
 use crate::AppContext;
 use crate::Error;
 
-// #[cfg(feature = "tcp")]
 pub fn accept_ws_kernel_connect(
     ctx: AppContext,
     req: Request<Body>,
@@ -56,8 +55,11 @@ pub fn accept_ws_kernel_connect(
                 return;
             }
         };
+        // browser -> kernel
         let (req_tx, mut req_rx) = tokio::sync::mpsc::channel(1000);
+        // kernel -> browser
         let (rsp_tx, _rsp_rx) = tokio::sync::broadcast::channel(1000);
+        let header = kernel_info.header.clone();
         let kernel = KernelWsConn {
             inode,
             kernel_info,
@@ -108,6 +110,12 @@ pub fn accept_ws_kernel_connect(
             }
         }
         // Ok::<(), Error>(())
+        rsp_tx
+            .send(kernel_common::Message {
+                header,
+                content: kernel_common::Content::ShutdownKernel {},
+            })
+            .unwrap();
         tracing::info!("end of ws idp_kernel->kernel_manage");
     });
 

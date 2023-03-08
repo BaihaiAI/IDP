@@ -56,7 +56,7 @@ pub fn convert_pyerr(
         "SyntaxError" | "IndentationError" => {
             let syntax_error = err
                 .value(py)
-                .cast_as::<pyo3::exceptions::PySyntaxError>()
+                .downcast::<pyo3::exceptions::PySyntaxError>()
                 .unwrap();
             let lineno = syntax_error
                 .getattr("lineno")
@@ -173,7 +173,6 @@ fn render_code_location(code: String, lineno: usize, col_opt: Option<usize>) -> 
     let mut rendered_lines = Vec::new();
     for (i, line) in code
         .lines()
-        .into_iter()
         .enumerate()
         .skip((lineno - 1).saturating_sub(5 / 2))
         .take(5)

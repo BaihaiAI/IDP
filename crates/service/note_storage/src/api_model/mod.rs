@@ -13,10 +13,12 @@
 // limitations under the License.
 
 pub mod content;
+pub mod deploy_service;
 pub mod environment;
 pub mod hpopt;
 pub mod pipeline;
 pub mod project;
+pub mod service_log;
 pub mod workspace;
 
 #[derive(serde::Deserialize)]

@@ -2,7 +2,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends import backend_agg
 from kernel_helper import display_publish_matplotlib_figures
 from matplotlib.figure import Figure
-import matplotlib
 
 FigureCanvas = FigureCanvasAgg
 

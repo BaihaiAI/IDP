@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod cookie_team_id;
-mod ipynb_path;
+// mod cookie_team_id;
+// mod ipynb_path;
 
+pub use axum::extract::Json;
+pub use axum::extract::Query;
+pub use axum::extract::State;
 pub use business::business_term::ProjectId;
-pub use cookie_team_id::team_id_from_cookie;
+pub use common_model::service::rsp::Rsp;
 pub use err::ErrorTrace;
-pub use hyper::header;
-pub use hyper::Body;
-pub use hyper::Request;
-pub use hyper::Response;
-pub use hyper::StatusCode;
-pub use ipynb_path::inode_from_query_string;
+// pub use hyper::header;
+// pub use hyper::Body;
+// pub use hyper::Request;
+// pub use hyper::Response;
+// pub use hyper::StatusCode;
 pub use kernel_common::typedef::CellId;
 pub use kernel_common::typedef::Inode;
 pub use kernel_common::typedef::TeamId;
@@ -34,10 +36,17 @@ pub use crate::app_context::AppContext;
 pub use crate::app_context::KernelEntryOps;
 pub use crate::error::Error;
 pub use crate::kernel_entry::kernel_operate::KernelOperate;
-pub use crate::kernel_entry::kernel_state::State;
+pub use crate::kernel_entry::kernel_state::KernelState;
 pub use crate::kernel_entry::KernelEntry;
-pub use crate::resp::Resp;
 
+#[derive(Deserialize, Debug, Clone)]
+#[cfg_attr(test, derive(serde::Serialize))]
+// #[serde(rename_all = "camelCase")]
+pub struct InodeReq {
+    pub inode: Inode,
+}
+
+#[cfg(not)]
 pub async fn de_hyper_body<T: serde::de::DeserializeOwned>(req: Request<Body>) -> Result<T, Error> {
     let body = req.into_body();
     let body = hyper::body::to_bytes(body).await?.to_vec();

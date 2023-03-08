@@ -74,7 +74,6 @@ where
     }
 }
 
-#[cfg(feature = "axum")]
 impl<T> axum::response::IntoResponse for Rsp<T>
 where
     T: Serialize,

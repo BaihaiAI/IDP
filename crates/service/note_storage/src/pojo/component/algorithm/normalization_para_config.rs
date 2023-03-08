@@ -1,4 +1,4 @@
-// Copyright 2022 BaihaiAI, Inc.
+// Copyright 2023 BaihaiAI, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,20 @@
 // limitations under the License.
 
 use serde::Deserialize;
+// use serde::Serialize;
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "PascalCase")]
-pub struct DbConfig {
-    pub db_host: String,
-    pub db_port: u16,
-    pub db_user_name: String,
-    pub db_password: String,
-    pub db_database_name: String,
+/**
+ * Copyright @baihai 2021
+ * User: Zhang Qike
+ * Date: 2023/1/18
+ * Time: 15:28
+ * To change this template use Preferences | Editor | File and Code Templates | Rust File
+ */
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NormalizationParaConfig {
+    pub method: String,
+    pub options: Vec<String>,
+    pub reserved: bool,
 }

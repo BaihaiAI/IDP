@@ -87,7 +87,7 @@ async fn dir_zip_(path: String, team_id: String, project_id: u64) -> Result<Rsp<
         cmd.current_dir(&abs_export_path)
             .arg("-q")
             .arg("-r")
-            .arg(&zip_full_path)
+            .arg(zip_full_path)
             .arg(".")
             .arg("-i")
             .arg("*");

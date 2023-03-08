@@ -18,14 +18,17 @@ use common_model::entity::cell::Updates;
 use tracing::error;
 
 use super::prelude::*;
-use crate::handler::prelude::State;
+use crate::handler::prelude::KernelState;
 
 impl super::KernelCtx {
     pub async fn handle_kernel_execute_resp(&mut self, resp: kernel_common::Message) {
         let start = std::time::Instant::now();
 
         // clear cell output when receive ExecuteInput
-        if matches!(resp.content, Content::ExecuteInput { .. }) {
+        if matches!(
+            resp.content,
+            Content::ExecuteInput { .. } | Content::ClearOutput { .. }
+        ) {
             let team_id = resp.header.team_id;
             let req = PartialUpdateCellReq {
                 path: resp.header.path.clone(),
@@ -59,7 +62,7 @@ impl super::KernelCtx {
         #[allow(unused_variables)]
         if let kernel_common::Content::Duration {
             duration,
-            ref code,
+            // ref code,
             run_at,
         } = resp.content
         {
@@ -106,7 +109,7 @@ impl super::KernelCtx {
         if resp.is_idle() {
             // pending.is_empty means all req send to kernel, does not mean kernel finish all req
             if self.pending_req.is_empty() {
-                self.update(State::Idle);
+                self.update(KernelState::Idle);
             }
             if self.err_cell_ids.contains(&resp.header.cell_id) {
                 tracing::debug!("pop all pending_req and reply stop on error");
@@ -119,7 +122,7 @@ impl super::KernelCtx {
                         error!("{err}");
                     }
                 }
-                self.update(State::Idle);
+                self.update(KernelState::Idle);
             } else if let Some(req) = self.pending_req.pop_front() {
                 self.send_req_to_kernel(req).await;
             }
@@ -141,7 +144,7 @@ impl super::KernelCtx {
         );
     }
 
-    pub fn update(&mut self, new_state: State) {
+    pub fn update(&mut self, new_state: KernelState) {
         if self.state.is_idle() && new_state.is_busy() {
             tracing::info!("kernel_state: idle->busy");
         }

@@ -1,8 +1,8 @@
 [workspace]
 members = [
-    "crates/test_runner",
+    # "crates/test_runner",
     "crates/cache_io",
-    # "crates/notebook_cache",
+    # "crates/kubernetes_client",
     "crates/license_generator",
 
     "crates/service/*",
@@ -17,6 +17,10 @@ license = "Apache-2.0"
 repository = "https://github.com/BaihaiAI/IDP"
 rust-version = "1.64.0"
 version = "1.0.0"
+
+[workspace.dependencies]
+base64 = "0.21"
+toml = "0.7"
 
 [profile.release]
 #lto = true

@@ -76,14 +76,15 @@ impl<'py> ExecuteCodeContext<'py> {
         python_defines: PythonDefines,
         ctx: ExecuteCodeTransportCtx,
     ) -> Self {
-        let code = escape_slash_from_frontend(code);
-        let args = pyo3::types::PyTuple::new(py, &[&code]);
+        // let code = escape_slash_from_frontend(code);
+        let code = code;
+        let args = pyo3::types::PyTuple::new(py, [&code]);
         // AttributeError: module 'IPython' has no attribute 'utils'
         let code = match python_defines.cvt_magic_code.call1(py, args) {
             Ok(code_after_convert) => code_after_convert.to_string(),
             Err(err) => {
                 tracing::error!("{err}");
-                wrap_shell_if_starts_with_exclamation_mark(code)
+                wrap_shell_if_starts_with_exclamation_mark(escape_slash_from_frontend(code))
             }
         };
         Self {
@@ -141,7 +142,6 @@ impl<'py> ExecuteCodeContext<'py> {
 }
 
 fn wrap_shell_if_starts_with_exclamation_mark(code: String) -> String {
-    dbg!(line!());
     if !code.trim_start().starts_with('!') {
         return code;
     }

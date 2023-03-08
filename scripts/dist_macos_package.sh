@@ -17,6 +17,11 @@ cp -r docker_build/store $dir/store
 cp docker_build/init.sh $dir/
 cp docker_build/start.sh $dir/
 # NOTE must run on conda base env to get CONDA_PREFIX without envs
+<<comment
+conda create -y --name py38 python=3.8
+conda create -y --name py39 python=3.9
+conda create -y --name py310 python=3.10
+comment
 for py_minor_version in 8 9 10; do
     #cp $CONDA_PREFIX/envs/py3$py_minor_version/lib/libpython3.$py_minor_version.dylib $dir/store/1/miniconda3/envs/python38/lib/
     cp $CONDA_PREFIX/envs/py3$py_minor_version/lib/libpython3.$py_minor_version.dylib $dir/lib/

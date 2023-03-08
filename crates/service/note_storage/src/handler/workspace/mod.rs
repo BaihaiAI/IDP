@@ -23,6 +23,7 @@ use uuid::Uuid;
 pub mod compress;
 pub mod decompress;
 pub mod example_project;
+mod upload_file_from_url;
 use std::collections::HashMap;
 use std::fs;
 use std::io::SeekFrom;
@@ -56,6 +57,7 @@ use tokio_util::codec::BytesCodec;
 use tokio_util::codec::FramedRead;
 use tracing::info;
 use tracing::instrument;
+pub use upload_file_from_url::upload_from_url;
 
 use self::decompress::rename_path_if_path_exist;
 use super::content::cat::file_mime_magic::find_mimetype;
@@ -119,7 +121,11 @@ pub async fn file_dir_move(
         from_path_str, to_path_str
     );
     //check_whether_file_can_change
-    handler::kernel::shutdown_by_dir_path(project_id, origin_path).await?;
+    handler::kernel::shutdown_by_project_id_and_kernel_idpnb_starts_with_path(
+        project_id,
+        &origin_path,
+    )
+    .await?;
 
     tokio::fs::rename(from_path_str, to_path_str).await?;
 
@@ -449,7 +455,7 @@ pub async fn model_export_dir(
     cmd.current_dir(&abs_export_path)
         .arg("-q")
         .arg("-r")
-        .arg(&dest_full_path)
+        .arg(dest_full_path)
         .arg(".")
         .arg("-i")
         .arg("*");
@@ -744,7 +750,7 @@ pub async fn dir_lazy_load(
 
             // TODO(code_review): should use Path::extension
             let pos_ext = filename.rfind('.');
-            if pos_ext == None {
+            if pos_ext.is_none() {
                 // sub_paths.push(short_path.to_string());
                 let _path_pojo = PathPojo::new(short_path.to_string(), sort_path.to_string());
                 path_pojos.push(_path_pojo);
@@ -1007,7 +1013,7 @@ pub fn recursive_search_child(
                 // sort_path.to_string()); pathbuf_vec.push(_pathbuf_pojo);
 
                 let pos_ext = filename.rfind('.');
-                if pos_ext == None {
+                if pos_ext.is_none() {
                     let _pathbuf_pojo = PathBufPojo::new(
                         path,
                         short_path,
@@ -1262,7 +1268,7 @@ pub fn recursive_global_keyword_search(
                 // info!("in recursiveChild          path: {}", path.display().to_string());
                 if path.is_file() {
                     let pos_ext = filename.rfind('.');
-                    if pos_ext == None {
+                    if pos_ext.is_none() {
                         // info!("in recursiveChild  no ext.");
                         put_result_to_vec(
                             vec,
@@ -1602,7 +1608,8 @@ pub async fn file_rename(
             .message(NB_RENAME_ERROR_MSG));
     }
 
-    handler::kernel::shutdown_by_dir_path(project_id, source).await?;
+    handler::kernel::shutdown_by_project_id_and_kernel_idpnb_starts_with_path(project_id, &source)
+        .await?;
 
     tokio::fs::rename(source_path_str, dest_path_str).await?;
     Ok(Rsp::success(()))
@@ -1941,7 +1948,7 @@ pub fn full_recursive_child(
                     let pipeline_ext = ["ipynb", "idpnb", "py", "sh"];
                     let pos_ext = filename.rfind('.');
                     let mut add_to_node_flag = true;
-                    if pos_ext == None {
+                    if pos_ext.is_none() {
                         if only_pipeline_support {
                             add_to_node_flag = false;
                         }

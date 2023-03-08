@@ -84,6 +84,9 @@ pub(crate) async fn add_req_to_pending(ctx: &AppContext, req: ExecuteCodeReq) ->
                     )
                 }
             }
+            execute_req_model::CellTypeMeta::DataExploration { df_name } => {
+                format!("__import__('baihai_aid').data_exploration({df_name})")
+            }
         };
         kernel_common::Message {
             header: header.clone(),

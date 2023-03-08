@@ -20,6 +20,8 @@ use std::sync::Mutex;
 use err::ErrorTrace;
 use resp::Decoder;
 use resp::Value;
+use tracing::error;
+use tracing::info;
 
 struct AppCtx {
     hashes: HashMap<String, HashMap<String, String>>,
@@ -49,6 +51,7 @@ PING
 ```
 */
 pub fn main() {
+    logger::init_logger();
     let ctx = Mutex::new(AppCtx {
         hashes: HashMap::new(),
         lists: HashMap::new(),
@@ -59,14 +62,22 @@ pub fn main() {
         return;
     }
     let redis_addr = std::net::SocketAddr::from(([0, 0, 0, 0], redis_port));
-    let listener = std::net::TcpListener::bind(&redis_addr).unwrap();
+    let listener = std::net::TcpListener::bind(redis_addr).unwrap();
     std::thread::scope(|s| {
         for stream_res in listener.incoming() {
-            let stream = stream_res.unwrap();
-            s.spawn(|| {
-                if let Err(err) = handle_connection(stream, &ctx) {
-                    eprintln!("{err:#?}");
+            let stream = match stream_res {
+                Ok(stream) => stream,
+                Err(err) => {
+                    error!("stream_res {err}");
+                    continue;
                 }
+            };
+            s.spawn(|| {
+                info!("before handle_connection");
+                if let Err(err) = handle_connection(stream, &ctx) {
+                    error!("handle_connection {err}");
+                }
+                info!("after  handle_connection");
             });
         }
     });
@@ -88,7 +99,7 @@ fn handle_connection(stream: std::net::TcpStream, ctx: &Ctx) -> Result<(), Error
     let mut decoder = Decoder::new(BufReader::new(stream));
     loop {
         // if stream is non-blocking IO, should sleep to prevent CPU busy-wait
-        std::thread::sleep(std::time::Duration::from_millis(20));
+        std::thread::sleep(std::time::Duration::from_millis(50));
         let mut req_args = {
             // try reading from tcp stream
             let req = match decoder.decode() {
@@ -137,6 +148,16 @@ fn handle_connection(stream: std::net::TcpStream, ctx: &Ctx) -> Result<(), Error
                 let mut ctx = ctx.lock().unwrap();
                 let hvals_remove = ctx.hashes.remove(&req_args[0]);
                 if hvals_remove.is_some() {
+                    ":1\r\n".to_string().into_bytes()
+                } else {
+                    ":0\r\n".to_string().into_bytes()
+                }
+            }
+            "exists" => {
+                let mut req_args = req_args.into_iter();
+                let redis_key = req_args.next().unwrap();
+                let ctx = ctx.lock().unwrap();
+                if ctx.hashes.contains_key(&redis_key) {
                     ":1\r\n".to_string().into_bytes()
                 } else {
                     ":0\r\n".to_string().into_bytes()

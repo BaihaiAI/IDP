@@ -113,7 +113,7 @@ pub async fn get_package_map(project_info_map: ProjectInfoMap, saas_flag: bool) 
                 let pip_list_vec = match pip_list_vec {
                     Ok(some) => some,
                     Err(err) => {
-                        tracing::error!("{:#?}", err);
+                        tracing::error!("{err}");
                         break 'outer;
                     }
                 };

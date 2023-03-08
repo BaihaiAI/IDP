@@ -64,7 +64,7 @@ impl super::KernelApp {
         if !is_pipeline {
             if let Err(err) = self.python_defines.load_or_skip.call1(
                 py,
-                pyo3::types::PyTuple::new(py, &[&session_file_path, enable_checkpoint]),
+                pyo3::types::PyTuple::new(py, [&session_file_path, enable_checkpoint]),
             ) {
                 tracing::warn!("load_or_skip {err}");
             };
@@ -80,7 +80,7 @@ impl super::KernelApp {
         );
 
         let mut execute_ctx = crate::execute_code::execute_code_context::ExecuteCodeContext::new(
-            req.code.clone(),
+            req.code,
             py,
             self.python_defines.clone(),
             self.ctx.clone(),
@@ -96,11 +96,14 @@ impl super::KernelApp {
                 //     warn!("flush matplotlib figures error: {err}");
                 // }
                 // execute_ctx.flush_matplotlib_flag = false;
-                if let Err(err) =
-                    execute_ctx
-                        .py
-                        .run("__import__('baihai_matplotlib_backend').show()", None, None)
-                {
+                if let Err(err) = execute_ctx.py.run(
+                    "try:
+    __import__('baihai_matplotlib_backend').show()
+except ModuleNotFoundError:
+    pass",
+                    None,
+                    None,
+                ) {
                     error!("after_run flush_figures {err}");
                 }
                 self.publish_content(Content::ExecuteReply(ExecuteReply {
@@ -140,7 +143,7 @@ impl super::KernelApp {
         if !is_pipeline {
             if let Err(err) = self.python_defines.after_run.call1(
                 py,
-                pyo3::types::PyTuple::new(py, &[
+                pyo3::types::PyTuple::new(py, [
                     &session_file_path,
                     &vars_file_path,
                     enable_checkpoint,
@@ -153,7 +156,7 @@ impl super::KernelApp {
         self.publish_content(Content::Duration {
             run_at: run_at as u64,
             duration: start.elapsed().as_millis() as u32,
-            code: req.code,
+            // code: req.code,
         });
 
         // ray cluster worker flush stdout has a delay to header, frontend would receive stdout after idle/duration msg

@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use axum::body::StreamBody;
 use axum::extract::Json;
+use axum::extract::State;
 use common_model::service::rsp::CODE_FAIL;
 use common_model::Rsp;
 use futures::stream::Stream;
+use tokio::sync::Mutex;
+
+type ProjectInfoMap = Arc<Mutex<HashMap<String, HashMap<String, String>>>>;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,18 +36,10 @@ pub struct PipInstallReq {
     pub version: String,
 }
 
-/*
-curl --location --request POST 'http://localhost:8082/api/v2/idp-note-rs/package/install' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "teamId": "1565387256278454272",
-    "projectId": "100",
-    "packageName": "tensorflow-gpu",
-    "version": "2.9.2"
-}'
-*/
 /// TODO cancel pip install command if frontend cancel request
+#[axum_macros::debug_handler]
 pub async fn pip_install(
+    State((_pg_option, project_info_map)): State<(Option<sqlx::PgPool>, ProjectInfoMap)>,
     Json(PipInstallReq {
         package_name,
         project_id,
@@ -64,6 +63,14 @@ pub async fn pip_install(
         match cmd.output().await {
             Ok(output) => {
                 if output.status.success() {
+                    {
+                        let project_info_key = format!("{team_id}+{project_id}");
+                        if let Some(package_map) =
+                            project_info_map.lock().await.get_mut(&project_info_key)
+                        {
+                            package_map.insert(package_name, version);
+                        }
+                    }
                     if let Err(err) = tx
                         .send(serde_json::to_string(&Rsp::success(())).unwrap())
                         .await

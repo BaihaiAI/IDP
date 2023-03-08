@@ -113,12 +113,18 @@ def fake_shell(cmd):
 # Why IdpInteractiveShell not inherit IPython.core.interactiveshell.InteractiveShell
 # Idp not require user install ipython
 class IdpInteractiveShell:
+    # display_formatter = DisplayFormatter()
     def __init__(self) -> None:
-        # branch 7.34.0 IPython/core/display.py:311
-        self.display_formatter = DisplayFormatter()
+        try:
+            from IPython.core.formatters import DisplayFormatter
+            # branch 7.34.0 IPython/core/display.py:311
+            self.display_formatter = DisplayFormatter()
+        except ModuleNotFoundError:
+            self.display_formatter = IdpDisplayFormatter()
         self.display_pub = DisplayPub()
         # part of ipython/traitlets required API
         self.this_class = IdpInteractiveShell
+        self.events = EventManager()
 
     def system(self, cmd: str):
         # system can't get stdout so we use subprocess
@@ -158,8 +164,8 @@ class IdpInteractiveShell:
         pass
 
     # part of ipython required API
-    # def register_post_execute(self, func):
-    #     pass
+    def register_post_execute(self, func):
+        pass
     
     # part of ipython/traitlets required API
     # def subclass_init(self, cls):
@@ -168,7 +174,26 @@ class IdpInteractiveShell:
     #     # cls.subclass_init()
     #     pass
 
-class DisplayFormatter:
+class EventManager():
+    def register(self, event, function):
+        pass
+    def unregister(self, event, function):
+        pass
+    def trigger(self, event, *args, **kwargs):
+        pass
+
+class IdpDisplayFormatter:
+    try:
+        from IPython.core.formatters import SVGFormatter, PNGFormatter, JPEGFormatter, PDFFormatter
+        formatters = {
+            "image/svg+xml": SVGFormatter,
+            "image/png": PNGFormatter,
+            "image/jpeg": JPEGFormatter,
+            "application/pdf": PDFFormatter,
+        }
+    except ModuleNotFoundError:
+        formatters = {}
+    type_printers = dict()
     # return format_dict, metadata_dict
     def format(self, obj, include=None, exclude=None):
         # object handled itself, don't proceed

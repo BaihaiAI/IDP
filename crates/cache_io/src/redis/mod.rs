@@ -22,10 +22,8 @@ pub mod snapshot;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use bb8_redis::bb8;
-use bb8_redis::redis;
-use bb8_redis::RedisConnectionManager;
 use err::ErrorTrace;
+use redis::aio::ConnectionManager;
 use redis::AsyncCommands;
 use redis::Value;
 use tokio::sync::Mutex;
@@ -34,9 +32,30 @@ use tokio::sync::RwLock;
 use crate::RefreshDto;
 
 #[derive(Clone)]
+pub struct Pool {
+    pool: ConnectionManager,
+}
+
+impl Pool {
+    async fn new(redis_url: &str) -> Self {
+        let client = redis::Client::open(redis_url).expect("redis::Client::open");
+        Self {
+            pool: ConnectionManager::new(client)
+                .await
+                .expect("redis ConnectionManager::new"),
+        }
+    }
+    #[allow(clippy::unused_async)]
+    async fn get(&self) -> Result<ConnectionManager, ErrorTrace> {
+        Ok(self.pool.clone())
+    }
+}
+
+#[derive(Clone)]
 pub struct CacheService {
     // pub(crate) connection: redis::aio::MultiplexedConnection,
-    pub(crate) pool: bb8_redis::bb8::Pool<bb8_redis::RedisConnectionManager>,
+    // pub(crate) pool: bb8_redis::bb8::Pool<bb8_redis::RedisConnectionManager>,
+    pub(crate) pool: Pool,
     pub(crate) refresh_sender: tokio::sync::mpsc::Sender<RefreshDto>,
     // (path, cell_id)
     #[allow(clippy::type_complexity)]
@@ -60,31 +79,13 @@ impl CacheService {
         if cfg!(debug_assertions) {
             tracing::debug!("redis_url = {redis_url}");
         }
-        let mut retry = 0;
-        let manager = loop {
-            match RedisConnectionManager::new(&*redis_url) {
-                Ok(manager) => break manager,
-                Err(err) => {
-                    tracing::error!("{err}");
-                    retry += 1;
-                    if retry > 10 {
-                        panic!("{err}");
-                    }
-                }
-            }
-        };
-        let pool = bb8::Pool::builder()
-            .connection_timeout(std::time::Duration::from_secs(35))
-            .max_size(200)
-            .build(manager)
-            .await
-            .expect("redis pool build err");
 
+        let pool = Pool::new(&redis_url).await;
         let (refresh_sender, refresh_receiver) = tokio::sync::mpsc::channel::<RefreshDto>(30);
 
         let mut conn = pool.get().await?;
         let pong = redis::cmd("PING")
-            .query_async::<_, String>(&mut *conn)
+            .query_async::<_, String>(&mut conn)
             .await
             .expect("redis send ping fail");
         drop(conn);

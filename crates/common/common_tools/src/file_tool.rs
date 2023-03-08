@@ -22,7 +22,6 @@ use err::ErrorTrace;
 /// write large text file to NFS, prevent pod/process/NFS down while on writing and lose data
 /// so we write to temp file on NFS first, and mv to target path on NFS
 /// make sure 100% data write success
-#[tracing::instrument(skip(content))]
 pub async fn write_large_to_nfs(
     path: &str,
     content: String,
@@ -50,8 +49,9 @@ pub async fn write_large_to_nfs(
     }
     */
     let write_bytes = match file_type {
-        Mimetype::Image => base64::decode(content)?,
-        Mimetype::Notebook { num_cells } => {
+        Mimetype::Image => base64::Engine::decode(&base64::prelude::BASE64_STANDARD, content)?,
+        Mimetype::Notebook => {
+            #[cfg(not)]
             if std::path::Path::new(path).exists() {
                 // if update old file on fs, if create new file on fs doesn't need to check cell lose
                 let old_notebook = read_notebook_from_disk(path).await?;
@@ -96,18 +96,10 @@ pub async fn write_notebook_to_disk<P: AsRef<Path>>(
     path: P,
     notebook: &Notebook,
 ) -> Result<(), ErrorTrace> {
-    if notebook.cells.is_empty() {
-        return Err(ErrorTrace::new("write_notebook_to_disk: no cells to write"));
-    }
-    // if notebook.cells.len() == 1 && notebook.cells[0].source.is_empty() {
-    //     tracing::warn!("panicked? notebook only one empty cell write to fs");
-    // }
     write_large_to_nfs(
         path.as_ref().to_str().unwrap(),
         serde_json::to_string_pretty(&notebook)?,
-        Mimetype::Notebook {
-            num_cells: notebook.cells.len(),
-        },
+        Mimetype::Notebook,
     )
     .await
 }
@@ -115,12 +107,16 @@ pub async fn write_notebook_to_disk<P: AsRef<Path>>(
 pub async fn read_notebook_from_disk(abs_path: &str) -> Result<Notebook, ErrorTrace> {
     let notebook_str = match tokio::fs::read_to_string(abs_path).await {
         Ok(str) => str,
-        Err(_) => {
-            let mut buf = Vec::new();
-            let mut f = std::fs::File::open(abs_path)
-                .map_err(|err| ErrorTrace::new(&format!("{abs_path} {err}")))?;
-            std::io::Read::read_to_end(&mut f, &mut buf)?;
-            encoding_rs::GB18030.decode(&buf).0.to_string()
+        Err(err) => {
+            if err.kind() == std::io::ErrorKind::InvalidData {
+                // 99% file is utf-8, if gpk we read twice no performance lose
+                encoding_rs::GB18030
+                    .decode(&tokio::fs::read(abs_path).await?)
+                    .0
+                    .to_string()
+            } else {
+                return Err(ErrorTrace::new(&format!("{abs_path} {err}")));
+            }
         }
     };
     let notebook = match serde_json::from_str::<Notebook>(&notebook_str) {
@@ -133,16 +129,16 @@ pub async fn read_notebook_from_disk(abs_path: &str) -> Result<Notebook, ErrorTr
         }
     };
 
-    if notebook.cells.is_empty() {
-        return Err(ErrorTrace::new(&format!("empty cells {abs_path}")));
-    }
+    // if notebook.cells.is_empty() {
+    //     return Err(ErrorTrace::new(&format!("empty cells {abs_path}")));
+    // }
 
     // add index/cell_id to all cells before fs->redis
     // first cell index can't be 0
     let cells = (1usize..)
         .zip(notebook.cells.into_iter())
         .map(|(index, mut cell)| {
-            if cell.id() == None {
+            if cell.id().is_none() {
                 let cell_id = common_model::entity::cell::Uuid::new_v4();
                 tracing::warn!(
                     "this cell has no cell_id:{:?}, new uuid str:{}",

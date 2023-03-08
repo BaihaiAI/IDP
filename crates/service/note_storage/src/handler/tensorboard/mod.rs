@@ -42,7 +42,7 @@ pub struct TensorboardEntry {
 /// e.g. hostname is idp-develop-b-executor-7b77cd4c6c-n866m port is 9090
 /// tbid is 7b77cd4c6c-n866m-9090
 pub(crate) fn tbid(hostname: &str, port: u16) -> String {
-    let mut host = hostname.rsplit('-').take(2).into_iter().collect::<Vec<_>>();
+    let mut host = hostname.rsplit('-').take(2).collect::<Vec<_>>();
     host.reverse();
     let host = host.join("-");
     format!("{host}-{port}")
@@ -51,7 +51,7 @@ pub(crate) fn tbid(hostname: &str, port: u16) -> String {
 #[test]
 fn test_tbid() {
     let hostname = "idp-develop-b-executor-7b77cd4c6c-n866m";
-    let mut host = hostname.rsplit('-').take(2).into_iter().collect::<Vec<_>>();
+    let mut host = hostname.rsplit('-').take(2).collect::<Vec<_>>();
     host.reverse();
     let host = host.join("-");
     assert_eq!(host, "7b77cd4c6c-n866m");

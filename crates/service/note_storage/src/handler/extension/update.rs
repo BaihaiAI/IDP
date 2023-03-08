@@ -16,11 +16,54 @@ use axum::extract::Json;
 use common_model::Rsp;
 use err::ErrorTrace;
 
-use super::install::install_handler;
 use super::models::ExtensionReq;
-use super::uninstall::uninstall_handler;
+use crate::handler::extension::models::ExtensionResp;
+use crate::handler::extension::write_file_lock;
 
 pub async fn update(Json(req): Json<ExtensionReq>) -> Result<Rsp<String>, ErrorTrace> {
-    uninstall_handler(req.team_id, req.user_id, &req.name).await?;
-    install_handler(req.team_id, req.user_id, &req.name, &req.version).await
+    tracing::info!("run update extensions,{:?}", req);
+    update_handler(req).await
+}
+
+async fn update_handler(req: ExtensionReq) -> Result<Rsp<String>, ErrorTrace> {
+    let installed_extensions_path =
+        business::path_tool::user_extensions_path(req.team_id, req.user_id);
+    let extension_name = format!("{}/{}", req.name, req.version);
+    tracing::info!("run extensions update path:{installed_extensions_path} ,name:{extension_name}");
+    let recommended_extension_path =
+        business::path_tool::recommended_extensions().join(&extension_name);
+
+    let extension_path = format!("{}/{}", installed_extensions_path, req.name);
+    common_tools::command_tools::copy(
+        recommended_extension_path.to_str().unwrap(),
+        &extension_path,
+    )
+    .await?;
+
+    let jdata = tokio::fs::read_to_string(recommended_extension_path.join("config.json")).await?;
+    let mut new_extension_config = serde_json::from_str::<ExtensionResp>(&jdata)?;
+
+    let url = format!("{installed_extensions_path}/{extension_name}/");
+    new_extension_config.url = Some(url.clone());
+
+    let extensions_config_path =
+        std::path::Path::new(&installed_extensions_path).join("extensions_config.json");
+
+    let contents = super::get_extensions_config(&extensions_config_path).await?;
+
+    let contents = contents
+        .into_iter()
+        .map(|mut extension| {
+            if extension.name == req.name {
+                extension = new_extension_config.to_owned();
+            };
+            extension
+        })
+        .collect::<Vec<ExtensionResp>>();
+
+    let data = serde_json::to_string(&contents).unwrap();
+
+    write_file_lock(extensions_config_path, data).await?;
+
+    Ok(Rsp::success(url))
 }

@@ -98,10 +98,10 @@ pub async fn run_git_clone(
     target_path: String,
     id: String,
 ) -> Result<(), err::ErrorTrace> {
-    let mut cmd = std::process::Command::new("git");
+    let mut cmd = tokio::process::Command::new("git");
     cmd.arg("clone").arg(url).arg(target_path);
     tracing::info!("cmd = {cmd:?}");
-    let output = cmd.output()?;
+    let output = cmd.output().await?;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         tracing::error!("{stderr}");
