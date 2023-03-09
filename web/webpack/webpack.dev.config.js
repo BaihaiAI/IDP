@@ -11,7 +11,7 @@ const webpackConfig = require('../config/webpack-config');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const publicPath = '/';
-const entry = Boolean(process.env.NODE_OPEN) ? "./src/open.jsx" : './src/index.jsx';
+const entry = Boolean(process.env.NODE_OPEN) ? "./src/openDev.jsx" : './src/index.jsx';
 const output = {
     path: path.join(__dirname, "../dist"),
     filename: `js/[name].[hash].js`,

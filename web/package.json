@@ -112,6 +112,7 @@
 		"@antv/x6-react-components": "^1.1.15",
 		"@antv/x6-react-shape": "^1.5.2",
 		"@babel/polyfill": "^7.12.1",
+		"@babel/preset-flow": "^7.18.6",
 		"@craco/craco": "^6.3.0",
 		"@mobx-devtools/tools": "^0.0.4",
 		"@monaco-editor/react": "^4.2.2",

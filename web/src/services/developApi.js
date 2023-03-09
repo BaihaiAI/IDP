@@ -46,7 +46,9 @@ function loadScript(params) {
 }
 
 function loadLocalSystemScript(params) {
-    return process.env.NODE === 'pro' ? `/child/idpStudio-idp/extension/${params.url}/${params.entry}` : `//localhost:${rescriptsrc.devServer().port}/extension/${params.url}/${params.entry}`;
+  return process.env.NODE === 'pro' 
+  ? (Boolean(process.env.NODE_OPEN) ? `/extension/${params.url}/${params.entry}` : `/child/idpStudio-idp/extension/${params.url}/${params.entry}`) 
+  : `//localhost:${rescriptsrc.devServer().port}/extension/${params.url}/${params.entry}`;
 }
 
 async function updatePluginVersion(version, name) {

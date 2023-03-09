@@ -68,43 +68,47 @@ async function updateSizeAction(it) {
 
 async function loadExtensions(callback) {
     try {
-        // let data = await developApi.installedList();
         const { data } = await axios.get(`${noteApiPath2}/extensions/installedList`, { params: { teamId, userId } });
         data.data = devLoadPlugins(data.data);
         if (data.code === 21000000) {
-            // 判断逻辑：以localPlugins为主，为辅install接口为辅
-            Object.values(localPlugins).forEach(it => {
-                const flgObjArray = data.data.filter(its => it.name == its.name);
-                if (flgObjArray.length > 0) {
-                    flgObjArray[0].local = true; // 置为空，则过滤不加载
-                    flgObjArray[0].url = it.name;
-                    flgObjArray[0].optionalVersion = [];
-                    flgObjArray[0].visible = false;
-                } else {
-                    data.data.push({
-                        name: it.name,
-                        optionalVersion: [],
-                        url: it.name,
-                        title: it.name,
-                        visible: false,
-                        local: true
-                    });
-                }
-            });
-            if (data.data.length > 0) {
-                const res = data.data.filter(it => it.url);
-                updatePluginVersionApi(res, (result) => {
-                    loadScriptApi(result, callback);
-                    LoadPlugins.updatePluginSize(result.length);
-                })
-            } else {
-                callback()
-            }
+            initRequetPluginData(localPlugins, data.data, callback);
         } else {
             callback();
         }
     } catch (error) {
-        callback();
+        initRequetPluginData(localPlugins, [], callback);
+    }
+}
+
+function initRequetPluginData(localPlugins = [], data = [], callback) {
+    // 判断逻辑：以localPlugins为主，为辅install接口为辅
+    Object.values(localPlugins).forEach(it => {
+        const flgObjArray = data.filter(its => it.name == its.name);
+        if (flgObjArray.length > 0) {
+            flgObjArray[0].local = true; // 置为空，则过滤不加载
+            flgObjArray[0].url = it.name;
+            flgObjArray[0].optionalVersion = [];
+            flgObjArray[0].visible = false;
+        } else {
+            data.push({
+                name: it.name,
+                optionalVersion: [],
+                url: it.name,
+                title: it.name,
+                entry: it.entry,
+                visible: false,
+                local: true
+            });
+        }
+    });
+    if (data.length > 0) {
+        const res = data.filter(it => it.url);
+        updatePluginVersionApi(res, (result) => {
+            loadScriptApi(result, callback);
+            LoadPlugins.updatePluginSize(result.length);
+        })
+    } else {
+        callback()
     }
 }
 

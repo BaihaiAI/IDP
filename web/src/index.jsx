@@ -13,23 +13,7 @@ import { ConfigProvider } from "antd";
 import globalData from "idpStudio/idp/global";
 import IdpIdle from '@/components/IdleDetector';
 
-// 用那个放开那个插件
 const loadDevPlugins = [
-    require('../extension/centre/src/index'),
-    // require('../extension/contact/src/index'),
-    require('../extension/dataSet/src/index'),
-    // require('../extension/environment/src/index'),
-    // require('../extension/feedback/src/index'),
-    // require('../extension/monitor/src/index'),
-    // require('../extension/networkstatus/src/index'),
-    // require('../extension/notification/src/index'),
-    // require('../extension/teams/src/index'),
-    // require('../extension/tensorboard/src/index'),
-    // require('../extension/usage/src/index'),
-    // require('../extension/workflow/src/index'),
-    require("../extension/modelwarenhouse/src/index"),
-    // require("../extension/optuna/src/index"),
-    // require("../extension/colony/src/index"),
 ];
 
 loadDevPlugins.forEach(module => {
