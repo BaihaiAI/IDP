@@ -1,0 +1,63 @@
+# Awesome Open Source LLMs
+
+A list of open-source LLM (Large Language Model) projects and the important news of LLMs.
+
+# Open source LLMs
+
+## 1. LLaMA
+
+LLaMA is a foundational Large Language Model released by Meta. It is featured for “smaller while performant”, enabling users who don’t have access to large amounts of infrastructure to study LLMs.
+
+LLaMA is available at 4 sizes：7B, 13B, 33B, and 65B parameters.
+
+LLaMA Inference Repository: [https://github.com/facebookresearch/llama](https://github.com/facebookresearch/llama)
+
+LLaMA quick start with Python: [https://github.com/BaihaiAI/IDP/blob/main/AIGC/LLaMA.ipynb](https://github.com/BaihaiAI/IDP/blob/main/AIGC/LLaMA.ipynb)
+
+### 1) **ChatLLaMA**
+
+Three days after the launch of LLaMA, startup AI company Nebuly AI has built ChatLLaMA.
+
+ChatLLaMA is a library that allows you to create hyper-personalized ChatGPT-like assistants using your own data and the least amount of compute possible.
+
+**Project Repo**: [https://github.com/nebuly-ai/nebullvm](https://github.com/nebuly-ai/nebullvm)
+
+![Untitled](Awesome%20Open%20Source%20LLMs%209ec862ab0e9d4f1eb44a3012a6a77241/Untitled.png)
+
+### **2) Standford Alpaca**
+
+Alpaca is an open source instruction-following language model, fine-tuned from LLaMA. According to Standford HAI, “*Alpaca 7B behaves similarly to OpenAI’s text-davinci-003, while being surprisingly small and easy/cheap to reproduce. ”*
+
+Project repo: [https://github.com/tatsu-lab/stanford_alpaca](https://github.com/tatsu-lab/stanford_alpaca)
+
+Trial: [https://alpaca-ai-custom5.ngrok.io/](https://alpaca-ai-custom5.ngrok.io/)
+
+![Untitled](Awesome%20Open%20Source%20LLMs%209ec862ab0e9d4f1eb44a3012a6a77241/Untitled%201.png)
+
+## 2. **ChatGLM-6B**
+
+ChatGLM-6B is a bilingual language model, which can be run on a single consumer-grade GPU.
+
+The model is based on the GLM architecture and has 6.2 billion parameters.
+
+ChatGLM-6B is trained on 1T identifiers in both Chinese and English, supported by supervised fine-tuning, feedback self-help, and human feedback reinforcement learning. Thus, though ChatGLM-6B is not as large as the 100 billion model, it has greatly reduced the inference cost, improved the efficiency, and has been able to generate responses that are quite consistent with human preferences. 
+
+Project repo: [https://github.com/THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B)
+
+![Untitled](Awesome%20Open%20Source%20LLMs%209ec862ab0e9d4f1eb44a3012a6a77241/Untitled%202.png)
+
+## 3. **OpenChatKit**
+
+**OpenChatKit is known as the  “Open source ChatGPT alternative”.**
+
+OpenChatkit is an open-source base to create both specialized and general purpose chatbots, supporting both English and Chinese. The kit includes an instruction-tuned 20 billion parameter language model, a 6 billion parameter moderation model, and an extensible retrieval system for including up-to-date responses from custom repositories.
+
+Currently, the model do good at multiple tasks, including summary, question answering with context, message extraction, text classification, etc.
+
+But it's not quite as good at creative writing, coding, multi-rounds conversations and being sluggish when switching topics ...
+
+The model is develeoped by Togegher, a startup founded in 2022/07. The company is aiming at building a decentralized cloud for AI.
+
+**Project repo:** [https://github.com/togethercomputer/OpenChatKit](https://github.com/togethercomputer/OpenChatKit)
+
+**Blog**: [https://www.together.xyz/blog/openchatkit](https://www.together.xyz/blog/openchatkit)
