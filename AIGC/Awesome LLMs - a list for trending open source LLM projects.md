@@ -22,7 +22,6 @@ ChatLLaMA is a library that allows you to create hyper-personalized ChatGPT-like
 
 **Project Repo**: [https://github.com/nebuly-ai/nebullvm](https://github.com/nebuly-ai/nebullvm)
 
-![Untitled](Awesome%20Open%20Source%20LLMs%209ec862ab0e9d4f1eb44a3012a6a77241/Untitled.png)
 
 ### **2) Standford Alpaca**
 
@@ -32,7 +31,6 @@ Project repo: [https://github.com/tatsu-lab/stanford_alpaca](https://github.com/
 
 Trial: [https://alpaca-ai-custom5.ngrok.io/](https://alpaca-ai-custom5.ngrok.io/)
 
-![Untitled](Awesome%20Open%20Source%20LLMs%209ec862ab0e9d4f1eb44a3012a6a77241/Untitled%201.png)
 
 ## 2. **ChatGLM-6B**
 
@@ -44,7 +42,6 @@ ChatGLM-6B is trained on 1T identifiers in both Chinese and English, supported b
 
 Project repo: [https://github.com/THUDM/ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B)
 
-![Untitled](Awesome%20Open%20Source%20LLMs%209ec862ab0e9d4f1eb44a3012a6a77241/Untitled%202.png)
 
 ## 3. **OpenChatKit**
 
@@ -61,3 +58,5 @@ The model is develeoped by Togegher, a startup founded in 2022/07. The company i
 **Project repo:** [https://github.com/togethercomputer/OpenChatKit](https://github.com/togethercomputer/OpenChatKit)
 
 **Blog**: [https://www.together.xyz/blog/openchatkit](https://www.together.xyz/blog/openchatkit)
+
+Contributions on the list and content are well welcome!
