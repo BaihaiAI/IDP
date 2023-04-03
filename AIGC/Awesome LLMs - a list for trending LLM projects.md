@@ -61,6 +61,13 @@ Trial: [https://alpaca-ai-custom5.ngrok.io/](https://alpaca-ai-custom5.ngrok.io/
 
 Note: Sinece LLaMA is not open sourced yet, LLaMA and LLaMA-based models are currently prohibited from commercial use.
 
+### 3) Vicuna
+
+Vicuna is created by fine-tuning a LLaMA base model using approximately 70K user-shared conversations gathered from ShareGPT.com with public APIs.  Vicuna impressed GPT-4 with 90% ChatGPT Quality. 
+
+Project repo: [https://github.com/lm-sys/FastChat](https://github.com/lm-sys/FastChat)
+
+
 ## 4. Databricks Dolly
 
 Dolly-v1-6b is a 6 billion parameter causal language model created by Databricks that is derived from EleutherAI’s GPT-J (released June 2021) and fine-tuned on a ~52K record instruction corpus (Stanford Alpaca) consisting of question/answer pairs generated using the techniques outlined in the Self-Instruct paper. Dolly was trained using deepspeed ZeRO 3 on the Databricks Machine Learning Platform in just 30 minutes using a single NDasrA100_v4 machine with 8x A100 40GB GPUs.
