@@ -179,7 +179,9 @@ export const CodeCell = (props) => {
 
   const editorInputRead = (instance, cellId) => {
     // !打头的pip忽略
-    if (instance.getValue().startsWith('!')) return;
+    const {line} = instance.getCursor();
+    const currentLineValue = instance.getLine(line);
+    if (currentLineValue.startsWith('!')) return;
 
     isCompleted = false;
     let cursor = instance.getCursor()
