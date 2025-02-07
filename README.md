@@ -59,7 +59,7 @@ cd idp-studio-v1.0.0-linux-x64
 ```
 
 ### Start with IDP on Cloud:
-Quickly check out IDP SaaS with <https://www.baihai.co/invitation.html>
+Quickly check out IDP SaaS with <https://www.baihai.co/>
 
 ### Build from source
 See [Compile And Deploy IDP From Source](/docs/compile-deploy-from-source.md)
